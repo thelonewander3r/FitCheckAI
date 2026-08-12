@@ -179,12 +179,20 @@ export default function WardrobePage() {
           >
             InterviewReady AI
           </Link>
-          <Link
-            href="/interview"
-            className="text-sm text-[#2a6f7f] hover:underline"
-          >
-            Start interview prep
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/occasion"
+              className="text-sm text-[#2a6f7f] hover:underline"
+            >
+              Plan an occasion
+            </Link>
+            <Link
+              href="/interview"
+              className="text-sm text-[#2a6f7f] hover:underline"
+            >
+              Start interview prep
+            </Link>
+          </div>
         </div>
       </header>
 

@@ -38,6 +38,9 @@ export const WARDROBE_COLORS = [
   "blue",
   "brown",
   "multicolor",
+  "ivory",
+  "blush",
+  "deep green",
 ] as const;
 export type WardrobeColor = (typeof WARDROBE_COLORS)[number];
 

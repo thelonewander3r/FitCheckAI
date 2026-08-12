@@ -63,6 +63,12 @@ export default function HomePage() {
               </svg>
             </Link>
             <Link
+              href="/occasion"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] hover:bg-[#f4f6f8] transition-colors"
+            >
+              Plan an occasion
+            </Link>
+            <Link
               href="/demo"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] hover:bg-[#f4f6f8] transition-colors"
             >

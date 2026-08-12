@@ -1,0 +1,20 @@
+Phase 2 is in place. Files touched:
+
+**New**
+- `src/types/occasion.ts` — Occasion types, intake, and session shapes
+- `src/lib/venue/types.ts` — Venue lookup types + provider interface
+- `src/lib/venue/mock-provider.ts` — Curated/keyword/event-default mock lookup + `formalityLevelToLabel`
+- `src/lib/venue/live-provider.ts` — Live stub that throws until configured
+- `src/lib/venue/index.ts` — `getVenueProvider()` (`VENUE_MODE=live` vs mock)
+- `src/lib/venue/mock-provider.test.ts` — Rooftop, bank, gala fallback, wedding cases
+- `src/lib/occasion-store.ts` — `.data/occasions.json` store (lock + atomic write)
+- `src/lib/services/occasion-service.ts` — Venue lookup → wardrobe compose → persist
+- `src/app/api/occasions/route.ts` — POST create (zod + 201 `{ occasionId }`)
+- `src/app/api/occasions/[id]/route.ts` — GET session by UUID
+- `src/app/api/occasions/demo/route.ts` — Demo dinner at Skyline Rooftop Bar
+- `src/app/occasion/page.tsx` — Intake form
+- `src/app/occasion/[id]/page.tsx` — Venue context + wardrobe outfits UI
+
+**Modified**
+- `src/app/page.tsx` — “Plan an occasion” CTA
+- `src/app/wardrobe/page.tsx` — “Plan an occasion” header link

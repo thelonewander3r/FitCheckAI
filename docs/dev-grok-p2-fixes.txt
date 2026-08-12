@@ -1,0 +1,46 @@
+You are a senior TypeScript developer applying fixes from a code review for this Next.js 16 repo (InterviewReadyAI). Implement EXACTLY these fixes. Do NOT run npm, node, or build commands (WSL lacks the Windows node_modules). Only edit files. Keep changes minimal.
+
+=== FIX H1 (HIGH) — src/lib/services/occasion-service.ts — stop persisting base64 in occasions ===
+ComposedOutfit.items are WardrobeItem[] which carry imageBase64 (up to 3MB each), so each occasion duplicates wardrobe images into .data/occasions.json and GET returns them all. Before the final store update, map the outfits to strip imageBase64: outfits: composed.outfits.map(o => ({ ...o, items: o.items.map(({ imageBase64: _omit, ...rest }) => rest) })). Keep every other field on items. Then update src/app/occasion/[id]/page.tsx: on mount also fetch /api/wardrobe, build a Map id -> imageBase64, and render item thumbnails by looking up each item id (fallback: a neutral placeholder div when not found). This keeps the visual and removes the duplication.
+
+=== FIX H2 (HIGH) — src/lib/venue/mock-provider.ts — floor curated formality at the event-type default ===
+Currently a name rule can silently downgrade a high-formality event (wedding at "Skyline Terrace" -> smart-casual; gala at "Lakeside Resort" -> casual; gala at "First National Bank" -> business-professional because bank precedes gala). Fix: when a curated match is found, compute level = Math.max(curatedLevel, EVENT_DEFAULT_LEVEL[eventType]) using the same event-default table used for the fallback. Keep the curated palette, hints, confidence, and source "mock:curated". Only the formality level is floored.
+
+=== FIX M1 (MEDIUM) — src/lib/venue/mock-provider.ts — word-boundary keyword matching ===
+Replace plain includes() substring checks with word-boundary regexes: build new RegExp(`\\b${keyword}\\b`, "i") against the lowercased venue name (escape regex special chars in keywords — none currently, but escape anyway). This must fix: "Burbank Town Center" (bank), "Lawrence Hall" (law), "Blake Hotel" (lake), "Operations Center" (opera), "Galaxy Lounge" (gala), "Skyler Building" (sky) all falling through to the event-default tier instead of matching. Keep the same rule order.
+
+=== FIX M2 (MEDIUM) — src/lib/services/occasion-service.ts — no orphan records on failure ===
+Currently storeCreate runs before the venue lookup, so a thrown lookup (e.g. VENUE_MODE=live) or a corrupt wardrobe.json leaves a permanent orphan session. Reorder: perform lookupVenue, load wardrobe items, compose, and THEN call storeCreate once with the fully-built session. On any throw, nothing is persisted. Remove the intermediate store write entirely.
+
+=== FIX M3 (MEDIUM) — src/app/occasion/[id]/page.tsx — empty-wardrobe state ===
+The empty state currently fires when gapsCoverAllCore, which is true whenever the wardrobe lacks pieces AT the required formality (a user with casual pieces planning a gala gets told they have nothing). Change the gate to: show the "Add your pieces first" state only when session.outfits.length === 0 AND the fetched wardrobe item count is 0. Otherwise always render the venue card, any outfits, the gaps list, and a muted note when outfits is empty but items exist ("You have pieces, but none that fit this occasion's formality — see missing pieces below.").
+
+=== FIX M4 (MEDIUM) — src/app/api/occasions/route.ts — input hardening ===
+- eventDate: change z.string().optional() to z.string().max(32).optional().
+- venueName: change to z.string().trim().min(1, "Venue name is required").max(200).
+
+=== FIX L1 (LOW) — src/types/wardrobe.ts ===
+Add "ivory", "blush", "deep green" to WARDROBE_COLORS so the wedding palette and the tan skin-tone palette can actually match wardrobe items.
+
+=== FIX L2 (LOW) — src/app/occasion/page.tsx — expose skin tone ===
+Add a "Skin tone (optional)" select to the intake form (fair/light/medium/tan/deep, default empty meaning not set), include it in the submit payload only when non-empty.
+
+=== FIX L3 (LOW) — src/lib/services/occasion-service.ts — make theme visible ===
+When intake.theme is a non-empty string, append a hint to the venue context cultureHints: Theme "{theme}" — match the occasion's stated dress expectations. (Only append when the hint is not already present.)
+
+=== FIX L4 (LOW) — src/lib/venue/mock-provider.ts — formalityLevelToLabel NaN safety ===
+Guard with Number.isFinite: return "smart-casual" for non-finite input; keep clamping to [0,4] for finite values.
+
+=== FIX L7 (LOW) — src/lib/venue/types.ts + mock-provider.ts ===
+- Move formalityLevelToLabel (or a copy) into src/lib/venue/types.ts and export it from there; update imports in occasion-service and any test.
+- Change type DressCodeLabel = WardrobeFormality (import WardrobeFormality from src/types/wardrobe) so the two cannot drift. Keep the same union values.
+
+=== TESTS — src/lib/venue/mock-provider.test.ts ===
+Add:
+- wedding at "Skyline Terrace" with eventType wedding -> formal (floor applied).
+- gala at "Lakeside Resort" with eventType gala -> formal (floor applied).
+- gala at "First National Bank" with eventType gala -> formal (floor overrides bank).
+- "Burbank Town Center" with eventType dinner -> NOT business-professional (word boundary; expect smart-casual from the dinner default).
+- formalityLevelToLabel(NaN) -> "smart-casual"; formalityLevelToLabel(7) -> "formal"; formalityLevelToLabel(-1) -> "casual".
+
+When done, list every file changed with a one-line summary. Do not touch anything else.
