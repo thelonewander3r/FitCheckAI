@@ -1,0 +1,12 @@
+Phase 0 person-profile personalization is in place. Files changed:
+
+1. **`src/lib/validation/schemas.ts`** — Optional `fitSize`, `weightLbs`, `skinTone`, `presentation`, `companyCulture` on `IntakeSchema`
+2. **`src/types/interview.ts`** — `flatteringColors` / `cultureFormality` on context; `presentation` on templates; `fitNote` on ranked outfits; person fields on `IntakePayload`
+3. **`src/lib/interview/context-engine.ts`** — Skin-tone color map; culture formality adjustment applied before dress-code label
+4. **`src/lib/outfits/templates.ts`** — `presentation` on each template (`neutral` / `masculine` / `feminine`)
+5. **`src/lib/outfits/ranking.ts`** — Presentation (+3/+1) and color (+2, cap +4) bonuses; optional person profile; `fitNote`
+6. **`src/lib/services/session-service.ts`** — Passes person profile into context inference and outfit selection
+7. **`src/app/interview/page.tsx`** — Person-profile form fields + canvas skin-tone prefill/hint
+8. **`src/lib/validation/schemas.test.ts`** — Parse + optionality cases for new fields
+9. **`src/lib/interview/context-engine.test.ts`** — Deep skin-tone colors; startup lowers formality
+10. **`src/lib/outfits/ranking.test.ts`** — Matching presentation + color intersection raises score

@@ -12,6 +12,13 @@ interface ContextInput {
   jobDescription: string;
   interviewFormat: InterviewFormat;
   interviewStage: InterviewStage;
+  skinTone?: "fair" | "light" | "medium" | "tan" | "deep";
+  companyCulture?:
+    | "corporate"
+    | "startup"
+    | "creative"
+    | "client-facing"
+    | "government";
 }
 
 // Keyword sets for industry inference
@@ -65,6 +72,28 @@ const CASUAL_KEYWORDS: readonly string[] = [
   "entertainment",
 ];
 
+const FLATTERING_COLORS_BY_SKIN_TONE: Record<
+  NonNullable<ContextInput["skinTone"]>,
+  string[]
+> = {
+  fair: ["navy", "black", "white", "burgundy"],
+  light: ["navy", "charcoal", "sage", "cream"],
+  medium: ["navy", "olive", "rust", "cream"],
+  tan: ["black", "white", "gold", "deep green"],
+  deep: ["white", "emerald", "gold", "royal blue"],
+};
+
+const CULTURE_FORMALITY: Record<
+  NonNullable<ContextInput["companyCulture"]>,
+  number
+> = {
+  corporate: 1,
+  startup: -1,
+  creative: -1,
+  "client-facing": 0.5,
+  government: 1,
+};
+
 type FormalityLevel = "formal" | "semiformal" | "casual";
 
 function detectFormalityFromText(text: string): {
@@ -111,6 +140,7 @@ function resolveDressCode(
   base: FormalityLevel,
   format: InterviewFormat,
   stage: InterviewStage,
+  cultureFormality = 0,
 ): DressCode {
   // Start with base formality level value (0=casual, 1=semiformal, 2=formal)
   let level = base === "formal" ? 2 : base === "semiformal" ? 1 : 0;
@@ -128,8 +158,12 @@ function resolveDressCode(
   if ((format === "recruiter" || stage === "phone-screen") && level === 2)
     level = 1;
 
+  // The numeric formality index is adjusted by cultureFormality before the
+  // dress-code label is chosen.
+  level = Math.max(0, Math.min(2, Math.round(level + cultureFormality)));
+
   if (level >= 2) return "business-professional";
-  if (level === 1) return "business-casual";
+  if (level >= 1) return "business-casual";
   return "smart-casual";
 }
 
@@ -172,10 +206,15 @@ export function inferInterviewContext(input: ContextInput): InterviewContext {
   const { level, inferredIndustry, confidence } =
     detectFormalityFromText(searchText);
 
+  const cultureFormality = input.companyCulture
+    ? CULTURE_FORMALITY[input.companyCulture]
+    : undefined;
+
   const dressCode = resolveDressCode(
     level,
     input.interviewFormat,
     input.interviewStage,
+    cultureFormality ?? 0,
   );
 
   const recommendedColors =
@@ -232,6 +271,10 @@ export function inferInterviewContext(input: ContextInput): InterviewContext {
     "These are guidance notes based on common patterns — your specific company culture may differ.",
   );
 
+  const flatteringColors = input.skinTone
+    ? FLATTERING_COLORS_BY_SKIN_TONE[input.skinTone]
+    : undefined;
+
   return {
     inferredIndustry,
     dressCode,
@@ -240,5 +283,7 @@ export function inferInterviewContext(input: ContextInput): InterviewContext {
     avoidPatterns,
     jacketRecommended,
     rationale: rationaleFragments,
+    ...(flatteringColors ? { flatteringColors } : {}),
+    ...(cultureFormality !== undefined ? { cultureFormality } : {}),
   };
 }

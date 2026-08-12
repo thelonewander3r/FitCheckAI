@@ -1,0 +1,13 @@
+All 10 review fixes are in. Files changed:
+
+1. **`src/app/interview/page.tsx`** — Fixed skin-tone HSL thresholds; isolated sampling so upload failures don’t wipe a valid image; empty presentation default + optional submit.
+2. **`src/lib/interview/context-engine.ts`** — Culture deltas now ±1 / +0.5; `Math.round` before clamp so they affect dress-code labels.
+3. **`src/app/interview/[sessionId]/try-on/page.tsx`** — Merged/deduped palette; presentation fallback `neutral`; render wardrobe gaps under combos.
+4. **`src/lib/outfits/ranking.ts`** — Clamp final overall to `[0, 100]`.
+5. **`src/lib/wardrobe/composer.ts`** — Skip palette colors in accent penalty; gap reporting only for needed categories (conditional dresses).
+6. **`src/app/api/wardrobe/route.ts`** — Base64 alphabet check; seasons `.min(1)`.
+7. **`src/app/api/wardrobe/[id]/route.ts`** — Same validation + reject empty PATCH.
+8. **`docs/privacy-and-safety.md`** — Wardrobe store privacy paragraph.
+9. **`src/lib/interview/context-engine.test.ts`** — Corporate culture raises formality.
+10. **`src/lib/wardrobe/composer.test.ts`** — Outerwear-rescue assertion + no spurious gaps.
+11. **`src/lib/outfits/ranking.test.ts`** — Overall never exceeds 100 with maxed bonuses.

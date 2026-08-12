@@ -10,15 +10,29 @@ import { Badge } from "@/components/ui/badge";
 import type { StoredSession } from "@/lib/session-store";
 import type { RankedOutfit } from "@/types/interview";
 import type { ApparelTryOnResult } from "@/lib/youcam/types";
+import type { WardrobeFormality, WardrobeItem } from "@/types/wardrobe";
+import { WARDROBE_FORMALITY } from "@/types/wardrobe";
+import { composeOutfits } from "@/lib/wardrobe/composer";
 
 interface Props {
   params: Promise<{ sessionId: string }>;
+}
+
+function mapDressCodeToFormality(label: string | undefined): WardrobeFormality {
+  if (
+    label &&
+    (WARDROBE_FORMALITY as readonly string[]).includes(label)
+  ) {
+    return label as WardrobeFormality;
+  }
+  return "business-casual";
 }
 
 export default function TryOnPage({ params }: Props) {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>("");
   const [session, setSession] = useState<StoredSession | null>(null);
+  const [wardrobeItems, setWardrobeItems] = useState<WardrobeItem[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [loadingTryOn, setLoadingTryOn] = useState<string | null>(null);
@@ -29,7 +43,7 @@ export default function TryOnPage({ params }: Props) {
     params.then(({ sessionId: id }) => setSessionId(id));
   }, [params]);
 
-  // Load session
+  // Load session + wardrobe
   useEffect(() => {
     if (!sessionId) return;
     fetch(`/api/sessions/${sessionId}`)
@@ -42,6 +56,15 @@ export default function TryOnPage({ params }: Props) {
         }
       })
       .catch(() => setLoadError("Failed to load session."));
+
+    fetch("/api/wardrobe")
+      .then((r) => r.json())
+      .then((data: { items?: WardrobeItem[] }) => {
+        setWardrobeItems(data.items ?? []);
+      })
+      .catch(() => {
+        setWardrobeItems([]);
+      });
   }, [sessionId]);
 
   async function handleTryOn(outfitId: string) {
@@ -160,6 +183,24 @@ export default function TryOnPage({ params }: Props) {
   >;
   const selectedId = session.selectedOutfitId;
 
+  const wardrobeCompose =
+    session.context && wardrobeItems.length > 0
+      ? composeOutfits(wardrobeItems, {
+          formality: mapDressCodeToFormality(session.context.dressCode),
+          palette: Array.from(
+            new Set(
+              [
+                ...(session.context.flatteringColors ?? []),
+                ...(session.context.recommendedColors ?? []),
+              ].map((c) => c.toLowerCase()),
+            ),
+          ),
+          season: "any",
+          presentation: session.intake.presentation ?? "neutral",
+        })
+      : { outfits: [], gaps: [] };
+  const { outfits: wardrobeOutfits, gaps: wardrobeGaps } = wardrobeCompose;
+
   return (
     <div className="min-h-screen bg-[#f4f6f8] pb-16">
       <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
@@ -205,6 +246,76 @@ export default function TryOnPage({ params }: Props) {
             />
           ))}
         </div>
+
+        {(wardrobeOutfits.length > 0 || wardrobeGaps.length > 0) && (
+          <section className="space-y-4 pt-2">
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-[#0f2744]">
+                From your wardrobe
+              </h2>
+              <p className="mt-1 text-sm text-[#718096]">
+                Combos built from pieces you already own, matched to this
+                interview&apos;s dress code.
+              </p>
+            </div>
+            {wardrobeOutfits.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {wardrobeOutfits.map((outfit) => {
+                const name =
+                  outfit.items
+                    .map((i) => i.name)
+                    .filter(Boolean)
+                    .join(" · ") || `Outfit ${outfit.id.replace("combo-", "")}`;
+                return (
+                  <div
+                    key={outfit.id}
+                    className="rounded-xl border border-[#e2e8f0] bg-white p-4 space-y-3"
+                  >
+                    <div className="flex gap-2 overflow-x-auto">
+                      {outfit.items.map((item) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={item.id}
+                          src={`data:image/jpeg;base64,${item.imageBase64}`}
+                          alt={item.name || item.category}
+                          className="h-16 w-16 shrink-0 rounded-md object-cover border border-[#e2e8f0]"
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-medium text-[#0f2744]">
+                        {name}
+                      </p>
+                      <Badge variant="secondary" className="shrink-0">
+                        {outfit.score}
+                      </Badge>
+                    </div>
+                    {outfit.why.length > 0 && (
+                      <ul className="space-y-1">
+                        {outfit.why.map((reason) => (
+                          <li
+                            key={reason}
+                            className="text-xs text-[#718096] leading-snug"
+                          >
+                            {reason}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            )}
+            {wardrobeGaps.length > 0 && (
+              <ul className="space-y-0.5 text-xs text-[#718096]">
+                <li>
+                  Missing pieces: {wardrobeGaps.join(", ")}
+                </li>
+              </ul>
+            )}
+          </section>
+        )}
 
         {actionError && (
           <p className="text-sm text-red-600 font-medium" role="alert">

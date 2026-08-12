@@ -1,0 +1,77 @@
+You are a senior TypeScript developer implementing Phase 1 (wardrobe module) for this Next.js 16 repo (InterviewReadyAI). The app becomes a personal stylist that knows what the user owns. Implement EXACTLY this spec. Do NOT run npm, node, or build commands (WSL lacks the Windows node_modules). Only edit files. Match existing code style (see session-store.ts, sessions API routes, interview page). Keep changes minimal.
+
+=== 1. src/types/wardrobe.ts (new) ===
+Define:
+export const WARDROBE_CATEGORIES = ["tops", "bottoms", "dresses", "outerwear", "shoes", "accessories"] as const
+export type WardrobeCategory = (typeof WARDROBE_CATEGORIES)[number]
+export const WARDROBE_FORMALITY = ["casual", "smart-casual", "business-casual", "business-professional", "formal"] as const
+export type WardrobeFormality = (typeof WARDROBE_FORMALITY)[number]
+export const WARDROBE_COLORS = ["black", "white", "navy", "charcoal", "gray", "cream", "beige", "camel", "burgundy", "olive", "sage", "rust", "emerald", "royal blue", "gold", "pink", "red", "blue", "brown", "multicolor"] as const
+export type WardrobeColor = (typeof WARDROBE_COLORS)[number]
+export const WARDROBE_SEASONS = ["any", "spring", "summer", "autumn", "winter"] as const
+export interface WardrobeItem {
+  id: string
+  name: string
+  category: WardrobeCategory
+  color: WardrobeColor
+  formality: WardrobeFormality
+  seasons: (typeof WARDROBE_SEASONS)[number][]
+  fitNote?: string
+  imageBase64: string
+  favorite: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+=== 2. src/lib/wardrobe-store.ts (new) ===
+Mirror the session-store pattern (atomic tmp+rename, module-level promise lock, single-process comment). Data file .data/wardrobe.json. Export: listItems(): Promise<WardrobeItem[]>, getItem(id): Promise<WardrobeItem | null>, createItem(input): Promise<WardrobeItem> (id = crypto.randomUUID()), updateItem(id, patch: Partial<WardrobeItem>): Promise<WardrobeItem | null> (merge, refresh updatedAt), deleteItem(id): Promise<boolean>. All mutations inside withLock. readWardrobe returns [] on ENOENT, throws on parse failure.
+
+=== 3. API routes ===
+a) src/app/api/wardrobe/route.ts (new): GET -> { items } (sorted by createdAt desc). POST: parse JSON, validate with zod: name optional string (default ""), category/color/formality required enums, seasons required array of the enum (default ["any"]), favorite optional boolean (default false), imageBase64 required non-empty string with a max length of 3_000_000 chars (downscaled images are small; reject larger with 422). Return 201 with the item. Errors: 400 invalid JSON, 422 validation.
+b) src/app/api/wardrobe/[id]/route.ts (new): GET (404 if missing), PATCH (partial merge; validate provided fields with the same zod rules; return updated item), DELETE (204). Validate id is a UUID -> 400.
+
+=== 4. src/lib/client/image-utils.ts (new) ===
+Extract a shared client-side helper: export async function downscaleToBase64(file: File, maxEdge = 512): Promise<string> — reads the file, loads the image, draws to canvas (longest edge <= maxEdge), returns JPEG 0.85 base64 (no data URL prefix). Throws on decode/canvas failure. Also export async function readFileAsBase64(file: File): Promise<string>.
+Refactor src/app/interview/page.tsx handleFileChange to use these helpers, preserving its current behavior exactly: 15 MB guard, fail-closed on error, setImageError message, and the skin-tone sampling that runs after downscale (keep that logic inline or move to a helper in the same file).
+
+=== 5. src/app/wardrobe/page.tsx (new) ===
+"My Wardrobe" page (client component), consistent styling with the rest of the app (same header pattern, max-w-5xl container, font-serif headings).
+- Header: "My Wardrobe" + subtitle explaining piece-by-piece capture.
+- "Add item" button opens an inline form (or modal) with: image file input (accept image/jpeg,image/png,image/webp), name (optional), category select, color select, formality select, seasons multi-select (simple checkboxes or comma select), and a live preview of the chosen image (reuse downscaleToBase64 on selection).
+- Grid of items: image (object-cover), name, category + color + formality badges, favorite star toggle, delete button (confirm via window.confirm).
+- Empty state: helpful copy ("Add your first piece — start with the items you wear most").
+- On mount fetch /api/wardrobe; after add/delete/toggle re-fetch or update local state.
+
+=== 6. src/lib/wardrobe/composer.ts (new) ===
+Pure TypeScript composition engine (no IO):
+export interface ComposeContext { formality: WardrobeFormality; palette?: string[]; season?: string; presentation?: string }
+export interface ComposedOutfit { id: string; items: WardrobeItem[]; score: number; why: string[] }
+export interface ComposeResult { outfits: ComposedOutfit[]; gaps: string[] }
+export function composeOutfits(items: WardrobeItem[], ctx: ComposeContext): ComposeResult
+Rules:
+- A valid outfit is: one dress, OR at least one top + one bottom, optionally plus outerwear and/or shoes/accessories.
+- Formality gating: each included piece must have formality level >= ctx.formality OR exactly one step below (a lower-formality top is acceptable only if the outfit includes a jacket/outerwear at the required level). Implement a small level index (casual=0 ... formal=4).
+- Season: pieces whose seasons include ctx.season or "any" are preferred (+2); others are allowed but penalized (-2).
+- Color harmony: count non-neutral colors (not in [black, white, navy, charcoal, gray, cream, beige, camel]). Two or more distinct non-neutral colors: -3 each beyond the first. A piece whose color is in ctx.palette (lowercased): +3.
+- Presentation: if ctx.presentation is "feminine", prefer dresses and tops (category tops/dresses get +1); if "masculine", prefer tops+bottoms combos (+1 to bottoms); neutral no bonus.
+- Generate combos: for each dress candidate + for each (top, bottom) pair, add outerwear (best formality match) and shoes (any) if available. Cap exploration reasonably (first 60 items sorted by formality desc then color harmony).
+- Score = base 50 + formality gating satisfied (+10 when all pieces at required level) + color bonuses + season + presentation. Return top 3 outfits sorted by score desc, each with why strings (e.g. "Blazer matches business-professional.", "Navy top flatters the recommended palette.").
+- gaps: categories missing at the required formality level (e.g. if no outerwear piece with formality >= required, gap "outerwear at {formality}"). Max 4 gap strings, deduped.
+- Outfit ids: "combo-1", "combo-2", "combo-3".
+
+=== 7. src/lib/wardrobe/composer.test.ts (new) ===
+Vitest tests (style like existing tests):
+- valid combo: dress-only outfit is produced when a dress exists.
+- formality gating: a casual-only wardrobe produces a gap for business-professional.
+- palette bonus: an item with color in palette scores higher than the same setup without palette.
+- gap reporting: missing outerwear at the required level appears in gaps.
+- presentation preference: with presentation feminine and both a dress and a top+bottom combo available, the dress combo ranks first.
+
+=== 8. Interview integration (src/app/interview/[sessionId]/try-on/page.tsx) ===
+After the existing template cards, add a "From your wardrobe" section (only when wardrobe items exist):
+- Fetch /api/wardrobe on mount (alongside the session fetch).
+- Build ctx from session: map context.dressCode label to WardrobeFormality (casual, smart-casual, business-casual, business-professional, formal — the context engine uses these labels), palette = context.recommendedColors ?? context.flatteringColors, season = "any", presentation = session.intake.presentation ?? "feminine".
+- Call composeOutfits; render top 3 as simple cards (item thumbnails in a row, name, why list, score). Keep it visually light; do not rework the existing template cards.
+- If the wardrobe is empty or composeOutfits returns no outfits, hide the section entirely.
+
+When done, list every file changed (new or modified) with a one-line summary. Do not touch anything else.

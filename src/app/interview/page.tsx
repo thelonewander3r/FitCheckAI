@@ -10,8 +10,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import type { IntakeInput } from "@/lib/validation/schemas";
+import { downscaleToBase64 } from "@/lib/client/image-utils";
 
-type FormState = Omit<IntakeInput, "budget"> & { budget: string };
+type FormState = Omit<
+  IntakeInput,
+  "budget" | "weightLbs" | "skinTone" | "companyCulture" | "presentation"
+> & {
+  budget: string;
+  weightLbs: string;
+  skinTone: string;
+  companyCulture: string;
+  presentation: "" | "feminine" | "masculine" | "neutral";
+};
 
 const EMPTY_FORM: FormState = {
   jobTitle: "",
@@ -24,22 +34,96 @@ const EMPTY_FORM: FormState = {
   budget: "",
   stylePreference: "classic",
   candidateName: "",
+  fitSize: "",
+  weightLbs: "",
+  skinTone: "",
+  presentation: "",
+  companyCulture: "",
 };
+
+type DetectedSkinTone = "fair" | "light" | "medium" | "tan" | "deep";
+
+function rgbToLightness(r: number, g: number, b: number): number {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  return ((max + min) / 2) * 100;
+}
+
+function classifySkinToneFromCanvas(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+): DetectedSkinTone | null {
+  const boxW = Math.max(1, Math.round(width * 0.2));
+  const boxH = Math.max(1, Math.round(height * 0.2));
+  const sx = Math.round((width - boxW) / 2);
+  const sy = Math.round((height - boxH) / 2);
+  const { data } = ctx.getImageData(sx, sy, boxW, boxH);
+
+  let rSum = 0;
+  let gSum = 0;
+  let bSum = 0;
+  const pixels = data.length / 4;
+  for (let i = 0; i < data.length; i += 4) {
+    rSum += data[i]!;
+    gSum += data[i + 1]!;
+    bSum += data[i + 2]!;
+  }
+  const r = rSum / pixels;
+  const g = gSum / pixels;
+  const b = bSum / pixels;
+  const lightness = rgbToLightness(r, g, b);
+
+  if (lightness < 18 || lightness > 92) return null;
+  if (lightness < 25) return "deep";
+  if (lightness < 35) return "tan";
+  if (lightness < 50) return "medium";
+  if (lightness < 60) return "light";
+  return "fair";
+}
+
+async function sampleSkinToneFromBase64(
+  base64: string,
+): Promise<DetectedSkinTone | null> {
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("decode failed"));
+    el.src = `data:image/jpeg;base64,${base64}`;
+  });
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.drawImage(img, 0, 0);
+  return classifySkinToneFromCanvas(ctx, img.width, img.height);
+}
 
 export default function InterviewPage() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [imageBase64, setImageBase64] = useState<string | undefined>(undefined);
   const [imageFileName, setImageFileName] = useState<string>("");
+  const [imageError, setImageError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [skinToneDetected, setSkinToneDetected] = useState(false);
+  const skinToneManualRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleChange(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) {
     const { name, value } = e.target;
+    if (name === "skinTone") {
+      skinToneManualRef.current = true;
+      setSkinToneDetected(false);
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof FormState]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -49,14 +133,42 @@ export default function InterviewPage() {
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const MAX_BYTES = 15 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      setImageError("Image must be 15 MB or smaller.");
+      setImageBase64(undefined);
+      setImageFileName("");
+      e.target.value = "";
+      return;
+    }
+
+    setImageError(null);
     setImageFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      const base64 = result.split(",")[1] ?? "";
+
+    try {
+      const base64 = await downscaleToBase64(file);
+      if (!base64) throw new Error("empty result");
       setImageBase64(base64);
-    };
-    reader.readAsDataURL(file);
+
+      try {
+        const detected = await sampleSkinToneFromBase64(base64);
+        if (detected && !skinToneManualRef.current) {
+          setForm((prev) => ({ ...prev, skinTone: detected }));
+          setSkinToneDetected(true);
+        }
+      } catch {
+        // Skin-tone sampling is best-effort; never clear a valid upload.
+      }
+    } catch {
+      // Fail closed: never upload an unprocessed (potentially huge or
+      // unsupported-format) file. The full-size original would defeat the
+      // downscale and persist megabytes into the session store.
+      setImageBase64(undefined);
+      setImageError(
+        "Could not process this image. Please upload a JPEG, PNG, or WebP under 15 MB.",
+      );
+    }
   }
 
   function validate(): boolean {
@@ -80,11 +192,30 @@ export default function InterviewPage() {
     setSubmitError(null);
 
     try {
+      const weightParsed = form.weightLbs ? parseFloat(form.weightLbs) : NaN;
       const payload = {
         ...form,
         budget: parseFloat(form.budget),
         industry: form.industry || undefined,
         candidateName: form.candidateName || undefined,
+        fitSize: form.fitSize || undefined,
+        weightLbs:
+          !isNaN(weightParsed) && weightParsed > 0 ? weightParsed : undefined,
+        skinTone: (form.skinTone || undefined) as
+          | DetectedSkinTone
+          | undefined,
+        presentation: (form.presentation || undefined) as
+          | "feminine"
+          | "masculine"
+          | "neutral"
+          | undefined,
+        companyCulture: (form.companyCulture || undefined) as
+          | "corporate"
+          | "startup"
+          | "creative"
+          | "client-facing"
+          | "government"
+          | undefined,
         imageBase64,
       };
 
@@ -296,6 +427,91 @@ export default function InterviewPage() {
               </div>
             </div>
 
+            {/* Person profile */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="fitSize">Fit size (optional)</Label>
+                <Input
+                  id="fitSize"
+                  name="fitSize"
+                  value={form.fitSize ?? ""}
+                  onChange={handleChange}
+                  placeholder="e.g. US 6 or M"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="weightLbs">Weight (lbs, optional)</Label>
+                <Input
+                  id="weightLbs"
+                  name="weightLbs"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.weightLbs}
+                  onChange={handleChange}
+                  placeholder="e.g. 140"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="skinTone">Skin tone (optional)</Label>
+                <Select
+                  id="skinTone"
+                  name="skinTone"
+                  value={form.skinTone}
+                  onChange={handleChange}
+                  options={[
+                    { value: "", label: "Prefer not to say" },
+                    { value: "fair", label: "Fair" },
+                    { value: "light", label: "Light" },
+                    { value: "medium", label: "Medium" },
+                    { value: "tan", label: "Tan" },
+                    { value: "deep", label: "Deep" },
+                  ]}
+                />
+                {skinToneDetected && form.skinTone && (
+                  <p className="text-xs text-[#718096]">
+                    (detected from photo — you can change it)
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="presentation">Presentation</Label>
+                <Select
+                  id="presentation"
+                  name="presentation"
+                  value={form.presentation}
+                  onChange={handleChange}
+                  options={[
+                    { value: "", label: "Prefer not to say" },
+                    { value: "feminine", label: "Feminine" },
+                    { value: "masculine", label: "Masculine" },
+                    { value: "neutral", label: "Neutral" },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="companyCulture">Company culture (optional)</Label>
+              <Select
+                id="companyCulture"
+                name="companyCulture"
+                value={form.companyCulture}
+                onChange={handleChange}
+                options={[
+                  { value: "", label: "Auto (from industry)" },
+                  { value: "corporate", label: "Corporate" },
+                  { value: "startup", label: "Startup" },
+                  { value: "creative", label: "Creative" },
+                  { value: "client-facing", label: "Client-facing" },
+                  { value: "government", label: "Government" },
+                ]}
+              />
+            </div>
+
             {/* Optional photo */}
             <div className="space-y-1.5">
               <Label>Photo (optional)</Label>
@@ -337,6 +553,9 @@ export default function InterviewPage() {
                 onChange={handleFileChange}
                 aria-label="Upload selfie"
               />
+              {imageError && (
+                <p className="text-xs text-red-500">{imageError}</p>
+              )}
             </div>
 
             {submitError && (

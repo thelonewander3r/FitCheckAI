@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { analyzeSession } from "@/lib/services/session-service";
+import {
+  analyzeSession,
+  toPublicSession,
+} from "@/lib/services/session-service";
 
 interface Context {
   params: Promise<{ id: string }>;
@@ -25,7 +28,7 @@ export async function POST(
 
   try {
     const session = await analyzeSession(id, imageBase64);
-    return NextResponse.json(session);
+    return NextResponse.json(toPublicSession(session));
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
     console.error(`[POST /api/sessions/${id}/analyze]`, msg);

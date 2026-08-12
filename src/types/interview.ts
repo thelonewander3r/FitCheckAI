@@ -30,6 +30,10 @@ export interface InterviewContext {
   jacketRecommended: boolean;
   /** Guidance notes — not universal rules */
   rationale: string[];
+  /** Derived from skin tone when provided */
+  flatteringColors?: string[];
+  /** -1 to +1 formality adjustment from company culture */
+  cultureFormality?: number;
 }
 
 export interface SkinObservation {
@@ -61,6 +65,7 @@ export interface OutfitTemplate {
   colors: string[];
   hasJacket: boolean;
   genderNeutralNote?: string;
+  presentation?: "feminine" | "masculine" | "neutral";
 }
 
 export interface OutfitScores {
@@ -75,6 +80,7 @@ export interface OutfitScores {
 export type RankedOutfit = OutfitTemplate & {
   scores: OutfitScores;
   explanation: string;
+  fitNote?: string;
 };
 
 export interface PreparationPlan {
@@ -101,4 +107,14 @@ export interface IntakePayload {
   budget: number;
   stylePreference: StylePreference;
   candidateName?: string;
+  fitSize?: string;
+  weightLbs?: number;
+  skinTone?: "fair" | "light" | "medium" | "tan" | "deep";
+  presentation?: "feminine" | "masculine" | "neutral";
+  companyCulture?:
+    | "corporate"
+    | "startup"
+    | "creative"
+    | "client-facing"
+    | "government";
 }

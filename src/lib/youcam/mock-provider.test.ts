@@ -125,5 +125,43 @@ describe('MockYouCamProvider', () => {
       })
       expect(result1.renderedImageUrl).not.toBe(result2.renderedImageUrl)
     })
+
+    it('embeds the user photo when a valid base64 image is provided', async () => {
+      const result = await provider.generateApparelTryOn({
+        userImageBase64:
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        garmentAssetId: 'outfit-001',
+      })
+      const svgContent = Buffer.from(
+        result.renderedImageUrl.replace(/^data:image\/svg\+xml;base64,/, ''),
+        'base64',
+      ).toString('utf-8')
+      expect(svgContent).toContain('<image href=')
+    })
+
+    it('renders the placeholder when no user image is provided', async () => {
+      const result = await provider.generateApparelTryOn({
+        garmentAssetId: 'outfit-001',
+      })
+      const svgContent = Buffer.from(
+        result.renderedImageUrl.replace(/^data:image\/svg\+xml;base64,/, ''),
+        'base64',
+      ).toString('utf-8')
+      expect(svgContent).not.toContain('<image href=')
+      expect(svgContent).toContain('rx="12"')
+    })
+
+    it('falls back to the placeholder for invalid base64 input', async () => {
+      const result = await provider.generateApparelTryOn({
+        userImageBase64: '"><foo bar="',
+        garmentAssetId: 'outfit-001',
+      })
+      const svgContent = Buffer.from(
+        result.renderedImageUrl.replace(/^data:image\/svg\+xml;base64,/, ''),
+        'base64',
+      ).toString('utf-8')
+      expect(svgContent).not.toContain('<image href=')
+      expect(svgContent).toContain('rx="12"')
+    })
   })
 })

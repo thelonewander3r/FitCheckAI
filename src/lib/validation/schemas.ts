@@ -47,6 +47,13 @@ export const IntakeSchema = z.object({
   budget: z.number().positive("Budget must be a positive number"),
   stylePreference: z.enum(STYLE_PREFERENCES),
   candidateName: z.string().optional(),
+  fitSize: z.string().max(20).optional(),
+  weightLbs: z.number().positive().max(1000).optional(),
+  skinTone: z.enum(["fair", "light", "medium", "tan", "deep"]).optional(),
+  presentation: z.enum(["feminine", "masculine", "neutral"]).optional(),
+  companyCulture: z
+    .enum(["corporate", "startup", "creative", "client-facing", "government"])
+    .optional(),
 });
 
 export type IntakeInput = z.input<typeof IntakeSchema>;

@@ -137,3 +137,60 @@ describe('inferInterviewContext — output shape', () => {
     expect(ctx.rationale.length).toBeGreaterThan(0)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Person-profile personalization
+// ---------------------------------------------------------------------------
+describe('inferInterviewContext — person profile', () => {
+  it('maps skinTone deep to flatteringColors', () => {
+    const ctx = inferInterviewContext({
+      jobTitle: 'Analyst',
+      jobDescription: 'General professional role in a corporate environment.',
+      interviewFormat: 'onsite',
+      interviewStage: 'first-round',
+      skinTone: 'deep',
+    })
+    expect(ctx.flatteringColors).toEqual([
+      'white',
+      'emerald',
+      'gold',
+      'royal blue',
+    ])
+  })
+
+  it('companyCulture startup lowers the formality label vs none', () => {
+    const base = {
+      jobTitle: 'Product Manager',
+      industry: 'healthcare',
+      jobDescription:
+        'Join our medical pharma team to manage product roadmaps and coordinate with clinical stakeholders.',
+      interviewFormat: 'onsite' as const,
+      interviewStage: 'first-round' as const,
+    }
+    const without = inferInterviewContext(base)
+    const withStartup = inferInterviewContext({
+      ...base,
+      companyCulture: 'startup',
+    })
+    expect(without.dressCode).toBe('business-casual')
+    expect(withStartup.dressCode).toBe('smart-casual')
+  })
+
+  it('companyCulture corporate raises the formality label vs none', () => {
+    const base = {
+      jobTitle: 'Product Manager',
+      industry: 'healthcare',
+      jobDescription:
+        'Join our medical pharma team to manage product roadmaps and coordinate with clinical stakeholders.',
+      interviewFormat: 'onsite' as const,
+      interviewStage: 'first-round' as const,
+    }
+    const without = inferInterviewContext(base)
+    const withCorporate = inferInterviewContext({
+      ...base,
+      companyCulture: 'corporate',
+    })
+    expect(without.dressCode).toBe('business-casual')
+    expect(withCorporate.dressCode).toBe('business-professional')
+  })
+})

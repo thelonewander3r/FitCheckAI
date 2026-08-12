@@ -143,3 +143,56 @@ describe('selectTopOutfits', () => {
     }
   })
 })
+
+// ---------------------------------------------------------------------------
+// Person-profile scoring bonuses
+// ---------------------------------------------------------------------------
+describe('rankOutfits — person profile bonuses', () => {
+  it('matching presentation and intersecting color raise total vs baseline', () => {
+    const template: OutfitTemplate = {
+      ...minimalTemplate,
+      presentation: 'feminine',
+      colors: ['navy', 'white'],
+    }
+    const [baseline] = rankOutfits(
+      [template],
+      businessProfessionalContext,
+      200,
+      'onsite',
+    )
+    const personalizedContext: InterviewContext = {
+      ...businessProfessionalContext,
+      flatteringColors: ['navy', 'emerald'],
+    }
+    const [personalized] = rankOutfits(
+      [template],
+      personalizedContext,
+      200,
+      'onsite',
+      { presentation: 'feminine' },
+    )
+    expect(personalized!.scores.overall).toBeGreaterThan(baseline!.scores.overall)
+  })
+
+  it('overall never exceeds 100 even with all bonuses maxed', () => {
+    const template: OutfitTemplate = {
+      ...minimalTemplate,
+      formality: 8,
+      baseRoleFit: 100,
+      baseCameraReadiness: 100,
+      baseVersatility: 100,
+      estimatedPrice: 50,
+      presentation: 'feminine',
+      colors: ['navy', 'white', 'charcoal', 'burgundy'],
+      hasJacket: true,
+    }
+    const maxedContext: InterviewContext = {
+      ...businessProfessionalContext,
+      flatteringColors: ['navy', 'white', 'charcoal', 'burgundy'],
+    }
+    const [ranked] = rankOutfits([template], maxedContext, 200, 'onsite', {
+      presentation: 'feminine',
+    })
+    expect(ranked!.scores.overall).toBeLessThanOrEqual(100)
+  })
+})

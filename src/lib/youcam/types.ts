@@ -30,8 +30,11 @@ export interface SkinAnalysisInput {
 // ---------------------------------------------------------------------------
 
 export interface ApparelTryOnInput {
-  /** Base64-encoded user photo — TODO: confirm format and size constraints */
-  userImageBase64: string;
+  /**
+   * Base64-encoded user photo — optional; mock provider renders a generic
+   * placeholder when absent. TODO: confirm format and size constraints.
+   */
+  userImageBase64?: string;
   /**
    * Identifier for the garment asset as registered in the YouCam system.
    * TODO: confirm asset registration flow and ID format.

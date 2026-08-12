@@ -20,6 +20,7 @@ export const OUTFIT_TEMPLATES: OutfitTemplate[] = [
     baseVersatility: 85,
     colors: ["navy", "white", "charcoal"],
     hasJacket: true,
+    presentation: "neutral",
     genderNeutralNote:
       "Blazer cut and trouser style can be adapted for any gender presentation.",
   },
@@ -42,6 +43,7 @@ export const OUTFIT_TEMPLATES: OutfitTemplate[] = [
     baseVersatility: 65,
     colors: ["gray", "light blue", "black"],
     hasJacket: true,
+    presentation: "masculine",
   },
   {
     id: "outfit-003",
@@ -61,6 +63,7 @@ export const OUTFIT_TEMPLATES: OutfitTemplate[] = [
     baseVersatility: 90,
     colors: ["navy", "khaki", "white"],
     hasJacket: false,
+    presentation: "neutral",
     genderNeutralNote:
       "Quarter-zips and chinos are widely available in inclusive fits.",
   },
@@ -83,6 +86,7 @@ export const OUTFIT_TEMPLATES: OutfitTemplate[] = [
     baseVersatility: 75,
     colors: ["charcoal", "blue", "black"],
     hasJacket: true,
+    presentation: "masculine",
   },
   {
     id: "outfit-005",
@@ -102,6 +106,7 @@ export const OUTFIT_TEMPLATES: OutfitTemplate[] = [
     baseVersatility: 80,
     colors: ["camel", "ivory", "charcoal"],
     hasJacket: true,
+    presentation: "feminine",
     genderNeutralNote: "Designed with a feminine-presenting silhouette in mind.",
   },
   {
@@ -122,6 +127,7 @@ export const OUTFIT_TEMPLATES: OutfitTemplate[] = [
     baseVersatility: 72,
     colors: ["navy", "charcoal", "burgundy"],
     hasJacket: true,
+    presentation: "feminine",
     genderNeutralNote: "Designed with a feminine-presenting silhouette in mind.",
   },
 ];

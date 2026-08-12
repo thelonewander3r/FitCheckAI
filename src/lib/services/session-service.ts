@@ -30,6 +30,18 @@ export async function getSession(id: string): Promise<StoredSession | null> {
   return storeGet(id);
 }
 
+/**
+ * Session shape returned to the client. Strips the raw selfie from API
+ * responses — the photo is only ever needed server-side for VTO.
+ */
+export function toPublicSession(
+  session: StoredSession,
+): Omit<StoredSession, "userImageBase64"> {
+  const { userImageBase64: _omit, ...pub } = session;
+  void _omit;
+  return pub;
+}
+
 export async function analyzeSession(
   id: string,
   imageBase64?: string,
@@ -49,6 +61,8 @@ export async function analyzeSession(
       jobDescription: intake.jobDescription,
       interviewFormat: intake.interviewFormat,
       interviewStage: intake.interviewStage,
+      skinTone: intake.skinTone,
+      companyCulture: intake.companyCulture,
     });
 
     let skinAnalysis: StoredSession["skinAnalysis"] = undefined;
@@ -69,6 +83,12 @@ export async function analyzeSession(
       intake.budget,
       intake.interviewFormat,
       3,
+      {
+        fitSize: intake.fitSize,
+        weightLbs: intake.weightLbs,
+        skinTone: intake.skinTone,
+        presentation: intake.presentation,
+      },
     );
 
     const isMock = process.env["YOUCAM_MODE"] !== "live";
@@ -79,6 +99,9 @@ export async function analyzeSession(
       skinAnalysis,
       outfits,
       isMockMode: isMock,
+      ...(imageBase64 && imageBase64.length > 0
+        ? { userImageBase64: imageBase64 }
+        : {}),
     });
 
     if (!updated) throw new Error(`Failed to update session ${id}`);
@@ -100,10 +123,14 @@ export async function tryOnOutfit(
     throw new Error("Invalid outfit");
   }
 
+  const userImage = session.userImageBase64?.length
+    ? session.userImageBase64
+    : undefined;
+
   let vtoResult: ApparelTryOnResult;
   try {
     vtoResult = await runApparelVto({
-      userImageBase64: PLACEHOLDER_IMAGE_BASE64,
+      userImageBase64: userImage,
       garmentAssetId: outfitId,
     });
   } catch (err) {

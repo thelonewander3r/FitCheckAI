@@ -6,6 +6,13 @@ import type {
   RankedOutfit,
 } from "@/types/interview";
 
+export interface PersonProfile {
+  fitSize?: string;
+  weightLbs?: number;
+  skinTone?: "fair" | "light" | "medium" | "tan" | "deep";
+  presentation?: "feminine" | "masculine" | "neutral";
+}
+
 // ---------------------------------------------------------------------------
 // Budget fit
 // ---------------------------------------------------------------------------
@@ -79,6 +86,44 @@ function scoreFormatSuitability(
 }
 
 // ---------------------------------------------------------------------------
+// Person-profile bonuses (additive to overall)
+// ---------------------------------------------------------------------------
+
+function scorePresentationBonus(
+  outfit: OutfitTemplate,
+  presentation?: PersonProfile["presentation"],
+): number {
+  if (!presentation) return 0;
+  if (outfit.presentation === presentation) return 3;
+  if (outfit.presentation === "neutral") return 1;
+  return 0;
+}
+
+function scoreColorBonus(
+  outfit: OutfitTemplate,
+  context: InterviewContext,
+): number {
+  if (!context.flatteringColors?.length) return 0;
+  const flattering = new Set(
+    context.flatteringColors.map((c) => c.toLowerCase()),
+  );
+  let hits = 0;
+  for (const color of outfit.colors) {
+    if (flattering.has(color.toLowerCase())) hits += 1;
+  }
+  return Math.min(4, hits * 2);
+}
+
+function buildFitNote(person?: PersonProfile): string | undefined {
+  if (!person?.fitSize && person?.weightLbs == null) return undefined;
+  const sizeLabel =
+    person.fitSize ??
+    (person.weightLbs != null ? `${person.weightLbs} lbs` : undefined);
+  if (!sizeLabel) return undefined;
+  return `Tailoring note: confirm jacket shoulders for ${sizeLabel}.`;
+}
+
+// ---------------------------------------------------------------------------
 // Overall score
 // ---------------------------------------------------------------------------
 
@@ -142,7 +187,10 @@ export function rankOutfits(
   context: InterviewContext,
   budget: number,
   interviewFormat: InterviewFormat,
+  person?: PersonProfile,
 ): RankedOutfit[] {
+  const fitNote = buildFitNote(person);
+
   return templates
     .map((outfit): RankedOutfit => {
       const roleAppropriateness = scoreRoleAppropriateness(outfit, context);
@@ -162,13 +210,22 @@ export function rankOutfits(
         cameraReadiness,
       };
 
-      const overall = computeOverall(partial);
+      const presentationBonus = scorePresentationBonus(
+        outfit,
+        person?.presentation,
+      );
+      const colorBonus = scoreColorBonus(outfit, context);
+      const overall = Math.min(
+        100,
+        Math.max(0, computeOverall(partial) + presentationBonus + colorBonus),
+      );
       const scores: OutfitScores = { ...partial, overall };
 
       return {
         ...outfit,
         scores,
         explanation: buildExplanation(outfit, scores, context, interviewFormat),
+        ...(fitNote ? { fitNote } : {}),
       };
     })
     .sort((a, b) => b.scores.overall - a.scores.overall);
@@ -180,8 +237,9 @@ export function selectTopOutfits(
   budget: number,
   interviewFormat: InterviewFormat,
   count = 3,
+  person?: PersonProfile,
 ): RankedOutfit[] {
-  return rankOutfits(templates, context, budget, interviewFormat).slice(
+  return rankOutfits(templates, context, budget, interviewFormat, person).slice(
     0,
     count,
   );

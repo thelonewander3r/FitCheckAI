@@ -20,13 +20,40 @@ function escapeXml(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function makePlaceholderSvgDataUrl(label: string): string {
+/** Sniff MIME from base64 magic bytes; default image/jpeg. */
+function sniffImageMime(base64: string): string {
+  if (base64.startsWith("/9j/")) return "image/jpeg";
+  if (base64.startsWith("iVBOR")) return "image/png";
+  if (base64.startsWith("UklGR")) return "image/webp";
+  return "image/jpeg";
+}
+
+/** Base64 alphabet check — prevents markup injection via user-supplied bytes. */
+function isValidBase64(value: string): boolean {
+  return value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value);
+}
+
+function makePlaceholderSvgDataUrl(
+  label: string,
+  userImageBase64?: string,
+): string {
   const safeLabel = escapeXml(label);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600">
-  <rect width="400" height="600" fill="#e8eef2"/>
-  <rect x="100" y="80" width="200" height="440" rx="12" fill="#c5d0d8"/>
+  let body: string;
+  if (userImageBase64 && isValidBase64(userImageBase64)) {
+    const mime = sniffImageMime(userImageBase64);
+    const href = escapeXml(`data:${mime};base64,${userImageBase64}`);
+    body = `<image href="${href}" xlink:href="${href}" x="100" y="80" width="200" height="440" preserveAspectRatio="xMidYMid slice"/>
+  <rect x="100" y="310" width="200" height="70" fill="rgba(0,0,0,0.45)"/>
+  <text x="200" y="340" font-family="DM Sans, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle">${safeLabel}</text>
+  <text x="200" y="365" font-family="DM Sans, sans-serif" font-size="12" fill="#e2e8f0" text-anchor="middle">Mock VTO Preview</text>`;
+  } else {
+    body = `<rect x="100" y="80" width="200" height="440" rx="12" fill="#c5d0d8"/>
   <text x="200" y="340" font-family="DM Sans, sans-serif" font-size="16" fill="#4a5568" text-anchor="middle">${safeLabel}</text>
-  <text x="200" y="365" font-family="DM Sans, sans-serif" font-size="12" fill="#718096" text-anchor="middle">Mock VTO Preview</text>
+  <text x="200" y="365" font-family="DM Sans, sans-serif" font-size="12" fill="#718096" text-anchor="middle">Mock VTO Preview</text>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="600" viewBox="0 0 400 600">
+  <rect width="400" height="600" fill="#e8eef2"/>
+  ${body}
 </svg>`;
   const encoded = Buffer.from(svg, "utf8").toString("base64");
   return `data:image/svg+xml;base64,${encoded}`;
@@ -87,6 +114,7 @@ export class MockYouCamProvider implements YouCamProvider {
     return {
       renderedImageUrl: makePlaceholderSvgDataUrl(
         `Garment: ${input.garmentAssetId}`,
+        input.userImageBase64,
       ),
       isMock: true,
       processingTimeMs: 0,

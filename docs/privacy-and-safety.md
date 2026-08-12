@@ -10,13 +10,19 @@ InterviewReady AI is a **cosmetic appearance guidance tool**. It does not diagno
 
 Uploaded candidate photos are:
 
-- Used **only** during the active session to generate Skin AI and Apparel VTO results
-- **Not written to disk** in the default configuration — the session service uses a 1×1 placeholder image internally when no upload is provided
+- **Downscaled on the client** to a longest edge of at most 512 pixels (JPEG quality 0.85) before upload
+- Used during the active session to generate Skin AI and Apparel VTO results
+- **Stored as base64** inside the session record in `.data/sessions.json` for the life of that session file — not written as separate image files
 - **Not associated** with any user account, name, or persistent identifier beyond the ephemeral session ID
+- The app currently has **no automatic TTL/cleanup sweep**; sessions (and any embedded selfie base64) remain until the file is deleted manually or the environment is reset
 
-### No permanent storage by default
+### Session file storage
 
-Session data (including any image payload) lives in `.data/sessions.json` for the duration of the browser session. The file-store is ephemeral and should not be committed to source control (it is listed in `.gitignore`).
+Session data (including any selfie `userImageBase64` payload) lives in `.data/sessions.json`. The file-store is local/ephemeral for development and should not be committed to source control (it is listed in `.gitignore`).
+
+### Wardrobe store
+
+Wardrobe piece photos are **downscaled on the client**, then stored as **base64** in `.data/wardrobe.json`. There is **no automatic TTL**; items remain until the data file is deleted. The wardrobe API is accessible on **localhost without authentication**, so treat the file as sensitive local data and delete it when clearing session state.
 
 In a production deployment with a real database, implementers must:
 

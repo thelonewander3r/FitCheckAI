@@ -41,6 +41,37 @@ describe('IntakeSchema — valid payloads', () => {
     const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, budget: 99.99 })
     expect(result.success).toBe(true)
   })
+
+  it('accepts optional person-profile fields', () => {
+    const result = IntakeSchema.safeParse({
+      ...DEMO_SCENARIO,
+      fitSize: 'US 6',
+      weightLbs: 140,
+      skinTone: 'medium',
+      presentation: 'feminine',
+      companyCulture: 'startup',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.fitSize).toBe('US 6')
+      expect(result.data.weightLbs).toBe(140)
+      expect(result.data.skinTone).toBe('medium')
+      expect(result.data.presentation).toBe('feminine')
+      expect(result.data.companyCulture).toBe('startup')
+    }
+  })
+
+  it('keeps person-profile fields optional (absent still passes)', () => {
+    const result = IntakeSchema.safeParse(DEMO_SCENARIO)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.fitSize).toBeUndefined()
+      expect(result.data.weightLbs).toBeUndefined()
+      expect(result.data.skinTone).toBeUndefined()
+      expect(result.data.presentation).toBeUndefined()
+      expect(result.data.companyCulture).toBeUndefined()
+    }
+  })
 })
 
 // ---------------------------------------------------------------------------

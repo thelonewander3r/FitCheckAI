@@ -37,6 +37,7 @@ export interface StoredSession {
   tryOnResults?: Record<string, ApparelTryOnResult>;
   plan?: PreparationPlan;
   isMockMode?: boolean;
+  userImageBase64?: string;
   createdAt: string;
   updatedAt: string;
 }
