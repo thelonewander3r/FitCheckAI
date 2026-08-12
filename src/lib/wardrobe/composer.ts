@@ -1,10 +1,20 @@
-import type { WardrobeFormality, WardrobeItem } from "@/types/wardrobe";
+import type {
+  WardrobeCategory,
+  WardrobeFormality,
+  WardrobeItem,
+} from "@/types/wardrobe";
+import { formalityToLevel } from "@/lib/wardrobe/formality";
 
 export interface ComposeContext {
   formality: WardrobeFormality;
   palette?: string[];
   season?: string;
   presentation?: string;
+  preferences?: {
+    colors?: string[];
+    categories?: WardrobeCategory[];
+    formality?: number;
+  };
 }
 
 export interface ComposedOutfit {
@@ -170,6 +180,35 @@ function scoreOutfit(
         score += 1;
       }
     }
+  }
+
+  const prefs = ctx.preferences;
+  if (prefs) {
+    const prefColors = new Set(
+      (prefs.colors ?? []).map((c) => c.toLowerCase()),
+    );
+    const prefCategories = new Set(prefs.categories ?? []);
+    let colorBonus = 0;
+    let categoryBonus = 0;
+    let formalityBonus = 0;
+
+    for (const item of items) {
+      if (prefColors.has(item.color.toLowerCase()) && colorBonus < 4) {
+        colorBonus = Math.min(4, colorBonus + 2);
+      }
+      if (prefCategories.has(item.category) && categoryBonus < 2) {
+        categoryBonus = Math.min(2, categoryBonus + 1);
+      }
+      if (
+        prefs.formality !== undefined &&
+        formalityToLevel(item.formality) === prefs.formality &&
+        formalityBonus < 2
+      ) {
+        formalityBonus = Math.min(2, formalityBonus + 1);
+      }
+    }
+
+    score += colorBonus + categoryBonus + formalityBonus;
   }
 
   const nonNeutrals = new Set(

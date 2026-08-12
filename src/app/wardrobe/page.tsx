@@ -18,8 +18,16 @@ import {
   type WardrobeFormality,
   type WardrobeItem,
 } from "@/types/wardrobe";
+import type { StyleProfile, WornOutfitRecord } from "@/types/worn";
+import { formalityLevelToLabel } from "@/lib/wardrobe/formality";
 
 type Season = (typeof WARDROBE_SEASONS)[number];
+
+const RATING_LABELS: Record<string, string> = {
+  loved: "Loved",
+  liked: "Liked",
+  meh: "Meh",
+};
 
 interface FormState {
   name: string;
@@ -56,6 +64,8 @@ export default function WardrobePage() {
   const [imageError, setImageError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [wornRecords, setWornRecords] = useState<WornOutfitRecord[]>([]);
+  const [styleProfile, setStyleProfile] = useState<StyleProfile | null>(null);
 
   async function fetchItems() {
     try {
@@ -74,8 +84,24 @@ export default function WardrobePage() {
     }
   }
 
+  async function fetchWorn() {
+    try {
+      const res = await fetch("/api/worn");
+      if (!res.ok) return;
+      const data = (await res.json()) as {
+        records?: WornOutfitRecord[];
+        profile?: StyleProfile;
+      };
+      setWornRecords(data.records ?? []);
+      setStyleProfile(data.profile ?? null);
+    } catch {
+      // ignore — sections stay empty
+    }
+  }
+
   useEffect(() => {
     void fetchItems();
+    void fetchWorn();
   }, []);
 
   async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
@@ -411,6 +437,102 @@ export default function WardrobePage() {
             ))}
           </div>
         )}
+
+        <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 space-y-4">
+          <h2 className="font-serif text-lg font-semibold text-[#0f2744]">
+            Recently worn
+          </h2>
+          {wornRecords.length === 0 ? (
+            <p className="text-sm text-[#718096]">
+              No worn outfits yet — mark outfits as worn from an occasion page.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {wornRecords.slice(0, 5).map((record) => (
+                <li
+                  key={record.id}
+                  className="flex flex-wrap items-start justify-between gap-2 border-b border-[#e2e8f0] pb-3 last:border-0 last:pb-0"
+                >
+                  <div className="space-y-1 min-w-0">
+                    <p className="text-sm font-medium text-[#0f2744]">
+                      {record.wornDate}
+                      {record.eventType
+                        ? ` · ${labelize(record.eventType)}`
+                        : ""}
+                    </p>
+                    <p className="text-sm text-[#4a5568]">
+                      {record.items
+                        .map((i) => i.name)
+                        .filter(Boolean)
+                        .join(", ") || "Outfit"}
+                    </p>
+                  </div>
+                  {record.rating && (
+                    <Badge variant="outline" className="shrink-0">
+                      {RATING_LABELS[record.rating] ?? record.rating}
+                    </Badge>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 space-y-4">
+          <h2 className="font-serif text-lg font-semibold text-[#0f2744]">
+            Your style profile
+          </h2>
+          {!styleProfile || styleProfile.totalWorn === 0 ? (
+            <p className="text-sm text-[#718096]">
+              Wear a few outfits and we&apos;ll learn your style.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[#718096]">
+                  Top colors
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {styleProfile.colors.length === 0 ? (
+                    <span className="text-sm text-[#718096]">—</span>
+                  ) : (
+                    styleProfile.colors.map(({ color, count }) => (
+                      <Badge key={color} variant="outline">
+                        {labelize(color)} ({count})
+                      </Badge>
+                    ))
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-[#718096]">
+                  Top categories
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {styleProfile.categories.length === 0 ? (
+                    <span className="text-sm text-[#718096]">—</span>
+                  ) : (
+                    styleProfile.categories.map(({ category, count }) => (
+                      <Badge key={category} variant="secondary">
+                        {labelize(category)} ({count})
+                      </Badge>
+                    ))
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-[#4a5568]">
+                Typical formality:{" "}
+                <span className="font-medium text-[#0f2744]">
+                  {labelize(formalityLevelToLabel(styleProfile.formality))}
+                </span>
+              </p>
+              <p className="text-sm text-[#718096]">
+                {styleProfile.totalWorn} outfit
+                {styleProfile.totalWorn === 1 ? "" : "s"} worn
+              </p>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

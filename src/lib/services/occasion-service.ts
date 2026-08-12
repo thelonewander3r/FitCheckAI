@@ -5,6 +5,11 @@ import {
 } from "@/lib/occasion-store";
 import { composeOutfits } from "@/lib/wardrobe/composer";
 import { listItems } from "@/lib/wardrobe-store";
+import { listRecords } from "@/lib/worn-store";
+import {
+  buildStyleProfile,
+  preferencesFromProfile,
+} from "@/lib/services/style-service";
 import { formalityLevelToLabel, getVenueProvider } from "@/lib/venue";
 import type { OccasionIntake, OccasionSession } from "@/types/occasion";
 
@@ -39,6 +44,17 @@ export async function createOccasion(
   });
 
   const items = await listItems();
+  let wornRecords: Awaited<ReturnType<typeof listRecords>> = [];
+  try {
+    wornRecords = await listRecords();
+  } catch (err) {
+    console.error(
+      "[createOccasion] worn-store read failed; continuing without style preferences:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+  const profile = buildStyleProfile(wornRecords);
+  const preferences = preferencesFromProfile(profile);
   const palette = mergePalette(venue.palette, intake.skinTone);
   const season = "any";
   const composed = composeOutfits(items, {
@@ -46,6 +62,7 @@ export async function createOccasion(
     palette,
     season,
     presentation: intake.presentation ?? "neutral",
+    preferences,
   });
 
   const cultureHints = [...venue.cultureHints];

@@ -224,4 +224,31 @@ describe('composeOutfits', () => {
       result.outfits[0]!.items.some((i) => i.category === 'dresses'),
     ).toBe(true)
   })
+
+  it('raises score when preferences match color and category', () => {
+    const items = [
+      item({
+        id: 'd1',
+        name: 'Burgundy Dress',
+        category: 'dresses',
+        color: 'burgundy',
+        formality: 'business-casual',
+      }),
+    ]
+
+    const without = composeOutfits(items, {
+      formality: 'business-casual',
+    })
+    const withPrefs = composeOutfits(items, {
+      formality: 'business-casual',
+      preferences: {
+        colors: ['burgundy'],
+        categories: ['dresses'],
+      },
+    })
+
+    expect(withPrefs.outfits[0]!.score).toBeGreaterThan(
+      without.outfits[0]!.score,
+    )
+  })
 })

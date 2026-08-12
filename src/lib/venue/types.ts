@@ -1,6 +1,6 @@
 import type { OccasionType } from "@/types/occasion";
 import type { WardrobeFormality } from "@/types/wardrobe";
-import { WARDROBE_FORMALITY } from "@/types/wardrobe";
+import { formalityLevelToLabel } from "@/lib/wardrobe/formality";
 
 export interface VenueLookupInput {
   venueName: string;
@@ -23,8 +23,4 @@ export interface VenueProvider {
   lookupVenue(input: VenueLookupInput): Promise<VenueContext>;
 }
 
-export function formalityLevelToLabel(level: number): DressCodeLabel {
-  if (!Number.isFinite(level)) return "smart-casual";
-  const clamped = Math.max(0, Math.min(4, Math.round(level)));
-  return WARDROBE_FORMALITY[clamped]!;
-}
+export { formalityLevelToLabel };

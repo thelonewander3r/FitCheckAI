@@ -1,0 +1,18 @@
+Phase 3 is in place. Files changed:
+
+**New**
+- `src/types/worn.ts` — WornItemRef, WornOutfitRecord, StyleProfile types
+- `src/lib/wardrobe/formality.ts` — formalityToLevel / formalityLevelToLabel (single source of truth)
+- `src/lib/worn-store.ts` — `.data/worn.json` persistence (add/list/delete)
+- `src/lib/services/style-service.ts` — buildStyleProfile + preferencesFromProfile
+- `src/lib/services/style-service.test.ts` — aggregation, empty profile, preference gating
+- `src/app/api/worn/route.ts` — GET records+profile, POST create worn record
+- `src/app/api/worn/[id]/route.ts` — DELETE by UUID
+
+**Modified**
+- `src/lib/venue/types.ts` — re-exports formalityLevelToLabel from wardrobe/formality
+- `src/lib/wardrobe/composer.ts` — optional preferences with bounded score bonuses
+- `src/lib/wardrobe/composer.test.ts` — preference score-boost test
+- `src/lib/services/occasion-service.ts` — feeds style preferences into composeOutfits
+- `src/app/occasion/[id]/page.tsx` — Mark as worn / Worn ✓ on outfit cards
+- `src/app/wardrobe/page.tsx` — Recently worn + Your style profile sections

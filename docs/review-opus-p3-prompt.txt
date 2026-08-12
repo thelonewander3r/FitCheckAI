@@ -1,0 +1,24 @@
+You are the lead developer doing a review of P3 (outfit history & learning) before commit in this Next.js 16 repo (InterviewReadyAI). The feature: users mark occasion outfits as worn, records persist in .data/worn.json, a style profile (top colors/categories/formality mean) is derived, and the wardrobe composer receives bounded preference bonuses so recommendations shift toward what the user actually wears.
+
+New/changed files:
+- src/types/worn.ts
+- src/lib/wardrobe/formality.ts (new single source of truth for formality level mapping)
+- src/lib/venue/types.ts (re-exports from formality.ts)
+- src/lib/worn-store.ts
+- src/lib/services/style-service.ts + style-service.test.ts
+- src/lib/wardrobe/composer.ts (preferences) + composer.test.ts
+- src/lib/services/occasion-service.ts (feeds preferences)
+- src/app/api/worn/route.ts, [id]/route.ts
+- src/app/occasion/[id]/page.tsx (Mark as worn), src/app/wardrobe/page.tsx (Recently worn + style profile)
+
+Verify specifically:
+1. Formality refactor: did moving formalityLevelToLabel/formalityToLevel to src/lib/wardrobe/formality.ts break anything in venue (mock-provider, index, types) or occasion-service? Any circular imports (formality.ts imports from wardrobe types only)? Is DressCodeLabel still consistent?
+2. Worn store: lock/atomic/ENOENT/array shape consistent with the other stores; deleteRecord semantics.
+3. Style profile: aggregation correctness (counts, top-N tie-breaking, formality mean rounding, empty records), preferencesFromProfile gating (count >= 2) not leaking one-off noise; determinism.
+4. Composer preferences: bonuses bounded (caps), zero effect when preferences absent (existing tests must stay valid), no negative scores, deterministic ordering with preferences.
+5. Occasion-service integration: preferences loaded per createOccasion; failure handling if worn store is corrupt (should not break occasion creation); performance (trivial file reads).
+6. API: validation of items array (min 1 max 12, enum fields), eventType "general" allowed, wornDate default, DELETE semantics, GET response shape { records, profile }.
+7. UI: Mark-as-worn button posts correct item refs (no imageBase64 leaked into worn records — confirm), local state handling (per-outfit), recently-worn rendering, style profile rendering with empty states; any client/server mismatch.
+8. Tests: style-service coverage meaningful; composer preference test actually isolates the preference effect.
+
+All gates green (typecheck, 105 unit tests, 2 e2e, build). Do NOT modify files. Output: verdicts per area (PASS / PASS-WITH-NOTE / FAIL), NEW issues with file:line and severity, final one-line recommendation.

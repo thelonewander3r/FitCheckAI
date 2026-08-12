@@ -72,7 +72,11 @@ Prisma/SQLite swap stays mechanical when the data model stabilizes.
 
 ## Phase 2 — Occasion / venue intelligence
 
-Extend past the interview.
+**Status: SHIPPED (2026-08-11)** — occasion flow live: event type + venue name
+→ mock venue lookup (curated/keyword/event-default, formality floored at
+event-type level, word-boundary matching, live stub behind `VENUE_MODE`) →
+wardrobe composition with venue dress code + palette. Known limits: season is
+hardcoded "any"; theme is a hint, not a level input; venue lookup is mock-only.
 
 - Intake becomes **occasion input**: event type (interview, gala, dinner,
   casual outing, wedding…), theme (if any), location/venue name.

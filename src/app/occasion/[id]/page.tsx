@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import type { OccasionSession } from "@/types/occasion";
 import type { WardrobeItem } from "@/types/wardrobe";
+import type { ComposedOutfit } from "@/lib/wardrobe/composer";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -54,6 +55,39 @@ function ItemThumbnail({
   );
 }
 
+function MarkAsWorn({
+  outfit,
+  marked,
+  pending,
+  error,
+  onMark,
+}: {
+  outfit: ComposedOutfit;
+  marked: boolean;
+  pending?: boolean;
+  error: string | null;
+  onMark: (outfit: ComposedOutfit) => void;
+}) {
+  if (marked) {
+    return (
+      <span className="text-xs font-medium text-[#2a6f7f]">Worn ✓</span>
+    );
+  }
+  return (
+    <div className="space-y-1">
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => onMark(outfit)}
+        className="text-xs font-medium text-[#2a6f7f] hover:underline disabled:cursor-wait disabled:text-[#a0b4c0]"
+      >
+        {pending ? "Marking…" : "Mark as worn"}
+      </button>
+      {error && <p className="text-xs text-[#718096]">{error}</p>}
+    </div>
+  );
+}
+
 export default function OccasionDetailPage({ params }: Props) {
   const router = useRouter();
   const [id, setId] = useState("");
@@ -61,6 +95,9 @@ export default function OccasionDetailPage({ params }: Props) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [imageById, setImageById] = useState<Map<string, string>>(new Map());
   const [wardrobeCount, setWardrobeCount] = useState(0);
+  const [markedWorn, setMarkedWorn] = useState<Record<string, boolean>>({});
+  const [markingWorn, setMarkingWorn] = useState<Record<string, boolean>>({});
+  const [wornErrors, setWornErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     params.then(({ id: occasionId }) => setId(occasionId));
@@ -96,6 +133,55 @@ export default function OccasionDetailPage({ params }: Props) {
       )
       .catch(() => setLoadError("Failed to load occasion."));
   }, [id]);
+
+  async function handleMarkWorn(outfit: ComposedOutfit) {
+    if (!session) return;
+    if (markedWorn[outfit.id] || markingWorn[outfit.id]) return;
+    setMarkingWorn((prev) => ({ ...prev, [outfit.id]: true }));
+    setWornErrors((prev) => {
+      const next = { ...prev };
+      delete next[outfit.id];
+      return next;
+    });
+    try {
+      const res = await fetch("/api/worn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          occasionId: session.id,
+          eventType: session.intake.eventType,
+          items: outfit.items.map(
+            ({ id, name, category, color, formality }) => ({
+              id,
+              name,
+              category,
+              color,
+              formality,
+            }),
+          ),
+        }),
+      });
+      if (!res.ok) {
+        setWornErrors((prev) => ({
+          ...prev,
+          [outfit.id]: "Could not mark as worn.",
+        }));
+        return;
+      }
+      setMarkedWorn((prev) => ({ ...prev, [outfit.id]: true }));
+    } catch {
+      setWornErrors((prev) => ({
+        ...prev,
+        [outfit.id]: "Could not mark as worn.",
+      }));
+    } finally {
+      setMarkingWorn((prev) => {
+        const next = { ...prev };
+        delete next[outfit.id];
+        return next;
+      });
+    }
+  }
 
   if (loadError) {
     return (
@@ -286,6 +372,13 @@ export default function OccasionDetailPage({ params }: Props) {
                       ))}
                     </ul>
                   )}
+                  <MarkAsWorn
+                    outfit={topOutfit}
+                    marked={!!markedWorn[topOutfit.id]}
+                    pending={!!markingWorn[topOutfit.id]}
+                    error={wornErrors[topOutfit.id] ?? null}
+                    onMark={handleMarkWorn}
+                  />
                 </div>
               </section>
             )}
@@ -338,6 +431,13 @@ export default function OccasionDetailPage({ params }: Props) {
                             ))}
                           </ul>
                         )}
+                        <MarkAsWorn
+                          outfit={outfit}
+                          marked={!!markedWorn[outfit.id]}
+                          pending={!!markingWorn[outfit.id]}
+                          error={wornErrors[outfit.id] ?? null}
+                          onMark={handleMarkWorn}
+                        />
                       </div>
                     );
                   })}
