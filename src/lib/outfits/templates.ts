@@ -1,0 +1,127 @@
+import type { OutfitTemplate } from "@/types/interview";
+
+export const OUTFIT_TEMPLATES: OutfitTemplate[] = [
+  {
+    id: "outfit-001",
+    name: "Navy Blazer & Charcoal Trousers",
+    description:
+      "A versatile business-casual combination that reads polished without being overly formal. Works well for onsite and video interviews alike.",
+    garments: [
+      "Navy single-breasted blazer",
+      "White dress shirt",
+      "Charcoal dress trousers",
+      "Dark leather Oxford shoes",
+      "Simple leather belt",
+    ],
+    estimatedPrice: 180,
+    formality: 7,
+    baseRoleFit: 75,
+    baseCameraReadiness: 80,
+    baseVersatility: 85,
+    colors: ["navy", "white", "charcoal"],
+    hasJacket: true,
+    genderNeutralNote:
+      "Blazer cut and trouser style can be adapted for any gender presentation.",
+  },
+  {
+    id: "outfit-002",
+    name: "Classic Gray Suit",
+    description:
+      "A medium-gray two-piece suit paired with a light-blue shirt — a reliable choice for business-professional environments.",
+    garments: [
+      "Medium-gray two-piece suit (jacket + trousers)",
+      "Light-blue dress shirt",
+      "Charcoal tie (optional)",
+      "Black leather shoes",
+      "Black leather belt",
+    ],
+    estimatedPrice: 250,
+    formality: 9,
+    baseRoleFit: 88,
+    baseCameraReadiness: 75,
+    baseVersatility: 65,
+    colors: ["gray", "light blue", "black"],
+    hasJacket: true,
+  },
+  {
+    id: "outfit-003",
+    name: "Smart-Casual Quarter-Zip Look",
+    description:
+      "A navy quarter-zip sweater over a collared shirt with neat chinos. Ideal for less formal roles or tech-adjacent environments.",
+    garments: [
+      "Navy quarter-zip sweater",
+      "White or light-gray collared shirt",
+      "Slim-fit chinos (khaki or stone)",
+      "Clean leather or suede loafers",
+    ],
+    estimatedPrice: 120,
+    formality: 5,
+    baseRoleFit: 60,
+    baseCameraReadiness: 82,
+    baseVersatility: 90,
+    colors: ["navy", "khaki", "white"],
+    hasJacket: false,
+    genderNeutralNote:
+      "Quarter-zips and chinos are widely available in inclusive fits.",
+  },
+  {
+    id: "outfit-004",
+    name: "Charcoal Blazer & Black Trousers",
+    description:
+      "A sharp charcoal blazer over a blue dress shirt with black trousers. Slightly more formal than the navy-blazer option.",
+    garments: [
+      "Charcoal single-breasted blazer",
+      "Blue dress shirt",
+      "Black dress trousers",
+      "Black Oxford or Derby shoes",
+      "Black leather belt",
+    ],
+    estimatedPrice: 190,
+    formality: 8,
+    baseRoleFit: 80,
+    baseCameraReadiness: 78,
+    baseVersatility: 75,
+    colors: ["charcoal", "blue", "black"],
+    hasJacket: true,
+  },
+  {
+    id: "outfit-005",
+    name: "Structured Jacket & Tailored Trousers",
+    description:
+      "A neutral blouse or shell top under a structured jacket, paired with tailored trousers. A polished, professional look that works across industries.",
+    garments: [
+      "Structured blazer or jacket (neutral tone — camel, ivory, or charcoal)",
+      "Blouse or shell top in a complementary neutral",
+      "Tailored high-rise trousers",
+      "Pointed-toe flats or low-block-heel shoes",
+    ],
+    estimatedPrice: 170,
+    formality: 8,
+    baseRoleFit: 82,
+    baseCameraReadiness: 83,
+    baseVersatility: 80,
+    colors: ["camel", "ivory", "charcoal"],
+    hasJacket: true,
+    genderNeutralNote: "Designed with a feminine-presenting silhouette in mind.",
+  },
+  {
+    id: "outfit-006",
+    name: "Professional Dress with Blazer",
+    description:
+      "A simple, well-fitted professional dress in a solid color, layered with a blazer for added formality and camera-friendliness.",
+    garments: [
+      "Solid-color sheath or A-line dress (navy, charcoal, or burgundy)",
+      "Fitted blazer in a complementary tone",
+      "Low block-heel or pointed-toe shoes",
+      "Minimal jewelry",
+    ],
+    estimatedPrice: 160,
+    formality: 7,
+    baseRoleFit: 78,
+    baseCameraReadiness: 85,
+    baseVersatility: 72,
+    colors: ["navy", "charcoal", "burgundy"],
+    hasJacket: true,
+    genderNeutralNote: "Designed with a feminine-presenting silhouette in mind.",
+  },
+];

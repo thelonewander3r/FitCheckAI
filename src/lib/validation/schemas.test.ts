@@ -1,0 +1,124 @@
+import { describe, it, expect } from 'vitest'
+import { IntakeSchema } from './schemas'
+import { DEMO_SCENARIO } from '@/lib/interview/demo-scenario'
+import type { IntakeInput } from './schemas'
+
+// ---------------------------------------------------------------------------
+// Valid payload — demo scenario
+// ---------------------------------------------------------------------------
+describe('IntakeSchema — valid payloads', () => {
+  it('accepts the DEMO_SCENARIO payload', () => {
+    const result = IntakeSchema.safeParse(DEMO_SCENARIO)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts a minimal valid payload without optional fields', () => {
+    const minimal: IntakeInput = {
+      jobTitle: 'Software Engineer',
+      companyName: 'Acme Corp',
+      jobDescription: 'Build and maintain web applications in a collaborative team.',
+      interviewStage: 'first-round',
+      interviewFormat: 'video',
+      interviewDate: '2026-09-01',
+      budget: 150,
+      stylePreference: 'classic',
+    }
+    const result = IntakeSchema.safeParse(minimal)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts an optional candidateName field', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, candidateName: 'Jordan' })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts an optional industry field', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, industry: 'Financial Services' })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts a positive fractional budget', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, budget: 99.99 })
+    expect(result.success).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Invalid payloads — field-level rejections
+// ---------------------------------------------------------------------------
+describe('IntakeSchema — invalid payloads', () => {
+  it('rejects an empty jobTitle', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, jobTitle: '' })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const fields = result.error.issues.map((i) => i.path[0])
+      expect(fields).toContain('jobTitle')
+    }
+  })
+
+  it('rejects a jobDescription that is too short (< 20 chars)', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, jobDescription: 'too short' })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const fields = result.error.issues.map((i) => i.path[0])
+      expect(fields).toContain('jobDescription')
+    }
+  })
+
+  it('rejects a jobDescription of exactly 19 characters', () => {
+    const result = IntakeSchema.safeParse({
+      ...DEMO_SCENARIO,
+      jobDescription: '1234567890123456789',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts a jobDescription of exactly 20 characters', () => {
+    const result = IntakeSchema.safeParse({
+      ...DEMO_SCENARIO,
+      jobDescription: '12345678901234567890',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a negative budget', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, budget: -50 })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const fields = result.error.issues.map((i) => i.path[0])
+      expect(fields).toContain('budget')
+    }
+  })
+
+  it('rejects a zero budget', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, budget: 0 })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects an invalid interviewFormat', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, interviewFormat: 'in-person' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects an invalid interviewStage', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, interviewStage: 'screening' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a malformed interviewDate', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, interviewDate: '01/09/2026' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects an empty companyName', () => {
+    const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, companyName: '' })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a missing required field (budget)', () => {
+    const rest = { ...DEMO_SCENARIO } as Partial<typeof DEMO_SCENARIO>
+    delete rest.budget
+    const result = IntakeSchema.safeParse(rest)
+    expect(result.success).toBe(false)
+  })
+})

@@ -1,0 +1,138 @@
+// Prisma schema for InterviewReady AI prototype (SQLite).
+// Uploaded images are referenced by temporary local paths and are not retained permanently by default.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model InterviewSession {
+  id                String   @id @default(cuid())
+  candidateName     String?
+  jobTitle          String
+  companyName       String
+  industry          String?
+  jobDescription    String
+  interviewStage    String
+  interviewFormat   String
+  interviewDate     String
+  budget            Float
+  stylePreference   String
+  selectedOutfitId  String?
+  status            String   @default("intake")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  uploadedImage     UploadedImage?
+  interviewContext  InterviewContextRecord?
+  skinAnalysis      SkinAnalysis?
+  outfits           Outfit[]
+  evaluations       OutfitEvaluation[]
+  tryOnResults      VirtualTryOnResult[]
+  preparationPlan   PreparationPlan?
+}
+
+model UploadedImage {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique
+  session      InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  /// Temporary local path or data-URL placeholder — not permanent object storage
+  tempPath     String?
+  mimeType     String?
+  /// Ephemeral base64 preview for prototype only; cleared after session flow when possible
+  previewData  String?
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime?
+}
+
+model InterviewContextRecord {
+  id                  String  @id @default(cuid())
+  sessionId           String  @unique
+  session             InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  inferredIndustry    String
+  dressCode           String
+  confidence          Float
+  recommendedColors   String  /// JSON array
+  avoidPatterns       String  /// JSON array
+  jacketRecommended   Boolean
+  rationale           String  /// JSON array
+}
+
+model SkinAnalysis {
+  id                       String  @id @default(cuid())
+  sessionId                String  @unique
+  session                  InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  observationsJson         String
+  preparationSuggestionsJson String
+  lightingNotesJson        String
+  disclaimer               String
+  isMock                   Boolean @default(true)
+  createdAt                DateTime @default(now())
+}
+
+model Outfit {
+  id                String  @id @default(cuid())
+  sessionId         String
+  session           InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  templateId        String
+  name              String
+  description       String
+  garmentsJson      String
+  estimatedPrice    Float
+  formality         Int
+  colorsJson        String
+  hasJacket         Boolean
+  explanation       String
+  rank              Int
+
+  evaluation        OutfitEvaluation?
+  tryOnResult       VirtualTryOnResult?
+
+  @@unique([sessionId, templateId])
+}
+
+model OutfitEvaluation {
+  id                          String @id @default(cuid())
+  sessionId                   String
+  session                     InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  outfitId                    String @unique
+  outfit                      Outfit @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  roleAppropriateness         Float
+  interviewFormatSuitability  Float
+  budgetFit                   Float
+  versatility                 Float
+  cameraReadiness             Float
+  overall                     Float
+}
+
+model VirtualTryOnResult {
+  id               String   @id @default(cuid())
+  sessionId        String
+  session          InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  outfitId         String   @unique
+  outfit           Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  renderedImageUrl String
+  isMock           Boolean  @default(true)
+  processingTimeMs Int?
+  createdAt        DateTime @default(now())
+}
+
+model PreparationPlan {
+  id                            String @id @default(cuid())
+  sessionId                     String @unique
+  session                       InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  selectedOutfitId              String
+  whySelected                   String
+  estimatedTotalPrice           Float
+  alternativeOutfitId           String
+  fiveDayChecklistJson          String
+  nightBeforeChecklistJson      String
+  oneHourBeforeChecklistJson    String
+  lightingAndCameraSuggestionsJson String
+  summaryText                   String
+  createdAt                     DateTime @default(now())
+}
