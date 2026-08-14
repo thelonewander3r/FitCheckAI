@@ -6,15 +6,24 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { assessEventDetail } from "@/lib/occasion/detail-assessment";
+import { OCCASION_SKIN_TONES } from "@/lib/occasion/preferences";
 
 interface FormState {
   venueName: string;
   theme: string;
+  location: string;
+  colorPreference: string;
+  skinTonePreference: string;
 }
 
 const EMPTY_FORM: FormState = {
   venueName: "",
   theme: "",
+  location: "",
+  colorPreference: "",
+  skinTonePreference: "",
 };
 
 const EVENT_EXAMPLES = [
@@ -32,6 +41,7 @@ export default function OccasionIntakePage() {
     Partial<Record<keyof FormState, string>>
   >({});
   const [submitting, setSubmitting] = useState(false);
+  const [showDetailQuestions, setShowDetailQuestions] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   function handleChange(
@@ -46,6 +56,7 @@ export default function OccasionIntakePage() {
 
   function applyExample(prompt: string) {
     setForm((prev) => ({ ...prev, venueName: prompt }));
+    setShowDetailQuestions(false);
     setErrors((prev) => ({ ...prev, venueName: undefined }));
   }
 
@@ -60,6 +71,12 @@ export default function OccasionIntakePage() {
     e.preventDefault();
     if (!validate()) return;
 
+    if (!showDetailQuestions && assessEventDetail(form.venueName).needsFollowUp) {
+      setShowDetailQuestions(true);
+      setSubmitError(null);
+      return;
+    }
+
     setSubmitting(true);
     setSubmitError(null);
 
@@ -67,6 +84,9 @@ export default function OccasionIntakePage() {
       const payload = {
         venueName: form.venueName.trim(),
         theme: form.theme.trim() || undefined,
+        location: form.location.trim() || undefined,
+        colorPreference: form.colorPreference.trim() || undefined,
+        skinTonePreference: form.skinTonePreference || undefined,
       };
 
       const res = await fetch("/api/occasions", {
@@ -95,6 +115,11 @@ export default function OccasionIntakePage() {
     }
   }
 
+  const needsMoreDetails =
+    form.venueName.trim().length > 0 &&
+    !showDetailQuestions &&
+    assessEventDetail(form.venueName).needsFollowUp;
+
   return (
     <div className="min-h-screen bg-[#f4f6f8] pb-16">
       <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
@@ -119,9 +144,13 @@ export default function OccasionIntakePage() {
           <h1 className="font-serif text-2xl font-semibold text-[#0f2744] mb-1">
             Check your whole outfit
           </h1>
-          <p className="text-sm text-[#718096] mb-8">
+          <p className="text-sm text-[#718096] mb-3">
             Start with the event. Tell us what you&apos;re going to, and we&apos;ll
             recommend a complete look from what you already own.
+          </p>
+          <p className="mb-8 text-xs text-[#718096]">
+            Current mode: use your wardrobe. Finding new pieces that suit you
+            will come in a later phase.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -162,16 +191,80 @@ export default function OccasionIntakePage() {
               )}
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="theme">Details that matter (optional)</Label>
-              <Input
-                id="theme"
-                name="theme"
-                value={form.theme}
-                onChange={handleChange}
-                placeholder="e.g. I want to look polished but still feel like myself"
-              />
-            </div>
+            {showDetailQuestions && (
+              <div
+                className="space-y-5 rounded-xl border border-[#d7e7eb] bg-[#f7fbfc] p-5"
+                data-testid="occasion-follow-up"
+              >
+                <div>
+                  <h2 className="text-sm font-semibold text-[#0f2744]">
+                    A few details will make this more useful
+                  </h2>
+                  <p className="mt-1 text-xs leading-5 text-[#718096]">
+                    We can use the restaurant, venue, company, or city to
+                    research the event context before composing your look.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="location">
+                    Where is it happening? (optional)
+                  </Label>
+                  <Input
+                    id="location"
+                    name="location"
+                    value={form.location}
+                    onChange={handleChange}
+                    placeholder="e.g. The Ivy in NYC, Acme HQ, or a rooftop restaurant"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="theme">Dress code or other details (optional)</Label>
+                  <Input
+                    id="theme"
+                    name="theme"
+                    value={form.theme}
+                    onChange={handleChange}
+                    placeholder="e.g. cocktail attire, outdoors, polished but relaxed"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="colorPreference">
+                    Colors you prefer or want to avoid (optional)
+                  </Label>
+                  <Input
+                    id="colorPreference"
+                    name="colorPreference"
+                    value={form.colorPreference}
+                    onChange={handleChange}
+                    placeholder="e.g. navy and emerald; avoid bright red"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="skinTonePreference">
+                    Skin-tone preference for color guidance (optional)
+                  </Label>
+                  <Select
+                    id="skinTonePreference"
+                    name="skinTonePreference"
+                    value={form.skinTonePreference}
+                    onChange={handleChange}
+                    placeholder="Skip — use event and wardrobe only"
+                    options={OCCASION_SKIN_TONES.map((tone) => ({
+                      value: tone,
+                      label: tone.charAt(0).toUpperCase() + tone.slice(1),
+                    }))}
+                  />
+                  <p className="text-xs leading-5 text-[#718096]">
+                    This is a manual preference for palette guidance. FitCheck
+                    AI never infers it from a photo.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {submitError && (
               <p className="text-sm text-red-600 font-medium" role="alert">
@@ -186,7 +279,11 @@ export default function OccasionIntakePage() {
               className="w-full"
               disabled={submitting}
             >
-              {submitting ? "Checking…" : "Check my outfit"}
+              {submitting
+                ? "Checking…"
+                : needsMoreDetails
+                  ? "Add useful details"
+                  : "Check my outfit"}
             </Button>
           </form>
         </div>

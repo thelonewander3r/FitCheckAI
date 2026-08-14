@@ -73,4 +73,24 @@ test.describe('Occasion flow', () => {
       page.getByRole('heading', { name: 'Add your pieces first', exact: true }),
     ).toBeVisible()
   })
+
+  test('asks for useful context when the event prompt is sparse', async ({ page }) => {
+    await page.goto('/occasion')
+    await page
+      .getByLabel('What event are you dressing for? *')
+      .fill('a wedding')
+
+    await page.getByRole('button', { name: 'Add useful details' }).click()
+
+    await expect(page.getByTestId('occasion-follow-up')).toBeVisible()
+    await expect(
+      page.getByLabel('Where is it happening? (optional)'),
+    ).toBeVisible()
+    await expect(
+      page.getByLabel('Colors you prefer or want to avoid (optional)'),
+    ).toBeVisible()
+    await expect(
+      page.getByLabel('Skin-tone preference for color guidance (optional)'),
+    ).toBeVisible()
+  })
 })

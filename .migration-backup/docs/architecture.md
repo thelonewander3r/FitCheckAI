@@ -2,7 +2,33 @@
 
 ## Overview
 
-FitCheck AI is a Next.js 16 (App Router) application. The server handles situation checks, wardrobe composition, and legacy interview sessions; the client renders results and drives the try-on / plan flow.
+FitCheck AI is a Next.js 16 (App Router) application. The server handles
+event checks, optional event-context research, wardrobe composition, and legacy
+interview sessions; the client renders results and drives the try-on / plan flow.
+
+## Event-first request flow
+
+The primary flow is intentionally staged so the first screen stays simple:
+
+1. **Choose the current source:** compose from the user's saved wardrobe. A
+   future source will find pieces that best suit the user.
+2. **Name the event:** accept a natural-language event request and infer a
+   bounded event type/dress context.
+3. **Clarify only when needed:** sparse requests ask for the restaurant,
+   venue, company, city, dress code, vibe, and optional manual color or
+   skin-tone preferences.
+4. **Research event context:** the venue/research provider uses the event and
+   location anchor to gather structured facts. Mock mode is deterministic today;
+   a future live adapter must return source URLs and freshness metadata.
+5. **Compose wardrobe outfits:** rank combinations from owned pieces using event
+   formality, researched palette, worn history, and explicit preferences.
+6. **Visualize optionally:** send valid image/reference inputs to the relevant
+   YouCam capability. Event text and web research guide FitCheck's decision;
+   they are not a substitute for YouCam's required media inputs.
+
+Web results are untrusted content. The live adapter must limit domains/query
+scope, sanitize retrieved text, preserve citations, and keep raw page content
+out of provider requests unless an explicit, reviewed classifier requires it.
 
 ---
 
@@ -153,7 +179,11 @@ const provider =
 
 The live provider currently implements Skin AI and Apparel VTO transport, including file upload, task creation, polling, response mapping, and URL validation. Live Skin AI still needs a credentialed smoke test. Live Apparel VTO additionally requires both a user image and a garment reference image; the current built-in outfit flow does not ingest those garment assets.
 
-The venue provider follows the same pattern, but only the mock venue lookup is currently available. Video capture is not implemented, and Prisma persistence remains deferred in favor of the file stores.
+The venue/research provider follows the same pattern. `MockVenueLookupProvider`
+is deterministic and now accepts an optional location anchor; the live provider
+is the seam for a future web-search adapter and is not yet an unrestricted
+scraper. Video capture is not implemented, and Prisma persistence remains
+deferred in favor of the file stores.
 
 ---
 

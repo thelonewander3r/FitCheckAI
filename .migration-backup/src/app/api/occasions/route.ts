@@ -3,14 +3,17 @@ import { z } from "zod";
 import { createOccasion } from "@/lib/services/occasion-service";
 import { inferOccasionType } from "@/lib/occasion/inference";
 import { OCCASION_TYPES } from "@/types/occasion";
+import { OCCASION_SKIN_TONES } from "@/lib/occasion/preferences";
 
 const OccasionIntakeSchema = z.object({
   eventType: z.enum(OCCASION_TYPES).optional(),
   venueName: z.string().trim().min(1, "Event is required").max(200),
   theme: z.string().max(200).optional(),
   // Kept optional for old links/API clients; the new UI does not ask for it.
-  location: z.string().max(200).optional(),
+  location: z.string().trim().max(200).optional(),
   eventDate: z.string().max(32).optional(),
+  colorPreference: z.string().trim().max(200).optional(),
+  skinTonePreference: z.enum(OCCASION_SKIN_TONES).optional(),
 });
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

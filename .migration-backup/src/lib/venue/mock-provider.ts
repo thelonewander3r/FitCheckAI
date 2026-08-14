@@ -134,7 +134,10 @@ const CURATED_RULES: CuratedRule[] = [
 
 export class MockVenueLookupProvider implements VenueProvider {
   async lookupVenue(input: VenueLookupInput): Promise<VenueContext> {
-    const name = input.venueName.toLowerCase();
+    const name = [input.venueName, input.location]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
     for (const rule of CURATED_RULES) {
       if (rule.match(name, input.eventType)) {

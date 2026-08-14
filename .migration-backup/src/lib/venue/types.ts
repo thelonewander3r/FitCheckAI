@@ -5,6 +5,8 @@ import { formalityLevelToLabel } from "@/lib/wardrobe/formality";
 export interface VenueLookupInput {
   venueName: string;
   eventType: OccasionType;
+  /** Optional restaurant, company, venue, city, or other research anchor. */
+  location?: string;
 }
 
 export type DressCodeLabel = WardrobeFormality;
