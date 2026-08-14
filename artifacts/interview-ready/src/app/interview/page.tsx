@@ -1,8 +1,6 @@
-
-
 import { useState, useRef, type ChangeEvent, type FormEvent } from "react";
-import { Link } from "wouter";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
+import { motion } from "framer-motion";
 import { StepNav } from "@/components/step-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import type { IntakeInput } from "@/lib/validation/schemas";
 import { downscaleToBase64 } from "@/lib/client/image-utils";
+import { cn } from "@/lib/utils";
 
 type FormState = Omit<
   IntakeInput,
@@ -79,13 +78,10 @@ export default function InterviewPage() {
     setImageFileName(file.name);
 
     try {
-      const base64 = await downscaleToBase64(file); // default maxEdge=1024 for YouCam SD skin short-side
+      const base64 = await downscaleToBase64(file);
       if (!base64) throw new Error("empty result");
       setImageBase64(base64);
     } catch {
-      // Fail closed: never upload an unprocessed (potentially huge or
-      // unsupported-format) file. The full-size original would defeat the
-      // downscale and persist megabytes into the session store.
       setImageBase64(undefined);
       setImageError(
         "Could not process this image. Please upload a JPEG, PNG, or WebP under 15 MB.",
@@ -98,7 +94,7 @@ export default function InterviewPage() {
     if (!form.jobTitle.trim()) newErrors.jobTitle = "Required";
     if (!form.companyName.trim()) newErrors.companyName = "Required";
     if (form.jobDescription.trim().length < 20)
-      newErrors.jobDescription = "At least 20 characters";
+      newErrors.jobDescription = "At least 20 characters required";
     if (!form.interviewDate) newErrors.interviewDate = "Required";
     const budget = parseFloat(form.budget);
     if (isNaN(budget) || budget <= 0) newErrors.budget = "Enter a positive number";
@@ -108,7 +104,10 @@ export default function InterviewPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
 
     setSubmitting(true);
     setSubmitError(null);
@@ -161,377 +160,372 @@ export default function InterviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] pb-16">
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-background pb-24"
+    >
       {/* Header */}
-      <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
+      <header className="border-b border-[#0f2744]/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
           <Link
             href="/"
-            className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors"
+            className="font-serif text-lg text-[#0f2744] hover:opacity-70 transition-opacity"
           >
-            InterviewReady AI
+            Vogue × Career
+          </Link>
+          <Link href="/" className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]/60 hover:text-[#0f2744] transition-colors">
+            Cancel
           </Link>
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-6 pt-8">
-        <StepNav currentStep={1} className="mb-8" />
+      <div className="mx-auto max-w-2xl px-6 pt-12 md:pt-20">
+        <StepNav currentStep={1} className="mb-16" />
 
-        <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
-          <h1 className="font-serif text-2xl font-semibold text-[#0f2744] mb-1">
-            Your interview details
-          </h1>
-          <p className="text-sm text-[#718096] mb-8">
-            Tell us about the role and your preferences so we can tailor outfit
-            recommendations for you.
-          </p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="space-y-12"
+        >
+          <div className="text-center space-y-4 mb-16">
+            <h1 className="font-serif text-4xl md:text-5xl text-[#0f2744] leading-tight">
+              The Consultation
+            </h1>
+            <p className="text-sm font-serif italic text-[#0f2744]/60 max-w-md mx-auto">
+              Please provide the details of your upcoming interview. The more context you share, the sharper our curation.
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-            {/* Personal */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="candidateName">Your name (optional)</Label>
+          {submitError && (
+            <div className="border border-red-900/10 bg-red-50/50 p-4 text-sm font-serif italic text-red-900 text-center">
+              {submitError}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-12" noValidate>
+            
+            {/* Section 1: The Role */}
+            <div className="space-y-8">
+              <h2 className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] border-b border-[#0f2744]/10 pb-2">
+                01 — The Opportunity
+              </h2>
+              
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="jobTitle" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Role Title *</Label>
+                  <Input
+                    id="jobTitle"
+                    name="jobTitle"
+                    value={form.jobTitle}
+                    onChange={handleChange}
+                    placeholder="e.g. Senior Director"
+                    className={cn(
+                      "border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors",
+                      errors.jobTitle && "border-red-500"
+                    )}
+                  />
+                  {errors.jobTitle && <p className="text-[10px] uppercase tracking-widest text-red-500 mt-1">{errors.jobTitle}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyName" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Company *</Label>
+                  <Input
+                    id="companyName"
+                    name="companyName"
+                    value={form.companyName}
+                    onChange={handleChange}
+                    placeholder="e.g. Acme Corp"
+                    className={cn(
+                      "border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors",
+                      errors.companyName && "border-red-500"
+                    )}
+                  />
+                  {errors.companyName && <p className="text-[10px] uppercase tracking-widest text-red-500 mt-1">{errors.companyName}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="industry" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Industry (Optional)</Label>
                 <Input
-                  id="candidateName"
-                  name="candidateName"
-                  value={form.candidateName}
+                  id="industry"
+                  name="industry"
+                  value={form.industry}
                   onChange={handleChange}
-                  placeholder="Alex"
-                  autoComplete="given-name"
+                  placeholder="e.g. Investment Banking, Tech, Healthcare"
+                  className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="interviewDate">Interview date *</Label>
-                <Input
-                  id="interviewDate"
-                  name="interviewDate"
-                  type="date"
-                  value={form.interviewDate}
+
+              <div className="space-y-2">
+                <Label htmlFor="jobDescription" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Role Description *</Label>
+                <Textarea
+                  id="jobDescription"
+                  name="jobDescription"
+                  value={form.jobDescription}
                   onChange={handleChange}
-                  min={new Date().toISOString().split("T")[0]}
-                  className={errors.interviewDate ? "border-red-400" : ""}
+                  rows={4}
+                  placeholder="Paste the job description. We read between the lines to infer culture and dress code."
+                  className={cn(
+                    "border border-[#0f2744]/10 bg-white/50 p-4 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-sm font-serif leading-relaxed transition-colors resize-none",
+                    errors.jobDescription && "border-red-500"
+                  )}
                 />
-                {errors.interviewDate && (
-                  <p className="text-xs text-red-500">{errors.interviewDate}</p>
-                )}
+                {errors.jobDescription && <p className="text-[10px] uppercase tracking-widest text-red-500 mt-1">{errors.jobDescription}</p>}
               </div>
             </div>
 
-            {/* Role */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="jobTitle">Job title *</Label>
-                <Input
-                  id="jobTitle"
-                  name="jobTitle"
-                  value={form.jobTitle}
-                  onChange={handleChange}
-                  placeholder="e.g. Senior Analyst"
-                  className={errors.jobTitle ? "border-red-400" : ""}
-                />
-                {errors.jobTitle && (
-                  <p className="text-xs text-red-500">{errors.jobTitle}</p>
-                )}
+            {/* Section 2: The Interview */}
+            <div className="space-y-8">
+              <h2 className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] border-b border-[#0f2744]/10 pb-2">
+                02 — The Encounter
+              </h2>
+              
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="interviewDate" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Date *</Label>
+                  <Input
+                    id="interviewDate"
+                    name="interviewDate"
+                    type="date"
+                    value={form.interviewDate}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split("T")[0]}
+                    className={cn(
+                      "border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors appearance-none",
+                      errors.interviewDate && "border-red-500"
+                    )}
+                  />
+                  {errors.interviewDate && <p className="text-[10px] uppercase tracking-widest text-red-500 mt-1">{errors.interviewDate}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyCulture" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Culture Profile</Label>
+                  <Select
+                    id="companyCulture"
+                    name="companyCulture"
+                    value={form.companyCulture}
+                    onChange={handleChange}
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                    options={[
+                      { value: "", label: "Infer automatically" },
+                      { value: "corporate", label: "Traditional Corporate" },
+                      { value: "startup", label: "Modern Startup" },
+                      { value: "creative", label: "Creative Studio" },
+                      { value: "client-facing", label: "Client Facing" },
+                      { value: "government", label: "Government / NGO" },
+                    ]}
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="companyName">Company *</Label>
-                <Input
-                  id="companyName"
-                  name="companyName"
-                  value={form.companyName}
-                  onChange={handleChange}
-                  placeholder="e.g. Acme Corp"
-                  className={errors.companyName ? "border-red-400" : ""}
-                />
-                {errors.companyName && (
-                  <p className="text-xs text-red-500">{errors.companyName}</p>
-                )}
+
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="interviewFormat" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Format</Label>
+                  <Select
+                    id="interviewFormat"
+                    name="interviewFormat"
+                    value={form.interviewFormat}
+                    onChange={handleChange}
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                    options={[
+                      { value: "video", label: "Video Conference" },
+                      { value: "onsite", label: "On-site" },
+                      { value: "recruiter", label: "Recruiter Screen" },
+                      { value: "hiring-manager", label: "Hiring Manager" },
+                      { value: "executive", label: "Executive Panel" },
+                    ]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="interviewStage" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Stage</Label>
+                  <Select
+                    id="interviewStage"
+                    name="interviewStage"
+                    value={form.interviewStage}
+                    onChange={handleChange}
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                    options={[
+                      { value: "phone-screen", label: "Initial Screen" },
+                      { value: "first-round", label: "First Round" },
+                      { value: "onsite", label: "On-site / Superday" },
+                      { value: "final", label: "Final Round" },
+                      { value: "other", label: "Other" },
+                    ]}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="industry">Industry (optional)</Label>
-              <Input
-                id="industry"
-                name="industry"
-                value={form.industry}
-                onChange={handleChange}
-                placeholder="e.g. Financial Services, Healthcare, Tech"
-              />
-            </div>
+            {/* Section 3: The Candidate */}
+            <div className="space-y-8">
+              <h2 className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] border-b border-[#0f2744]/10 pb-2">
+                03 — The Canvas
+              </h2>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="jobDescription">Job description *</Label>
-              <Textarea
-                id="jobDescription"
-                name="jobDescription"
-                value={form.jobDescription}
-                onChange={handleChange}
-                rows={5}
-                placeholder="Paste or summarise the job description — the more detail, the better our dress code inference."
-                className={errors.jobDescription ? "border-red-400" : ""}
-              />
-              {errors.jobDescription && (
-                <p className="text-xs text-red-500">{errors.jobDescription}</p>
-              )}
-            </div>
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="candidateName" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Name</Label>
+                  <Input
+                    id="candidateName"
+                    name="candidateName"
+                    value={form.candidateName}
+                    onChange={handleChange}
+                    placeholder="Optional"
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="presentation" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Presentation</Label>
+                  <Select
+                    id="presentation"
+                    name="presentation"
+                    value={form.presentation}
+                    onChange={handleChange}
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                    options={[
+                      { value: "", label: "Prefer not to say" },
+                      { value: "feminine", label: "Feminine" },
+                      { value: "masculine", label: "Masculine" },
+                      { value: "neutral", label: "Neutral" },
+                    ]}
+                  />
+                </div>
+              </div>
 
-            {/* Interview specifics */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="interviewFormat">Interview format</Label>
-                <Select
-                  id="interviewFormat"
-                  name="interviewFormat"
-                  value={form.interviewFormat}
-                  onChange={handleChange}
-                  options={[
-                    { value: "video", label: "Video call" },
-                    { value: "onsite", label: "On-site" },
-                    { value: "recruiter", label: "Recruiter screen" },
-                    { value: "hiring-manager", label: "Hiring manager" },
-                    { value: "executive", label: "Executive panel" },
-                  ]}
-                />
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="budget" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Budget (USD) *</Label>
+                  <Input
+                    id="budget"
+                    name="budget"
+                    type="number"
+                    min="1"
+                    step="10"
+                    value={form.budget}
+                    onChange={handleChange}
+                    placeholder="e.g. 500"
+                    className={cn(
+                      "border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors",
+                      errors.budget && "border-red-500"
+                    )}
+                  />
+                  {errors.budget && <p className="text-[10px] uppercase tracking-widest text-red-500 mt-1">{errors.budget}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stylePreference" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Aesthetic</Label>
+                  <Select
+                    id="stylePreference"
+                    name="stylePreference"
+                    value={form.stylePreference}
+                    onChange={handleChange}
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                    options={[
+                      { value: "classic", label: "Classic / Timeless" },
+                      { value: "modern", label: "Modern / Sharp" },
+                      { value: "minimal", label: "Minimalist / Understated" },
+                      { value: "creative", label: "Creative / Bold" },
+                    ]}
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="interviewStage">Interview stage</Label>
-                <Select
-                  id="interviewStage"
-                  name="interviewStage"
-                  value={form.interviewStage}
-                  onChange={handleChange}
-                  options={[
-                    { value: "phone-screen", label: "Phone screen" },
-                    { value: "first-round", label: "First round" },
-                    { value: "onsite", label: "On-site" },
-                    { value: "final", label: "Final round" },
-                    { value: "other", label: "Other" },
-                  ]}
-                />
-              </div>
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="budget">Outfit budget (USD) *</Label>
-                <Input
-                  id="budget"
-                  name="budget"
-                  type="number"
-                  min="1"
-                  step="10"
-                  value={form.budget}
-                  onChange={handleChange}
-                  placeholder="e.g. 200"
-                  className={errors.budget ? "border-red-400" : ""}
-                />
-                {errors.budget && (
-                  <p className="text-xs text-red-500">{errors.budget}</p>
-                )}
+              <div className="grid gap-8 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="skinTone" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Complexion</Label>
+                  <Select
+                    id="skinTone"
+                    name="skinTone"
+                    value={form.skinTone}
+                    onChange={handleChange}
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                    options={[
+                      { value: "", label: "Skip / Infer from photo" },
+                      { value: "fair", label: "Fair" },
+                      { value: "light", label: "Light" },
+                      { value: "medium", label: "Medium" },
+                      { value: "tan", label: "Tan" },
+                      { value: "deep", label: "Deep" },
+                    ]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fitSize" className="text-xs uppercase tracking-widest text-[#0f2744]/70">Sizing (Optional)</Label>
+                  <Input
+                    id="fitSize"
+                    name="fitSize"
+                    value={form.fitSize ?? ""}
+                    onChange={handleChange}
+                    placeholder="e.g. US 6, M, 40R"
+                    className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="stylePreference">Style preference</Label>
-                <Select
-                  id="stylePreference"
-                  name="stylePreference"
-                  value={form.stylePreference}
-                  onChange={handleChange}
-                  options={[
-                    { value: "classic", label: "Classic" },
-                    { value: "modern", label: "Modern" },
-                    { value: "minimal", label: "Minimal" },
-                    { value: "creative", label: "Creative" },
-                  ]}
-                />
-              </div>
-            </div>
 
-            {/* Person profile */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="fitSize">Fit size (optional)</Label>
-                <Input
-                  id="fitSize"
-                  name="fitSize"
-                  value={form.fitSize ?? ""}
-                  onChange={handleChange}
-                  placeholder="e.g. US 6 or M"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="weightLbs">Weight (lbs, optional)</Label>
-                <Input
-                  id="weightLbs"
-                  name="weightLbs"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={form.weightLbs}
-                  onChange={handleChange}
-                  placeholder="e.g. 140"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="skinTone">Skin tone (optional)</Label>
-                <Select
-                  id="skinTone"
-                  name="skinTone"
-                  value={form.skinTone}
-                  onChange={handleChange}
-                  options={[
-                    { value: "", label: "Prefer not to say" },
-                    { value: "fair", label: "Fair" },
-                    { value: "light", label: "Light" },
-                    { value: "medium", label: "Medium" },
-                    { value: "tan", label: "Tan" },
-                    { value: "deep", label: "Deep" },
-                  ]}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="presentation">Presentation</Label>
-                <Select
-                  id="presentation"
-                  name="presentation"
-                  value={form.presentation}
-                  onChange={handleChange}
-                  options={[
-                    { value: "", label: "Prefer not to say" },
-                    { value: "feminine", label: "Feminine" },
-                    { value: "masculine", label: "Masculine" },
-                    { value: "neutral", label: "Neutral" },
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="companyCulture">Company culture (optional)</Label>
-              <Select
-                id="companyCulture"
-                name="companyCulture"
-                value={form.companyCulture}
-                onChange={handleChange}
-                options={[
-                  { value: "", label: "Auto (from industry)" },
-                  { value: "corporate", label: "Corporate" },
-                  { value: "startup", label: "Startup" },
-                  { value: "creative", label: "Creative" },
-                  { value: "client-facing", label: "Client-facing" },
-                  { value: "government", label: "Government" },
-                ]}
-              />
-            </div>
-
-            {/* Optional photo */}
-            <div className="space-y-1.5">
-              <Label>Photo (optional)</Label>
-              <p className="text-xs text-[#718096]">
-                Upload a selfie to enable personalised skin analysis and virtual
-                try-on. Stored in the local session store and may remain until
-                local data is cleared.
-              </p>
-              <div
-                className="flex items-center gap-3 rounded-lg border border-dashed border-[#c3ccd6] bg-[#f4f6f8] p-4 cursor-pointer hover:border-[#2a6f7f] transition-colors"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <svg
-                  className="h-6 w-6 text-[#718096]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
+              <div className="space-y-4 pt-4">
+                <Label className="text-xs uppercase tracking-widest text-[#0f2744]/70">Portrait (Optional)</Label>
+                <p className="text-sm font-serif italic text-[#0f2744]/60">
+                  Upload a photo to unlock virtual try-on and bespoke color analysis.
+                </p>
+                <div
+                  className="group relative flex flex-col items-center justify-center gap-3 border border-[#0f2744]/10 bg-white/50 p-8 cursor-pointer hover:bg-white hover:border-[#0f2744]/30 transition-all duration-300"
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <span className="text-sm text-[#718096]">
-                  {imageFileName ? imageFileName : "Click to select image"}
-                </span>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="sr-only"
-                onChange={handleFileChange}
-                aria-label="Upload selfie"
-              />
-              {imageError && (
-                <p className="text-xs text-red-500">{imageError}</p>
-              )}
-            </div>
-
-            {submitError && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {submitError}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={submitting}
-              className="w-full"
-            >
-              {submitting ? (
-                <>
                   <svg
-                    className="animate-spin h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                  Analysing…
-                </>
-              ) : (
-                <>
-                  Analyse my interview
-                  <svg
-                    className="h-4 w-4"
+                    className="h-6 w-6 text-[#0f2744]/40 group-hover:text-[#0f2744] transition-colors"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    strokeWidth={2}
+                    strokeWidth={1}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                </>
-              )}
-            </Button>
+                  <span className="text-sm font-serif text-[#0f2744]/60 group-hover:text-[#0f2744] transition-colors">
+                    {imageFileName ? imageFileName : "Select a portrait"}
+                  </span>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={handleFileChange}
+                  aria-label="Upload portrait"
+                />
+                {imageError && (
+                  <p className="text-[10px] uppercase tracking-widest text-red-500 mt-1">{imageError}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-8 flex justify-center">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="group relative px-12 py-5 bg-[#0f2744] text-white text-xs font-medium uppercase tracking-widest overflow-hidden transition-all hover:bg-[#0a1d35] disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+              >
+                {submitting ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Analyzing Profile
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-3">
+                    Begin Analysis
+                    <svg className="h-4 w-4 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            </div>
           </form>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

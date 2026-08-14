@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams } from "wouter";
+import { motion } from "framer-motion";
 import { StepNav } from "@/components/step-nav";
 import { Checklist } from "@/components/checklist";
-import { Badge } from "@/components/ui/badge";
 import type { StoredSession } from "@/types/session";
 
 export default function PlanPage() {
@@ -55,9 +55,12 @@ export default function PlanPage() {
 
   if (loadError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f6f8]">
-        <div className="rounded-xl border border-red-200 bg-white p-8 text-center max-w-sm">
-          <p className="text-sm text-red-600 font-medium">{loadError}</p>
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="border border-red-900/10 bg-red-50/50 p-8 text-center max-w-md w-full">
+          <p className="text-sm font-serif italic text-red-900 mb-6">{loadError}</p>
+          <Link href="/interview" className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] border-b border-[#0f2744]/20 pb-1 hover:border-[#0f2744]">
+            Begin New Consultation
+          </Link>
         </div>
       </div>
     );
@@ -65,12 +68,12 @@ export default function PlanPage() {
 
   if (!session?.plan) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#f4f6f8]">
-        <svg className="animate-spin h-8 w-8 text-[#2a6f7f]" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background">
+        <svg className="animate-spin h-8 w-8 text-[#0f2744]/30" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+          <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
-        <p className="font-serif text-base font-medium text-[#0f2744]">Building your plan…</p>
+        <p className="font-serif text-sm italic text-[#0f2744]/60 tracking-wide">Drafting your itinerary…</p>
       </div>
     );
   }
@@ -79,102 +82,186 @@ export default function PlanPage() {
   const selectedOutfit = outfits?.find((o) => o.id === selectedOutfitId) ?? outfits?.[0];
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] pb-16">
-      <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
-        <div className="mx-auto max-w-3xl flex items-center justify-between">
-          <Link href="/" className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors">
-            InterviewReady AI
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-background pb-32"
+    >
+      <header className="border-b border-[#0f2744]/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+          <Link href="/" className="font-serif text-lg text-[#0f2744] hover:opacity-70 transition-opacity">
+            Vogue × Career
           </Link>
-          {isMockMode && <Badge variant="outline" className="text-xs">Mock mode</Badge>}
+          {isMockMode && <span className="text-[10px] uppercase tracking-widest text-[#0f2744]/40 border border-[#0f2744]/10 px-2 py-1">Mock Mode</span>}
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-6 pt-8 space-y-8">
-        <StepNav currentStep={4} />
+      <div className="mx-auto max-w-5xl px-6 pt-12 md:pt-20">
+        <StepNav currentStep={4} className="mb-16 md:mb-24" />
 
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-2xl font-semibold text-[#0f2744]">Your preparation plan</h1>
-            <p className="mt-1 text-sm text-[#718096]">
-              {intake.jobTitle} at {intake.companyName} · {intake.interviewDate}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4 border-b border-[#0f2744]/10 pb-2 inline-block">The Execution</p>
+            <h1 className="font-serif text-5xl md:text-6xl text-[#0f2744] leading-tight">
+              Your Itinerary
+            </h1>
+            <p className="mt-4 text-lg font-serif italic text-[#0f2744]/70">
+              {intake.jobTitle} at {intake.companyName}
+              <span className="mx-2 not-italic text-[#0f2744]/30">|</span>
+              {intake.interviewDate}
             </p>
-          </div>
-          {plan.summaryText && (
-            <button
-              onClick={() => void handleCopySummary()}
-              className="shrink-0 rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 text-xs font-medium text-[#0f2744] hover:bg-[#f4f6f8] transition-colors"
-            >
-              {copied ? "Copied!" : "Copy summary"}
-            </button>
-          )}
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+          >
+            {plan.summaryText && (
+              <button
+                onClick={() => void handleCopySummary()}
+                className="group relative px-6 py-3 border border-[#0f2744] bg-transparent text-[#0f2744] text-[10px] font-medium uppercase tracking-widest transition-colors hover:bg-[#0f2744]/5"
+              >
+                {copied ? "Copied to Clipboard" : "Export Summary"}
+              </button>
+            )}
+          </motion.div>
         </div>
 
-        {/* Selected outfit */}
-        {selectedOutfit && (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 space-y-3">
-            <h2 className="font-serif text-base font-semibold text-[#0f2744]">Selected outfit</h2>
-            <p className="text-sm font-medium text-[#0f2744]">{selectedOutfit.name}</p>
-            <p className="text-sm text-[#718096]">{plan.whySelected}</p>
-            {typeof plan.estimatedTotalPrice === "number" && (
-              <p className="text-xs text-[#718096]">
-                Estimated cost: <span className="font-semibold text-[#0f2744]">${plan.estimatedTotalPrice.toFixed(0)}</span>
-              </p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
+          <div className="lg:col-span-8 space-y-16">
+            
+            {/* 5-day checklist */}
+            {plan.fiveDayChecklist && plan.fiveDayChecklist.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="bg-white p-8 md:p-12 border border-[#0f2744]/10 shadow-sm"
+              >
+                <Checklist title="T-Minus 5 Days" items={plan.fiveDayChecklist} />
+              </motion.div>
+            )}
+
+            {/* Night before */}
+            {plan.nightBeforeChecklist && plan.nightBeforeChecklist.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="bg-[#0f2744] text-white p-8 md:p-12 shadow-sm"
+              >
+                <div className="space-y-4">
+                  <h3 className="text-xs uppercase tracking-widest font-medium text-white/80 pb-2 border-b border-white/20">
+                    The Eve of the Encounter
+                  </h3>
+                  <ul className="space-y-3">
+                    {plan.nightBeforeChecklist.map((item, index) => (
+                      <li key={index} className="flex gap-4 items-start">
+                        <span className="mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center border border-white/30"></span>
+                        <span className="text-sm text-white/90 leading-relaxed font-serif">
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* 1-hour before */}
+              {plan.oneHourBeforeChecklist && plan.oneHourBeforeChecklist.length > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8 }}
+                  className="bg-white p-8 border border-[#0f2744]/10 shadow-sm"
+                >
+                  <Checklist title="T-Minus 1 Hour" items={plan.oneHourBeforeChecklist} />
+                </motion.div>
+              )}
+
+              {/* Lighting & camera */}
+              {plan.lightingAndCameraSuggestions && plan.lightingAndCameraSuggestions.length > 0 && intake.interviewFormat === "video" && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8 }}
+                  className="bg-white p-8 border border-[#0f2744]/10 shadow-sm"
+                >
+                  <h3 className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] pb-2 border-b border-[#0f2744]/10 mb-4">
+                    Camera & Set Design
+                  </h3>
+                  <ul className="space-y-3">
+                    {plan.lightingAndCameraSuggestions.map((s, i) => (
+                      <li key={i} className="flex gap-3 text-sm font-serif italic text-[#0f2744]/80 leading-relaxed">
+                        <span className="text-[#2a6f7f] text-xs mt-1 not-italic">/</span>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          <div className="lg:col-span-4">
+            {/* Selected outfit feature */}
+            {selectedOutfit && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="bg-white border border-[#0f2744]/10 p-8 shadow-sm lg:sticky lg:top-32"
+              >
+                <p className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]/50 mb-6 pb-2 border-b border-[#0f2744]/10">
+                  The Chosen Look
+                </p>
+                <h2 className="font-serif text-2xl text-[#0f2744] mb-3 leading-tight">{selectedOutfit.name}</h2>
+                <p className="text-sm font-serif italic text-[#0f2744]/70 leading-relaxed mb-8">{plan.whySelected}</p>
+                
+                <div className="pt-6 border-t border-[#0f2744]/10">
+                  <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-1">Estimated Investment</p>
+                  {typeof plan.estimatedTotalPrice === "number" && (
+                    <p className="font-serif text-2xl text-[#0f2744]">
+                      ${plan.estimatedTotalPrice.toFixed(0)}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
             )}
           </div>
-        )}
+        </div>
 
-        {/* 5-day checklist */}
-        {plan.fiveDayChecklist && plan.fiveDayChecklist.length > 0 && (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-6">
-            <Checklist title="5-day countdown" items={plan.fiveDayChecklist} />
-          </div>
-        )}
-
-        {/* Night before */}
-        {plan.nightBeforeChecklist && plan.nightBeforeChecklist.length > 0 && (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-6">
-            <Checklist title="Night before" items={plan.nightBeforeChecklist} />
-          </div>
-        )}
-
-        {/* 1-hour before */}
-        {plan.oneHourBeforeChecklist && plan.oneHourBeforeChecklist.length > 0 && (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-6">
-            <Checklist title="One hour before" items={plan.oneHourBeforeChecklist} />
-          </div>
-        )}
-
-        {/* Lighting & camera */}
-        {plan.lightingAndCameraSuggestions && plan.lightingAndCameraSuggestions.length > 0 && intake.interviewFormat === "video" && (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-6">
-            <h2 className="font-serif text-base font-semibold text-[#0f2744] mb-4">Camera & lighting</h2>
-            <ul className="space-y-2">
-              {plan.lightingAndCameraSuggestions.map((s, i) => (
-                <li key={i} className="flex gap-2 text-sm text-[#4a5568]">
-                  <span className="text-[#2a6f7f] mt-0.5 shrink-0">•</span>
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Start over */}
-        <div className="flex items-center justify-between pt-2">
-          <button
-            onClick={() => setLocation(`/interview/${sessionId}/try-on`)}
-            className="flex items-center gap-1.5 text-sm text-[#718096] hover:text-[#0f2744] transition-colors"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        {/* Footer Navigation */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-16 mt-16 border-t border-[#0f2744]/10"
+        >
+          <Link href={`/interview/${sessionId}/try-on`} className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]/60 hover:text-[#0f2744] transition-colors flex items-center gap-2">
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to try-on
-          </button>
-          <Link href="/interview" className="text-sm text-[#2a6f7f] hover:text-[#235f6e] hover:underline transition-colors">
-            Start a new session →
+            Review Collection
           </Link>
-        </div>
+          <Link href="/interview" className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] border-b border-[#0f2744] pb-1 hover:text-[#2a6f7f] hover:border-[#2a6f7f] transition-colors">
+            Start A New Consultation
+          </Link>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

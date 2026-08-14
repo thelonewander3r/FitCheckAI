@@ -8,29 +8,25 @@ interface ChecklistProps {
 
 export function Checklist({ title, items, className }: ChecklistProps) {
   return (
-    <div className={cn("space-y-3", className)}>
-      <h3 className="font-serif text-sm font-semibold text-[#0f2744]">
+    <div className={cn("space-y-4", className)}>
+      <h3 className="text-xs uppercase tracking-widest font-medium text-[#0f2744] pb-2 border-b border-[#0f2744]/10">
         {title}
       </h3>
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {items.map((item, index) => (
-          <li key={index} className="flex gap-3 items-start">
-            <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border border-[#e2e8f0] bg-[#f4f6f8]">
+          <li key={index} className="flex gap-4 items-start group cursor-default">
+            <span className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center border border-[#0f2744]/20 transition-colors group-hover:border-[#0f2744]/50">
               <svg
-                className="h-3 w-3 text-[#2a6f7f]"
+                className="h-2.5 w-2.5 text-transparent transition-colors group-hover:text-[#0f2744]/30"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                strokeWidth={2.5}
+                strokeWidth={2}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </span>
-            <span className="text-sm text-[#4a5568] leading-relaxed">
+            <span className="text-sm text-[#0f2744]/80 leading-relaxed font-serif transition-colors group-hover:text-[#0f2744]">
               {item}
             </span>
           </li>

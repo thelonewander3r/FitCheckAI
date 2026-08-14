@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -18,6 +18,7 @@ import {
 } from "@/types/wardrobe";
 import type { StyleProfile, WornOutfitRecord } from "@/types/worn";
 import { formalityLevelToLabel } from "@/lib/wardrobe/formality";
+import { cn } from "@/lib/utils";
 
 type Season = (typeof WARDROBE_SEASONS)[number];
 
@@ -108,7 +109,10 @@ export default function WardrobePage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!form.imageBase64) { setSubmitError("Please upload an image of the item."); return; }
+    if (!form.imageBase64) {
+      setSubmitError("Please upload an image of the piece.");
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -118,7 +122,7 @@ export default function WardrobePage() {
         body: JSON.stringify(form),
       });
       const data = (await res.json()) as WardrobeItem & { error?: string };
-      if (!res.ok) { setSubmitError(data.error ?? "Failed to add item."); return; }
+      if (!res.ok) { setSubmitError(data.error ?? "Failed to add piece."); return; }
       setItems((prev) => [data, ...prev]);
       setForm(EMPTY_FORM);
       setPreviewUrl(null);
@@ -138,181 +142,309 @@ export default function WardrobePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] pb-16">
-      <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <Link href="/" className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors">
-            InterviewReady AI
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-background pb-32"
+    >
+      <header className="border-b border-[#0f2744]/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <Link href="/" className="font-serif text-lg text-[#0f2744] hover:opacity-70 transition-opacity">
+            Vogue × Career
           </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/occasion" className="text-sm text-[#718096] hover:text-[#0f2744] transition-colors">
-              Plan an occasion
-            </Link>
-          </div>
+          <Link href="/occasion" className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]/60 hover:text-[#0f2744] transition-colors">
+            Plan Occasion
+          </Link>
         </div>
       </header>
 
-      <div className="mx-auto max-w-4xl px-6 pt-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-serif text-2xl font-semibold text-[#0f2744]">My wardrobe</h1>
-            <p className="mt-1 text-sm text-[#718096]">{items.length} item{items.length === 1 ? "" : "s"}</p>
-          </div>
-          <Button onClick={() => setShowForm((v) => !v)} className="bg-[#0f2744] text-white hover:bg-[#0a1d35]">
-            {showForm ? "Cancel" : "Add item"}
-          </Button>
+      <div className="mx-auto max-w-7xl px-6 pt-12 md:pt-20">
+        
+        {/* Header Area */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 lg:mb-24 border-b border-[#0f2744]/10 pb-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4">Digital Closet</p>
+            <h1 className="font-serif text-5xl md:text-6xl text-[#0f2744] leading-tight mb-2">
+              The Collection
+            </h1>
+            <p className="text-sm font-serif italic text-[#0f2744]/70">
+              {items.length} curated {items.length === 1 ? "piece" : "pieces"}
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+          >
+            <button 
+              onClick={() => setShowForm((v) => !v)} 
+              className={cn(
+                "px-8 py-3 text-[10px] font-medium uppercase tracking-widest transition-all duration-300",
+                showForm 
+                  ? "bg-transparent text-[#0f2744] border border-[#0f2744] hover:bg-[#0f2744]/5" 
+                  : "bg-[#0f2744] text-white hover:bg-[#0a1d35]"
+              )}
+            >
+              {showForm ? "Cancel Entry" : "Acquire Piece"}
+            </button>
+          </motion.div>
         </div>
 
-        {/* Add form */}
-        {showForm && (
-          <form onSubmit={(e) => void handleSubmit(e)} className="rounded-xl border border-[#e2e8f0] bg-white p-6 space-y-5">
-            <h2 className="font-serif text-base font-semibold text-[#0f2744]">Add a wardrobe item</h2>
-
-            {/* Image upload */}
-            <div className="space-y-1.5">
-              <Label>Photo *</Label>
-              <div className="flex items-start gap-4">
-                {previewUrl && (
-                  <img src={previewUrl} alt="Preview" className="h-20 w-20 rounded-lg object-cover border border-[#e2e8f0]" />
-                )}
-                <div className="flex-1">
-                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => void handleImageChange(e)}
-                    className="block w-full text-sm text-[#718096] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#f4f6f8] file:text-[#0f2744] hover:file:bg-[#e2e8f0]" />
-                  {imageError && <p className="mt-1 text-xs text-red-500">{imageError}</p>}
+        <AnimatePresence>
+          {showForm && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden mb-24"
+            >
+              <form onSubmit={(e) => void handleSubmit(e)} className="bg-white border border-[#0f2744]/10 p-8 md:p-12 space-y-12">
+                <div className="flex justify-between items-end border-b border-[#0f2744]/10 pb-4">
+                  <h2 className="font-serif text-3xl text-[#0f2744]">Catalog New Piece</h2>
                 </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+                  
+                  {/* Image Column */}
+                  <div className="lg:col-span-5 space-y-4">
+                    <Label className="text-[10px] uppercase tracking-widest text-[#0f2744]/70">Portrait *</Label>
+                    <div className="aspect-[3/4] w-full border border-[#0f2744]/10 bg-[#f9f6f0] flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer" onClick={() => document.getElementById('wardrobe-img-upload')?.click()}>
+                      {previewUrl ? (
+                        <img src={previewUrl} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      ) : (
+                        <div className="flex flex-col items-center gap-4 text-[#0f2744]/30">
+                          <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span className="text-sm font-serif italic">Upload Image</span>
+                        </div>
+                      )}
+                      
+                      <div className="absolute inset-0 bg-[#0f2744]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <span className="text-white text-[10px] uppercase tracking-widest">Change Photo</span>
+                      </div>
+                    </div>
+                    
+                    <input id="wardrobe-img-upload" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => void handleImageChange(e)} className="hidden" />
+                    {imageError && <p className="text-[10px] uppercase tracking-widest text-red-500">{imageError}</p>}
+                  </div>
+                  
+                  {/* Details Column */}
+                  <div className="lg:col-span-7 space-y-8">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-[10px] uppercase tracking-widest text-[#0f2744]/70">Piece Name (Optional)</Label>
+                      <Input 
+                        id="name" 
+                        name="name" 
+                        value={form.name} 
+                        onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} 
+                        placeholder="e.g. Navy Silk Blouse" 
+                        className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-xl font-serif transition-colors"
+                      />
+                    </div>
+
+                    <div className="grid gap-8 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase tracking-widest text-[#0f2744]/70">Category</Label>
+                        <Select 
+                          value={form.category} 
+                          onChange={(e) => setForm((p) => ({ ...p, category: e.target.value as WardrobeCategory }))}
+                          className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                        >
+                          {WARDROBE_CATEGORIES.map((c) => <option key={c} value={c}>{labelize(c)}</option>)}
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase tracking-widest text-[#0f2744]/70">Color Story</Label>
+                        <Select 
+                          value={form.color} 
+                          onChange={(e) => setForm((p) => ({ ...p, color: e.target.value as WardrobeColor }))}
+                          className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                        >
+                          {WARDROBE_COLORS.map((c) => <option key={c} value={c}>{labelize(c)}</option>)}
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase tracking-widest text-[#0f2744]/70">Formality</Label>
+                      <Select 
+                        value={form.formality} 
+                        onChange={(e) => setForm((p) => ({ ...p, formality: e.target.value as WardrobeFormality }))}
+                        className="border-0 border-b border-[#0f2744]/20 bg-transparent px-0 py-2 focus-visible:ring-0 focus-visible:border-[#0f2744] rounded-none shadow-none text-base font-serif transition-colors"
+                      >
+                        {WARDROBE_FORMALITY.map((f) => <option key={f} value={f}>{labelize(f)}</option>)}
+                      </Select>
+                    </div>
+
+                    <div className="space-y-4">
+                      <Label className="text-[10px] uppercase tracking-widest text-[#0f2744]/70">Seasonality</Label>
+                      <div className="flex flex-wrap gap-3">
+                        {WARDROBE_SEASONS.map((s) => (
+                          <button 
+                            key={s} 
+                            type="button" 
+                            onClick={() => toggleSeason(s)}
+                            className={cn(
+                              "px-4 py-2 text-[10px] uppercase tracking-widest font-medium transition-colors border",
+                              form.seasons.includes(s)
+                                ? "bg-[#0f2744] text-white border-[#0f2744]"
+                                : "bg-transparent text-[#0f2744]/60 border-[#0f2744]/20 hover:border-[#0f2744]/50"
+                            )}
+                          >
+                            {labelize(s)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {submitError && <div className="border border-red-900/10 bg-red-50/50 p-4 text-sm font-serif italic text-red-900 text-center">{submitError}</div>}
+
+                    <div className="pt-8">
+                      <button 
+                        type="submit" 
+                        disabled={submitting} 
+                        className="group relative px-12 py-4 bg-[#0f2744] text-white text-[10px] font-medium uppercase tracking-widest overflow-hidden transition-all hover:bg-[#0a1d35] disabled:opacity-50 w-full"
+                      >
+                        {submitting ? "Archiving..." : "Add To Collection"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Style Profile Feature */}
+        {styleProfile && styleProfile.totalWorn > 0 && !showForm && (
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="mb-24 grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-[#0f2744] text-white p-8 md:p-12 shadow-sm"
+          >
+            <div className="md:col-span-5">
+              <p className="text-[10px] uppercase tracking-widest text-white/50 mb-3">Insights</p>
+              <h2 className="font-serif text-3xl leading-tight mb-2">Style Profile</h2>
+              <p className="text-sm font-serif italic text-white/70">Based on {styleProfile.totalWorn} catalogued wears.</p>
+            </div>
+            
+            <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-8 border-t md:border-t-0 md:border-l border-white/10 pt-8 md:pt-0 md:pl-12">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Palette</p>
+                {styleProfile.colors.length > 0 ? (
+                  <ul className="space-y-1">
+                    {styleProfile.colors.slice(0, 3).map(({ color, count }) => (
+                      <li key={color} className="font-serif text-sm">
+                        {labelize(color)} <span className="text-white/40 italic ml-1">({count})</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <span className="text-sm text-white/30">—</span>}
+              </div>
+              
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Focus</p>
+                {styleProfile.categories.length > 0 ? (
+                  <ul className="space-y-1">
+                    {styleProfile.categories.slice(0, 3).map(({ category, count }) => (
+                      <li key={category} className="font-serif text-sm">
+                        {labelize(category)} <span className="text-white/40 italic ml-1">({count})</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <span className="text-sm text-white/30">—</span>}
+              </div>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Signature</p>
+                <p className="font-serif text-lg leading-tight">
+                  {labelize(formalityLevelToLabel(styleProfile.formality))}
+                </p>
               </div>
             </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Name (optional)</Label>
-              <Input id="name" name="name" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. Navy slim-fit blazer" />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-1.5">
-                <Label>Category</Label>
-                <Select value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value as WardrobeCategory }))}>
-                  {WARDROBE_CATEGORIES.map((c) => <option key={c} value={c}>{labelize(c)}</option>)}
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Color</Label>
-                <Select value={form.color} onChange={(e) => setForm((p) => ({ ...p, color: e.target.value as WardrobeColor }))}>
-                  {WARDROBE_COLORS.map((c) => <option key={c} value={c}>{labelize(c)}</option>)}
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Formality</Label>
-                <Select value={form.formality} onChange={(e) => setForm((p) => ({ ...p, formality: e.target.value as WardrobeFormality }))}>
-                  {WARDROBE_FORMALITY.map((f) => <option key={f} value={f}>{labelize(f)}</option>)}
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>Seasons</Label>
-              <div className="flex flex-wrap gap-2">
-                {WARDROBE_SEASONS.map((s) => (
-                  <button key={s} type="button" onClick={() => toggleSeason(s)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                      form.seasons.includes(s)
-                        ? "border-[#2a6f7f] bg-[#e8f4f6] text-[#2a6f7f]"
-                        : "border-[#e2e8f0] bg-white text-[#718096] hover:border-[#b0bec5]"
-                    }`}>
-                    {labelize(s)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {submitError && <p className="text-sm text-red-500">{submitError}</p>}
-
-            <Button type="submit" disabled={submitting} className="w-full bg-[#0f2744] text-white hover:bg-[#0a1d35]">
-              {submitting ? "Adding…" : "Add to wardrobe"}
-            </Button>
-          </form>
+          </motion.section>
         )}
 
-        {/* Items grid */}
+        {/* Collection Grid */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <svg className="animate-spin h-8 w-8 text-[#2a6f7f]" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          <div className="flex justify-center py-24">
+            <svg className="animate-spin h-8 w-8 text-[#0f2744]/30" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+              <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           </div>
         ) : loadError ? (
-          <div className="rounded-xl border border-red-200 bg-white p-6 text-center">
-            <p className="text-sm text-red-600">{loadError}</p>
+          <div className="border border-red-900/10 bg-red-50/50 p-8 text-center max-w-2xl mx-auto">
+            <p className="text-sm font-serif italic text-red-900">{loadError}</p>
           </div>
-        ) : items.length === 0 ? (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-8 text-center space-y-3">
-            <p className="text-sm text-[#718096]">Your wardrobe is empty. Add your first item above.</p>
+        ) : items.length === 0 && !showForm ? (
+          <div className="border border-[#0f2744]/10 bg-white p-24 text-center max-w-3xl mx-auto space-y-6">
+            <p className="text-xl font-serif italic text-[#0f2744]/70">The collection is unwritten.</p>
+            <button onClick={() => setShowForm(true)} className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] border-b border-[#0f2744] pb-1 hover:text-[#2a6f7f] hover:border-[#2a6f7f] transition-colors">
+              Begin Curating
+            </button>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
-              <div key={item.id} className="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden">
-                {item.imageBase64 && (
-                  <div className="aspect-square bg-[#f4f6f8]">
-                    <img src={`data:image/jpeg;base64,${item.imageBase64}`} alt={item.name ?? item.category}
-                      className="h-full w-full object-cover" />
+          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {items.map((item, i) => (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.05 }}
+                key={item.id} 
+                className="group relative bg-white border border-[#0f2744]/10 overflow-hidden flex flex-col hover:border-[#0f2744]/30 transition-colors"
+              >
+                {item.imageBase64 ? (
+                  <div className="aspect-[3/4] bg-[#f9f6f0] overflow-hidden">
+                    <img 
+                      src={`data:image/jpeg;base64,${item.imageBase64}`} 
+                      alt={item.name ?? item.category}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-[3/4] bg-[#f9f6f0] flex items-center justify-center">
+                    <span className="text-xs uppercase tracking-widest text-[#0f2744]/30">No Image</span>
                   </div>
                 )}
-                <div className="p-4 space-y-2">
-                  <p className="text-sm font-medium text-[#0f2744] truncate">{item.name || labelize(item.category)}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <Badge variant="outline" className="text-xs">{labelize(item.color)}</Badge>
-                    <Badge variant="secondary" className="text-xs">{labelize(item.formality)}</Badge>
-                    {item.favorite && <Badge variant="accent" className="text-xs">Favourite</Badge>}
+                
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="mb-4">
+                    <h3 className="font-serif text-xl text-[#0f2744] mb-1 line-clamp-1">{item.name || labelize(item.category)}</h3>
+                    <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/60">{labelize(item.color)}</p>
                   </div>
-                  <button onClick={() => void handleDelete(item.id)}
-                    className="text-xs text-[#718096] hover:text-red-500 transition-colors">
-                    Remove
-                  </button>
+                  
+                  <div className="mt-auto pt-4 border-t border-[#0f2744]/10 flex justify-between items-center">
+                    <span className="text-[10px] uppercase tracking-widest text-[#0f2744]">{labelize(item.formality)}</span>
+                    <button 
+                      onClick={() => void handleDelete(item.id)}
+                      className="opacity-0 group-hover:opacity-100 text-[10px] uppercase tracking-widest text-red-700 hover:underline transition-opacity"
+                    >
+                      Archive
+                    </button>
+                  </div>
                 </div>
-              </div>
+                
+                {item.favorite && (
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-2 py-1 text-[9px] uppercase tracking-widest text-[#0f2744]">
+                    Iconic
+                  </div>
+                )}
+              </motion.div>
             ))}
           </div>
         )}
-
-        {/* Style profile */}
-        {styleProfile && styleProfile.totalWorn > 0 && (
-          <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 space-y-4">
-            <h2 className="font-serif text-base font-semibold text-[#0f2744]">Your style profile</h2>
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-[#718096]">Top colors</p>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {styleProfile.colors.length === 0 ? (
-                    <span className="text-sm text-[#718096]">—</span>
-                  ) : (
-                    styleProfile.colors.map(({ color, count }) => (
-                      <Badge key={color} variant="outline">{labelize(color)} ({count})</Badge>
-                    ))
-                  )}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-[#718096]">Top categories</p>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {styleProfile.categories.length === 0 ? (
-                    <span className="text-sm text-[#718096]">—</span>
-                  ) : (
-                    styleProfile.categories.map(({ category, count }) => (
-                      <Badge key={category} variant="secondary">{labelize(category)} ({count})</Badge>
-                    ))
-                  )}
-                </div>
-              </div>
-              <p className="text-sm text-[#4a5568]">
-                Typical formality: <span className="font-medium text-[#0f2744]">{labelize(formalityLevelToLabel(styleProfile.formality))}</span>
-              </p>
-              <p className="text-sm text-[#718096]">{styleProfile.totalWorn} outfit{styleProfile.totalWorn === 1 ? "" : "s"} worn</p>
-            </div>
-          </section>
-        )}
       </div>
-    </div>
+    </motion.div>
   );
 }

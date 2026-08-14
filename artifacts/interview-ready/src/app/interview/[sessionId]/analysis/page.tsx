@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useParams } from "wouter";
+import { motion } from "framer-motion";
 import { StepNav } from "@/components/step-nav";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { Badge } from "@/components/ui/badge";
@@ -13,21 +14,14 @@ const DRESS_CODE_LABELS: Record<string, string> = {
   "business-professional": "Business Professional",
 };
 
-const DRESS_CODE_COLORS: Record<string, "secondary" | "accent" | "default"> = {
-  casual: "secondary",
-  "smart-casual": "accent",
-  "business-casual": "accent",
-  "business-professional": "default",
-};
-
 function Spinner() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#f4f6f8]">
-      <svg className="animate-spin h-8 w-8 text-[#2a6f7f]" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background">
+      <svg className="animate-spin h-8 w-8 text-[#0f2744]/30" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+        <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
       </svg>
-      <p className="font-serif text-base font-medium text-[#0f2744]">Analysis in progress…</p>
+      <p className="font-serif text-sm italic text-[#0f2744]/60 tracking-wide">Curating your looks…</p>
     </div>
   );
 }
@@ -66,11 +60,11 @@ export default function AnalysisPage() {
 
   if (loadError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f6f8]">
-        <div className="rounded-xl border border-red-200 bg-white p-8 text-center max-w-sm">
-          <p className="text-sm text-red-600 font-medium">{loadError}</p>
-          <Link href="/interview" className="mt-4 inline-block text-sm text-[#2a6f7f] hover:underline">
-            Start a new session
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="border border-red-900/10 bg-red-50/50 p-8 text-center max-w-md w-full">
+          <p className="text-sm font-serif italic text-red-900 mb-6">{loadError}</p>
+          <Link href="/interview" className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744] border-b border-[#0f2744]/20 pb-1 hover:border-[#0f2744]">
+            Begin New Consultation
           </Link>
         </div>
       </div>
@@ -84,167 +78,199 @@ export default function AnalysisPage() {
   const { context, skinAnalysis, intake, isMockMode } = session;
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] pb-16">
-      {/* Header */}
-      <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
-        <div className="mx-auto max-w-3xl flex items-center justify-between">
-          <Link href="/" className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors">
-            InterviewReady AI
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-background pb-32"
+    >
+      <header className="border-b border-[#0f2744]/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+          <Link href="/" className="font-serif text-lg text-[#0f2744] hover:opacity-70 transition-opacity">
+            Vogue × Career
           </Link>
-          {isMockMode && <Badge variant="outline" className="text-xs">Mock mode</Badge>}
+          {isMockMode && <span className="text-[10px] uppercase tracking-widest text-[#0f2744]/40 border border-[#0f2744]/10 px-2 py-1">Mock Mode</span>}
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-6 pt-8 space-y-8">
-        <StepNav currentStep={2} />
+      <div className="mx-auto max-w-5xl px-6 pt-12 md:pt-20">
+        <StepNav currentStep={2} className="mb-16 md:mb-24" />
 
-        {/* Title */}
-        <div>
-          <h1 className="font-serif text-2xl font-semibold text-[#0f2744]">
-            Interview analysis{intake.candidateName ? ` for ${intake.candidateName}` : ""}
-          </h1>
-          <p className="mt-1 text-sm text-[#718096]">
-            {intake.jobTitle} at {intake.companyName}
-          </p>
-        </div>
-
-        {/* Dress code card */}
-        <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="font-serif text-lg font-semibold text-[#0f2744]">Recommended dress code</h2>
-              <p className="text-sm text-[#718096] mt-0.5">Industry: {context.inferredIndustry}</p>
-            </div>
-            <div className="text-right">
-              <Badge
-                variant={
-                  (DRESS_CODE_COLORS[context.dressCode] ?? "default") as
-                    | "default" | "secondary" | "accent" | "success" | "warning" | "outline"
-                }
-              >
-                {DRESS_CODE_LABELS[context.dressCode] ?? context.dressCode}
-              </Badge>
-              <p className="mt-1 text-xs text-[#718096]">
-                Confidence: {Math.round(context.confidence * 100)}%
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+          
+          {/* Main Content Column */}
+          <div className="lg:col-span-8 space-y-16">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <h1 className="font-serif text-5xl md:text-6xl text-[#0f2744] leading-tight mb-4">
+                The Verdict
+              </h1>
+              <p className="text-lg font-serif italic text-[#0f2744]/70">
+                {intake.jobTitle} at {intake.companyName}
               </p>
-            </div>
+            </motion.div>
+
+            {/* Editorial Dress Code Block */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="border-t border-b border-[#0f2744]/10 py-12 space-y-10"
+            >
+              <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-6">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-3">Inferred Dress Code</p>
+                  <h2 className="font-serif text-4xl text-[#0f2744]">
+                    {DRESS_CODE_LABELS[context.dressCode] ?? context.dressCode}
+                  </h2>
+                </div>
+                <div className="md:text-right">
+                  <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-1">Confidence</p>
+                  <p className="font-serif text-2xl text-[#0f2744]">{Math.round(context.confidence * 100)}%</p>
+                </div>
+              </div>
+
+              {context.rationale && context.rationale.length > 0 && (
+                <div className="max-w-2xl">
+                  <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4">The Logic</p>
+                  <ul className="space-y-3">
+                    {context.rationale.map((r, i) => (
+                      <li key={i} className="text-sm font-serif leading-relaxed text-[#0f2744]/80">
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                {context.recommendedColors && context.recommendedColors.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4">Palette</p>
+                    <div className="flex flex-wrap gap-2">
+                      {context.recommendedColors.map((c) => (
+                        <span key={c} className="border border-[#0f2744]/10 bg-white/50 px-3 py-1.5 text-[10px] uppercase tracking-widest text-[#0f2744]">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {context.avoidPatterns && context.avoidPatterns.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4">Avoid</p>
+                    <div className="flex flex-wrap gap-2">
+                      {context.avoidPatterns.map((p) => (
+                        <span key={p} className="bg-[#0f2744]/5 px-3 py-1.5 text-[10px] uppercase tracking-widest text-[#0f2744]/60">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {context.jacketRecommended && (
+                <div className="bg-[#0f2744] text-white p-6 flex items-start gap-4">
+                  <span className="text-xl font-serif italic mt-[-2px]">Note</span>
+                  <p className="text-sm font-serif leading-relaxed text-white/90">
+                    A tailored jacket or blazer is highly recommended to anchor this look.
+                  </p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Skin Analysis if available */}
+            {skinAnalysis && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-8"
+              >
+                <h3 className="font-serif text-3xl text-[#0f2744]">Grooming & Presentation</h3>
+                
+                <div className="grid gap-8">
+                  {skinAnalysis.observations && skinAnalysis.observations.length > 0 && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4 border-b border-[#0f2744]/10 pb-2">Analysis</p>
+                      <ul className="space-y-4">
+                        {skinAnalysis.observations.map((obs) => (
+                          <li key={obs.id} className="text-sm font-serif leading-relaxed text-[#0f2744]/80">
+                            <span className="font-medium text-[#0f2744] capitalize not-italic">{obs.label} — </span>
+                            <span className="italic">{obs.guidance}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {skinAnalysis.preparationSuggestions && skinAnalysis.preparationSuggestions.length > 0 && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4 border-b border-[#0f2744]/10 pb-2">Preparation Protocol</p>
+                      <ul className="space-y-3">
+                        {skinAnalysis.preparationSuggestions.map((s, i) => (
+                          <li key={i} className="flex gap-3 text-sm font-serif leading-relaxed text-[#0f2744]/80">
+                            <span className="text-[#2a6f7f] text-xs mt-1">/</span>
+                            {s}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {skinAnalysis.lightingNotes && skinAnalysis.lightingNotes.length > 0 && intake.interviewFormat === "video" && (
+                    <div className="bg-white p-8 border border-[#0f2744]/10">
+                      <p className="text-[10px] uppercase tracking-widest text-[#0f2744] mb-4">Camera Optimization</p>
+                      <ul className="space-y-3">
+                        {skinAnalysis.lightingNotes.map((note, i) => (
+                          <li key={i} className="text-sm font-serif leading-relaxed text-[#0f2744]/80 italic">
+                            {note}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                <DisclaimerBanner text={COSMETIC_DISCLAIMER} />
+              </motion.div>
+            )}
           </div>
 
-          {context.rationale && context.rationale.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-[#0f2744] mb-2">Why this dress code?</p>
-              <ul className="space-y-1.5">
-                {context.rationale.map((r, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-[#4a5568]">
-                    <span className="text-[#2a6f7f] mt-0.5 shrink-0">•</span>
-                    {r}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {context.recommendedColors && context.recommendedColors.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-[#0f2744] mb-2">Recommended colours</p>
-              <div className="flex flex-wrap gap-1.5">
-                {context.recommendedColors.map((c) => (
-                  <span key={c} className="rounded-full bg-[#e8f4f6] px-2.5 py-0.5 text-xs font-medium text-[#2a6f7f] capitalize">
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {context.avoidPatterns && context.avoidPatterns.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-[#0f2744] mb-2">Avoid</p>
-              <div className="flex flex-wrap gap-1.5">
-                {context.avoidPatterns.map((p) => (
-                  <span key={p} className="rounded-full bg-[#f4f6f8] px-2.5 py-0.5 text-xs text-[#718096] capitalize">
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {context.jacketRecommended && (
-            <p className="text-sm text-[#4a5568] flex items-center gap-1.5">
-              <svg className="h-4 w-4 text-[#2a6f7f] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              A jacket or blazer is recommended for this interview.
-            </p>
-          )}
-        </div>
-
-        {/* Skin analysis */}
-        {skinAnalysis && (
-          <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 space-y-4">
-            <h2 className="font-serif text-lg font-semibold text-[#0f2744]">Appearance preparation</h2>
-
-            {skinAnalysis.observations && skinAnalysis.observations.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-[#0f2744] mb-2">Observations</p>
-                <ul className="space-y-1.5">
-                  {skinAnalysis.observations.map((obs) => (
-                    <li key={obs.id} className="text-sm text-[#4a5568]">
-                      <span className="font-medium text-[#0f2744] capitalize">{obs.label}: </span>
-                      {obs.guidance}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {skinAnalysis.preparationSuggestions && skinAnalysis.preparationSuggestions.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-[#0f2744] mb-2">Preparation tips</p>
-                <ul className="space-y-1.5">
-                  {skinAnalysis.preparationSuggestions.map((s, i) => (
-                    <li key={i} className="flex gap-2 text-sm text-[#4a5568]">
-                      <span className="text-[#2a6f7f] mt-0.5 shrink-0">•</span>
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {skinAnalysis.lightingNotes && skinAnalysis.lightingNotes.length > 0 && intake.interviewFormat === "video" && (
-              <div>
-                <p className="text-xs font-semibold text-[#0f2744] mb-2">Lighting notes (video interview)</p>
-                <ul className="space-y-1.5">
-                  {skinAnalysis.lightingNotes.map((note, i) => (
-                    <li key={i} className="flex gap-2 text-xs text-[#4a5568]">
-                      <span className="text-[#2a6f7f] mt-0.5">•</span>
-                      {note}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <DisclaimerBanner text={COSMETIC_DISCLAIMER} />
+          {/* Sidebar / CTA Column */}
+          <div className="lg:col-span-4 lg:sticky lg:top-32 self-start mt-12 lg:mt-0">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-[#0f2744] text-white p-8 md:p-10 flex flex-col items-center text-center gap-6"
+            >
+              <h3 className="font-serif text-3xl leading-tight">
+                Ready to view <br/><span className="italic font-light">the curations?</span>
+              </h3>
+              <p className="text-sm font-serif italic text-white/60">
+                We have prepared bespoke looks based on this analysis.
+              </p>
+              <Link
+                href={`/interview/${sessionId}/try-on`}
+                data-testid="continue-to-try-on"
+                className="mt-4 bg-white text-[#0f2744] px-8 py-4 text-xs font-medium uppercase tracking-widest hover:bg-[#f9f6f0] transition-colors w-full flex justify-center items-center gap-3"
+              >
+                Reveal Outfits
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </motion.div>
           </div>
-        )}
 
-        {/* CTA */}
-        <div className="flex justify-end">
-          <Link
-            href={`/interview/${sessionId}/try-on`}
-            data-testid="continue-to-try-on"
-            className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#0f2744] px-6 text-sm font-semibold text-white hover:bg-[#0a1d35] transition-colors"
-          >
-            Continue to Virtual Try-On
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

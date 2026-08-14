@@ -1,0 +1,1 @@
+- [Editorial design system](editorial-design.md) — magazine aesthetic: ivory bg, Playfair Display + DM Sans, navy/teal palette, framer-motion transitions

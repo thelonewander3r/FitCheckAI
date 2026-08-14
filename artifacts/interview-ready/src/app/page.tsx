@@ -1,110 +1,216 @@
 import { Link } from "wouter";
+import { motion } from "framer-motion";
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col min-h-screen">
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }} 
+      transition={{ duration: 0.8 }}
+      className="flex flex-col min-h-screen bg-background selection:bg-[#0f2744] selection:text-white"
+    >
       {/* Nav */}
-      <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <span className="font-serif text-lg font-semibold text-[#0f2744]">
-            InterviewReady AI
+      <header className="fixed top-0 w-full z-50 mix-blend-difference text-white px-6 py-6 transition-all duration-300">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <span className="font-serif text-xl font-normal tracking-wide">
+            Vogue × Career
           </span>
-          <Link
-            href="/interview"
-            className="rounded-lg bg-[#0f2744] px-4 py-2 text-sm font-medium text-white hover:bg-[#0a1d35] transition-colors"
-          >
-            Start now
-          </Link>
+          <div className="flex gap-6 items-center">
+            <Link href="/demo" className="text-sm font-medium tracking-widest uppercase hover:opacity-70 transition-opacity">
+              Demo
+            </Link>
+            <Link href="/interview" className="text-sm font-medium tracking-widest uppercase hover:opacity-70 transition-opacity">
+              Start
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center bg-white">
-        <div className="mx-auto max-w-2xl space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#e8f4f6] bg-[#e8f4f6] px-3 py-1 text-xs font-medium text-[#2a6f7f]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#2a6f7f]" />
-            Powered by AI analysis
+      <section className="relative min-h-[100dvh] flex flex-col justify-end pb-24 px-6 md:px-12 bg-[#0f2744] overflow-hidden">
+        {/* Background Image - Cinematic Bleed */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/attached_assets/hero-editorial.jpg" 
+            alt="Editorial fashion professional" 
+            className="w-full h-full object-cover opacity-80"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a1017] via-transparent to-transparent opacity-90" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="text-white/70 text-[10px] uppercase tracking-[0.3em] font-medium mb-6">
+              InterviewReady AI
+            </p>
+            <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.85] tracking-tight mb-8">
+              Dress for <br />
+              <span className="italic font-light text-[#f9f6f0]">the role.</span>
+            </h1>
+            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center max-w-2xl">
+              <p className="text-white/80 text-lg md:text-xl font-serif font-light leading-relaxed">
+                Your personal style advisor for the boardroom. We translate job descriptions into outfit intelligence.
+              </p>
+              <Link
+                href="/interview"
+                className="shrink-0 bg-white text-[#0f2744] px-8 py-4 text-xs font-medium uppercase tracking-widest hover:bg-[#f9f6f0] transition-colors"
+              >
+                Start Preparation
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Editorial Content Block 1 */}
+      <section className="py-32 px-6 md:px-12 bg-background">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-24 items-center">
+          <div className="md:col-span-5 md:col-start-2 order-2 md:order-1">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="font-serif text-4xl md:text-5xl text-[#0f2744] leading-tight mb-6">
+                The intersection of <br/><span className="italic">style and strategy.</span>
+              </h2>
+              <p className="text-[#0f2744]/70 text-base leading-relaxed mb-8">
+                Enter your interview details. Our AI analyzes the role, company culture, and format to infer the precise dress code. It then curates bespoke outfits tailored to your budget and personal presentation.
+              </p>
+              <div className="flex gap-4">
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-[#0f2744] hover:text-[#2a6f7f] transition-colors border-b border-[#0f2744]/20 pb-1 hover:border-[#2a6f7f]"
+                >
+                  Load Demo Scenario
+                </Link>
+              </div>
+            </motion.div>
           </div>
-
-          <p className="font-serif text-sm font-semibold tracking-wide text-[#2a6f7f] uppercase">
-            InterviewReady AI
-          </p>
-
-          <h1 className="font-serif text-4xl font-semibold leading-tight text-[#0f2744] sm:text-5xl">
-            Walk into your interview
-            <br />
-            <span className="text-[#2a6f7f]">dressed for the role.</span>
-          </h1>
-
-          <p className="text-base text-[#4a5568] leading-relaxed max-w-xl mx-auto">
-            InterviewReady AI analyses your job description, infers the dress
-            code, and recommends tailored outfits — complete with virtual
-            try-ons and a day-by-day preparation plan.
-          </p>
-
-          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link
-              href="/interview"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#0f2744] px-6 text-sm font-semibold text-white hover:bg-[#0a1d35] transition-colors"
+          <div className="md:col-span-6 md:col-start-7 order-1 md:order-2">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1 }}
+              className="aspect-[3/4] overflow-hidden bg-[#e8e6e1]"
             >
-              Start preparation
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-            <Link
-              href="/occasion"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] hover:bg-[#f4f6f8] transition-colors"
-            >
-              Plan an occasion
-            </Link>
-            <Link
-              href="/demo"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] hover:bg-[#f4f6f8] transition-colors"
-            >
-              Load demo scenario
-            </Link>
+              <img 
+                src="/attached_assets/feature-tryon.jpg" 
+                alt="Virtual Try On" 
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="border-t border-[#e2e8f0] bg-[#f4f6f8] px-6 py-16">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-center font-serif text-2xl font-semibold text-[#0f2744] mb-10">
-            How it works
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-3">
+      {/* The Features / Grid */}
+      <section className="py-32 px-6 md:px-12 bg-[#0f2744] text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+            <h2 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-none">
+              A masterclass <br/><span className="italic text-[#f9f6f0]/80">in preparation.</span>
+            </h2>
+            <p className="max-w-md text-white/60 font-serif text-lg md:text-xl italic">
+              From the first impression to the final handshake, every detail is considered.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-16">
             {[
               {
-                step: "01",
-                title: "Tell us about your interview",
-                body: "Enter your job title, company, interview format, and a brief description. Takes about two minutes.",
+                num: "01",
+                title: "Inference",
+                desc: "We analyze the subtext of the job description to decode the true dress code, bypassing generic advice."
               },
               {
-                step: "02",
-                title: "Get personalised outfit picks",
-                body: "Our AI infers the dress code, analyses your style, and recommends outfits that fit your budget.",
+                num: "02",
+                title: "Curation",
+                desc: "Receive beautifully composed looks pulled from real logic, considering color psychology and format."
               },
               {
-                step: "03",
-                title: "See yourself in the outfits",
-                body: "Virtual try-on shows you each look, then we build a day-by-day preparation checklist.",
-              },
-            ].map(({ step, title, body }) => (
-              <div key={step} className="rounded-xl bg-white border border-[#e2e8f0] p-6 space-y-3">
-                <span className="font-mono text-xs font-bold text-[#2a6f7f]">{step}</span>
-                <h3 className="font-serif text-base font-semibold text-[#0f2744]">{title}</h3>
-                <p className="text-sm text-[#4a5568] leading-relaxed">{body}</p>
-              </div>
+                num: "03",
+                title: "Execution",
+                desc: "A meticulous day-by-day countdown ensures everything is pressed, polished, and ready."
+              }
+            ].map((feature, i) => (
+              <motion.div 
+                key={feature.num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="group cursor-default"
+              >
+                <div className="text-[10px] uppercase tracking-widest text-white/40 mb-4 border-b border-white/10 pb-4 transition-colors group-hover:border-white/40 group-hover:text-white/80">
+                  Step {feature.num}
+                </div>
+                <h3 className="font-serif text-3xl mb-3">{feature.title}</h3>
+                <p className="text-white/60 leading-relaxed">{feature.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-[#e2e8f0] bg-white px-6 py-6 text-center text-xs text-[#718096]">
-        InterviewReady AI — outfit guidance only, not professional styling or medical advice.
+      {/* Editorial Content Block 2 */}
+      <section className="py-32 px-6 md:px-12 bg-background">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-24 items-center">
+          <div className="md:col-span-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1 }}
+              className="aspect-[4/5] overflow-hidden bg-[#e8e6e1]"
+            >
+              <img 
+                src="/attached_assets/feature-wardrobe.jpg" 
+                alt="Digital Wardrobe" 
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </div>
+          <div className="md:col-span-5 md:col-start-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+            >
+              <h2 className="font-serif text-4xl md:text-5xl text-[#0f2744] leading-tight mb-6">
+                Your digital <br/><span className="italic">wardrobe.</span>
+              </h2>
+              <p className="text-[#0f2744]/70 text-base leading-relaxed mb-8">
+                Beyond interviews, manage your entire professional and occasion wardrobe. Catalogue your pieces and let our AI assemble looks for galas, dinners, and conferences.
+              </p>
+              <Link
+                href="/occasion"
+                className="inline-block border border-[#0f2744] px-8 py-4 text-xs font-medium uppercase tracking-widest text-[#0f2744] hover:bg-[#0f2744] hover:text-white transition-colors"
+              >
+                Plan an Occasion
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#f9f6f0] border-t border-[#0f2744]/10 py-12 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <span className="font-serif text-2xl text-[#0f2744]">Vogue × Career</span>
+          <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 text-center md:text-left">
+            InterviewReady AI — Outfit guidance only, not professional styling.
+          </p>
+        </div>
       </footer>
-    </main>
+    </motion.div>
   );
 }
