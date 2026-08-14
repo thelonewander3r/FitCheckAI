@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Occasion flow', () => {
+  test('landing page opens the event intake', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('link', { name: 'Check my outfit', exact: true }).click()
+    await page.waitForURL(/\/occasion$/)
+    await expect(
+      page.getByRole('heading', { name: 'Check your whole outfit' }),
+    ).toBeVisible()
+  })
+
   test('plans a mock dinner occasion with an empty local wardrobe', async ({ page }) => {
     await page.route('**/api/occasions/*', async (route) => {
       if (route.request().method() !== 'GET') {
