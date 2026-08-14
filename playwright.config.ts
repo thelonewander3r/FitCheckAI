@@ -5,7 +5,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // The mock app persists sessions/occasions in local JSON stores. Keep E2E
+  // requests in one worker so parallel browser contexts cannot race those files.
+  workers: 1,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
