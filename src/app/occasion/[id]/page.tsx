@@ -268,7 +268,7 @@ export default function OccasionDetailPage({ params }: Props) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="font-serif text-lg font-semibold text-[#0f2744]">
-                  Situation context
+                  Event context
                 </h2>
                 <p className="text-sm text-[#718096] mt-0.5">
                   {intake.venueName} · {labelize(intake.eventType)}
@@ -294,12 +294,12 @@ export default function OccasionDetailPage({ params }: Props) {
             )}
 
             <p className="text-xs text-[#718096]">
-              Situation confidence:{" "}
+              Event context confidence:{" "}
               {Math.round(venueContext.confidence * 100)}%
             </p>
             <p className="text-xs text-[#718096]">
               {venueContext.isMock
-                ? "Mock situation inference"
+                ? "Mock event inference"
                 : `Source: ${venueContext.source}`}
             </p>
           </div>
