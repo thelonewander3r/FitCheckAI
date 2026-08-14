@@ -4,6 +4,7 @@ import {
   toPublicSession,
   tryOnOutfit,
 } from "@/lib/services/session-service";
+import { YouCamConfigurationError } from "@/lib/youcam/live-provider";
 
 interface Context {
   params: Promise<{ id: string }>;
@@ -39,8 +40,27 @@ export async function POST(
     const session = await tryOnOutfit(id, parsed.data.outfitId);
     return NextResponse.json(toPublicSession(session));
   } catch (err) {
+    if (err instanceof YouCamConfigurationError) {
+      const msg = err.message;
+      if (/garment reference image/i.test(msg) || /garmentImageBase64/i.test(msg)) {
+        return NextResponse.json(
+          {
+            error:
+              "Live try-on is not available for this outfit (missing garment reference image).",
+          },
+          { status: 501 },
+        );
+      }
+      console.error("[POST /api/sessions/try-on]", {
+        errorClass: err.name,
+      });
+      return NextResponse.json({ error: "Try-on failed." }, { status: 500 });
+    }
+
     const msg = err instanceof Error ? err.message : "Unknown error";
-    console.error(`[POST /api/sessions/${id}/try-on]`, msg);
+    console.error("[POST /api/sessions/try-on]", {
+      errorClass: err instanceof Error ? err.name : "UnknownError",
+    });
     if (msg.includes("not found")) {
       return NextResponse.json({ error: "Session not found." }, { status: 404 });
     }

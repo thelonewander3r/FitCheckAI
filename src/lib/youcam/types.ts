@@ -1,9 +1,8 @@
 /**
- * YouCam integration types.
+ * YouCam / Perfect Corp integration types.
  *
- * Fields marked `// TODO: replace with official schema` are placeholders.
- * Consult the YouCam SDK / API documentation to obtain the authoritative
- * request and response shapes before wiring a live integration.
+ * Live API: https://yce-api-01.makeupar.com (Bearer auth).
+ * File upload → skin-analysis / cloth-v4 task create → poll to completion.
  */
 
 import type { SkinAnalysisResult, SkinObservation } from "@/types/interview";
@@ -19,9 +18,9 @@ export type { SkinAnalysisResult, SkinObservation };
 // ---------------------------------------------------------------------------
 
 export interface SkinAnalysisInput {
-  /** Base64-encoded JPEG or PNG image data — TODO: confirm format with YouCam */
+  /** Base64-encoded JPEG, PNG, or WebP (raw or data URL) */
   imageBase64: string;
-  /** Optional hint for the analysis locale — TODO: confirm supported values */
+  /** Optional locale hint for future API use */
   locale?: string;
 }
 
@@ -29,30 +28,45 @@ export interface SkinAnalysisInput {
 // Apparel virtual try-on
 // ---------------------------------------------------------------------------
 
+export type GarmentCategory =
+  | "full_body"
+  | "lower_body"
+  | "upper_body"
+  | "shoes"
+  | "auto"
+  | "outer";
+
 export interface ApparelTryOnInput {
   /**
-   * Base64-encoded user photo — optional; mock provider renders a generic
-   * placeholder when absent. TODO: confirm format and size constraints.
+   * Base64-encoded user photo (raw or data URL).
+   * Optional for the mock provider; required for live AI Clothes.
    */
   userImageBase64?: string;
   /**
-   * Identifier for the garment asset as registered in the YouCam system.
-   * TODO: confirm asset registration flow and ID format.
+   * App-level garment asset identifier (mock compatibility).
+   * Not sent as a YouCam file ID — live mode requires `garmentImageBase64`.
    */
   garmentAssetId: string;
-  /** Optionally override render resolution — TODO: confirm supported values */
+  /**
+   * Base64 garment reference image for live AI Clothes (raw or data URL).
+   * Required when `YOUCAM_MODE=live`.
+   */
+  garmentImageBase64?: string;
+  /** Perfect Corp garment category; defaults to `auto` in live mode */
+  garmentCategory?: GarmentCategory;
+  /** Optional render resolution hint (unused by current live API) */
   outputResolution?: { width: number; height: number };
 }
 
 export interface ApparelTryOnResult {
   /**
-   * Rendered try-on image as a data URL or URL string.
-   * TODO: confirm whether the live API returns base64 data URLs or hosted URLs.
+   * Rendered try-on image: mock SVG data URL, or (server-side only) a temporary
+   * https YCE URL. Public API responses rewrite live URLs to an app-owned proxy path.
    */
   renderedImageUrl: string;
   /** True when this result was produced by the mock provider */
   isMock: boolean;
-  /** Optional processing time reported by the API — TODO: confirm field name */
+  /** Optional processing time in milliseconds */
   processingTimeMs?: number;
 }
 
@@ -70,19 +84,17 @@ export interface YouCamProvider {
 // ---------------------------------------------------------------------------
 
 export interface YouCamConfig {
-  /**
-   * API key for YouCam services.
-   * TODO: confirm the exact header/param name expected by the live API.
-   */
+  /** API key for Bearer Authorization against the YouCam / Perfect Corp API */
   apiKey: string;
-  /**
-   * Base URL for the YouCam API.
-   * TODO: obtain the authoritative endpoint from YouCam documentation.
-   */
+  /** Base URL for the YouCam API (trailing slash is stripped) */
   baseUrl: string;
-  /**
-   * Optional timeout in milliseconds.
-   * TODO: confirm any SDK-level timeout defaults.
-   */
+  /** Overall request/poll timeout in milliseconds (default 120000) */
   timeoutMs?: number;
+  /** Delay between task status polls in milliseconds (default 1500) */
+  pollIntervalMs?: number;
+  /**
+   * Skin analysis `dst_actions` (SD or HD, never mixed).
+   * Default: texture, pore, redness, radiance.
+   */
+  skinActions?: string[];
 }

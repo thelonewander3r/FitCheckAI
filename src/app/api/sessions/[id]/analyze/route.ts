@@ -4,6 +4,7 @@ import {
   analyzeSession,
   toPublicSession,
 } from "@/lib/services/session-service";
+import { YouCamApiError } from "@/lib/youcam/live-provider";
 
 interface Context {
   params: Promise<{ id: string }>;
@@ -31,7 +32,15 @@ export async function POST(
     return NextResponse.json(toPublicSession(session));
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
-    console.error(`[POST /api/sessions/${id}/analyze]`, msg);
+    console.error("[POST /api/sessions/analyze] Analysis failed.", {
+      errorClass: err instanceof Error ? err.name : "UnknownError",
+      ...(err instanceof YouCamApiError && err.status !== undefined
+        ? { status: err.status }
+        : {}),
+      ...(err instanceof YouCamApiError && err.errorCode !== undefined
+        ? { errorCode: err.errorCode }
+        : {}),
+    });
     if (msg.includes("not found")) {
       return NextResponse.json({ error: "Session not found." }, { status: 404 });
     }

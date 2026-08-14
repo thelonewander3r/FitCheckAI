@@ -147,7 +147,7 @@ export default function InterviewPage() {
     setImageFileName(file.name);
 
     try {
-      const base64 = await downscaleToBase64(file);
+      const base64 = await downscaleToBase64(file); // default maxEdge=1024 for YouCam SD skin short-side
       if (!base64) throw new Error("empty result");
       setImageBase64(base64);
 

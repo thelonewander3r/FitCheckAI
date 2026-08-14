@@ -4,6 +4,10 @@ import { selectTopOutfits } from "@/lib/outfits/ranking";
 import { generatePreparationPlan } from "@/lib/prep/plan-generator";
 import { runApparelVto } from "@/lib/youcam/apparel-vto";
 import { runSkinAnalysis } from "@/lib/youcam/skin-analysis";
+import {
+  YouCamApiError,
+  YouCamConfigurationError,
+} from "@/lib/youcam/live-provider";
 import type { RankedOutfit } from "@/types/interview";
 import type { ApparelTryOnResult } from "@/lib/youcam/types";
 import {
@@ -20,6 +24,31 @@ export type { StoredSession };
 const PLACEHOLDER_IMAGE_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
+function isLiveYouCamMode(): boolean {
+  return (process.env["YOUCAM_MODE"] ?? "mock").toLowerCase() === "live";
+}
+
+/**
+ * Log only a fixed message plus safe error class/status/errorCode.
+ * Never logs provider messages, URLs, IDs, or credentials.
+ */
+function logYouCamFailure(scope: string, err: unknown): void {
+  const info: {
+    errorClass: string;
+    status?: number;
+    errorCode?: string;
+  } = {
+    errorClass: err instanceof Error ? err.name : "UnknownError",
+  };
+  if (err instanceof YouCamApiError) {
+    if (err.status !== undefined) info.status = err.status;
+    if (err.errorCode !== undefined) info.errorCode = err.errorCode;
+  } else if (err instanceof YouCamConfigurationError) {
+    info.errorClass = err.name;
+  }
+  console.error(`[${scope}] YouCam provider failed.`, info);
+}
+
 export async function createSession(
   intake: IntakePayload,
 ): Promise<StoredSession> {
@@ -31,15 +60,34 @@ export async function getSession(id: string): Promise<StoredSession | null> {
 }
 
 /**
- * Session shape returned to the client. Strips the raw selfie from API
- * responses — the photo is only ever needed server-side for VTO.
+ * Session shape returned to the client. Strips the raw selfie and rewrites
+ * live try-on result URLs to an app-owned proxy path (never exposes signed YCE URLs).
  */
 export function toPublicSession(
   session: StoredSession,
 ): Omit<StoredSession, "userImageBase64"> {
-  const { userImageBase64: _omit, ...pub } = session;
+  const { userImageBase64: _omit, tryOnResults, ...rest } = session;
   void _omit;
-  return pub;
+
+  if (!tryOnResults) {
+    return rest;
+  }
+
+  const rewritten: Record<string, ApparelTryOnResult> = {};
+  for (const [outfitId, result] of Object.entries(tryOnResults)) {
+    const url = result.renderedImageUrl ?? "";
+    if (result.isMock || url.startsWith("data:")) {
+      rewritten[outfitId] = result;
+      continue;
+    }
+    // Live https (or any non-mock) result → app-owned relative proxy
+    rewritten[outfitId] = {
+      ...result,
+      renderedImageUrl: `/api/sessions/${session.id}/try-on/${outfitId}/image`,
+    };
+  }
+
+  return { ...rest, tryOnResults: rewritten };
 }
 
 export async function analyzeSession(
@@ -71,10 +119,11 @@ export async function analyzeSession(
         imageBase64: imageBase64 ?? PLACEHOLDER_IMAGE_BASE64,
       });
     } catch (err) {
-      console.error(
-        "[analyzeSession] Skin analysis failed:",
-        err instanceof Error ? err.message : "unknown",
-      );
+      logYouCamFailure("analyzeSession", err);
+      if (isLiveYouCamMode()) {
+        throw err;
+      }
+      // Mock mode: fail soft and continue to a ready session.
     }
 
     const outfits = selectTopOutfits(
@@ -91,7 +140,7 @@ export async function analyzeSession(
       },
     );
 
-    const isMock = process.env["YOUCAM_MODE"] !== "live";
+    const isMock = !isLiveYouCamMode();
 
     const updated = await storeUpdate(id, {
       status: "ready",
@@ -115,6 +164,7 @@ export async function analyzeSession(
 export async function tryOnOutfit(
   id: string,
   outfitId: string,
+  garmentImageBase64?: string,
 ): Promise<StoredSession> {
   const session = await storeGet(id);
   if (!session) throw new Error(`Session ${id} not found`);
@@ -127,17 +177,30 @@ export async function tryOnOutfit(
     ? session.userImageBase64
     : undefined;
 
+  const live = isLiveYouCamMode();
+  // Template outfits have no garment reference; live mode must not invent one
+  // or send garmentAssetId as a YouCam file ID.
+  if (live && !garmentImageBase64?.trim()) {
+    throw new YouCamConfigurationError(
+      "Live try-on requires a garment reference image.",
+    );
+  }
+
   let vtoResult: ApparelTryOnResult;
   try {
     vtoResult = await runApparelVto({
       userImageBase64: userImage,
       garmentAssetId: outfitId,
+      ...(garmentImageBase64?.trim()
+        ? { garmentImageBase64: garmentImageBase64.trim() }
+        : {}),
     });
   } catch (err) {
-    console.error(
-      "[tryOnOutfit] VTO failed:",
-      err instanceof Error ? err.message : "unknown",
-    );
+    logYouCamFailure("tryOnOutfit", err);
+    if (live) {
+      throw err;
+    }
+    // Mock mode: fail soft with an empty mock result.
     vtoResult = { renderedImageUrl: "", isMock: true, processingTimeMs: 0 };
   }
 

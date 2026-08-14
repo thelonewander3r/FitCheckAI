@@ -93,9 +93,11 @@ signal.
 
 ## Phase 3 — Outfit history & learning (fast-follow)
 
-- Track outfits actually worn (user confirms at the event) → learn
-  preferences and repeat-wear habits.
-- "Outfit of the day" suggestions from wardrobe + calendar.
+**Status: SHIPPED (2026-08-11)** — mark outfits as worn from occasion pages;
+worn records persist, a style profile (top colors/categories, typical
+formality) is derived, and the composer applies bounded preference bonuses so
+recommendations learn. "Outfit of the day" calendar suggestion still a
+fast-follow.
 
 ## Phase 4 — Video capture (later, high leverage)
 

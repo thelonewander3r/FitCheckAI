@@ -21,9 +21,14 @@ export async function readFileAsBase64(file: File): Promise<string> {
   });
 }
 
+/**
+ * Downscale for upload. Default maxEdge=1024 keeps common 4:3 / 16:9 interview
+ * selfies at short side >=480 (YouCam SD skin) while staying well under 4096.
+ * Does not enlarge images smaller than maxEdge.
+ */
 export async function downscaleToBase64(
   file: File,
-  maxEdge = 512,
+  maxEdge = 1024,
 ): Promise<string> {
   const objectUrl = URL.createObjectURL(file);
   try {
