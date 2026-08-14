@@ -1,7 +1,0 @@
-All five changes are in place. Files updated:
-
-1. **`src/lib/session-store.ts`** — Added optional `userImageBase64?: string` to `StoredSession`.
-2. **`src/lib/services/session-service.ts`** — Persists the selfie in the post-analysis `storeUpdate` when non-empty; `tryOnOutfit` uses the stored photo (else placeholder) for `runApparelVto`.
-3. **`src/lib/youcam/mock-provider.ts`** — MIME sniffing helper; mock SVG embeds the user photo with a readable label strip when base64 is present.
-4. **`src/app/interview/page.tsx`** — Client-side 15 MB guard + downscale to max 512px JPEG @ 0.85, with fallback to original base64 on failure.
-5. **`docs/privacy-and-safety.md`** — Aligned image-handling docs with client downscale, session-file base64 storage, and no automatic TTL cleanup.
