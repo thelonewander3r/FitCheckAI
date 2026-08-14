@@ -22,7 +22,7 @@ export default function HomePage() {
               href="/occasion"
               className="rounded-lg bg-[#0f2744] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0a1d35]"
             >
-              Check an outfit
+              Check an event
             </Link>
           </div>
         </div>
@@ -40,15 +40,15 @@ export default function HomePage() {
           </p>
 
           <h1 className="font-serif text-4xl font-semibold leading-tight text-[#0f2744] sm:text-5xl">
-            Know what to wear,
+            Dress for what&apos;s next,
             <br />
-            <span className="text-[#2a6f7f]">using what you own.</span>
+            <span className="text-[#2a6f7f]">using what you already own.</span>
           </h1>
 
           <p className="mx-auto max-w-xl text-base leading-relaxed text-[#4a5568]">
-            Tell us what event you&apos;re dressing for in one sentence. FitCheck AI
-            infers the setting, checks the whole outfit against it, and
-            recommends a coherent look from your wardrobe.
+            Tell us about the event in one sentence. FitCheck AI learns the
+            setting, checks the full look against it, and recommends a coherent
+            outfit from your wardrobe.
           </p>
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -56,7 +56,7 @@ export default function HomePage() {
               href="/occasion"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#0f2744] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#0a1d35]"
             >
-              Check my outfit
+              Plan my event outfit
               <svg
                 className="h-4 w-4"
                 fill="none"
@@ -78,10 +78,10 @@ export default function HomePage() {
               Build my wardrobe
             </Link>
             <Link
-              href="/demo"
+              href="/occasion/demo"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] transition-colors hover:bg-[#f4f6f8]"
             >
-              Load demo
+              Try event demo
             </Link>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function HomePage() {
               {
                 step: "01",
                 title: "Describe the event",
-                body: "Ask what to wear to a wedding, dinner date, conference, interview, or any other event.",
+                body: "Ask what to wear to a wedding, dinner date, conference, brunch, birthday, or any other event.",
               },
               {
                 step: "02",
@@ -134,13 +134,9 @@ export default function HomePage() {
             ))}
           </div>
 
-          <p className="mt-8 text-center text-xs text-[#718096]">
-            Interview prep is still available as a focused mode when you need
-            it.
-            {" "}
-            <Link href="/interview" className="text-[#2a6f7f] hover:underline">
-              Open interview mode
-            </Link>
+          <p className="mt-8 text-center text-xs leading-5 text-[#718096]">
+            Coming next: find new pieces that suit you, expand your wardrobe,
+            and get makeup guidance for the event and outfit.
           </p>
         </div>
       </section>

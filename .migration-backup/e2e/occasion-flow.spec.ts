@@ -3,10 +3,22 @@ import { test, expect } from '@playwright/test'
 test.describe('Occasion flow', () => {
   test('landing page opens the event intake', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('link', { name: 'Check my outfit', exact: true }).click()
+    await page.getByRole('link', { name: 'Plan my event outfit', exact: true }).click()
     await page.waitForURL(/\/occasion$/)
     await expect(
       page.getByRole('heading', { name: 'Check your whole outfit' }),
+    ).toBeVisible()
+  })
+
+  test('landing page opens the event demo', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('link', { name: 'Try event demo', exact: true }).click()
+    await page.waitForURL(/\/occasion\/[^/]+$/)
+    await expect(
+      page.getByText('Skyline Rooftop Bar · Dinner', { exact: true }),
+    ).toBeVisible()
+    await expect(
+      page.getByText('Mock event inference', { exact: true }),
     ).toBeVisible()
   })
 

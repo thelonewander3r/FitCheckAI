@@ -122,7 +122,7 @@ npm run dev
 
 Skin AI, AI Clothes VTO, and event context lookup use deterministic mock data. Sparse event prompts reveal follow-up questions for location, dress code, and optional color guidance. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
 
-Start at [`http://localhost:3000`](http://localhost:3000) and choose **Check my outfit** to describe an event in one sentence. If the event is too general, FitCheck asks for useful context before creating the outfit check. Or click **Load demo scenario** to see the full interview-focused flow instantly.
+Start at [`http://localhost:3000`](http://localhost:3000) and choose **Plan my event outfit** to describe an event in one sentence. If the event is too general, FitCheck asks for useful context before creating the outfit check. Or click **Try event demo** to open the rooftop dinner event flow.
 
 ---
 
@@ -167,15 +167,26 @@ See [`docs/privacy-and-safety.md`](docs/privacy-and-safety.md) for the full poli
 
 ---
 
-## Demo Flow
+## Demo Flows
+
+### Event demo from the landing page
 
 1. Open [`http://localhost:3000`](http://localhost:3000)
-2. Click **Load demo scenario** (or navigate to `/demo`)
-3. The app pre-fills the Alex / Data Analytics / Meridian Financial Group scenario and runs analysis
-4. **Analysis page** — see inferred dress code (Business Professional), recommended colours, and cosmetic prep notes
-5. **Virtual Try-On page** — browse three ranked outfits; click **Try on** to generate a VTO preview
-6. **Select** your preferred outfit and click **Continue to Final Plan**
-7. **Plan page** — review the 5-day countdown checklist, night-before checklist, and 1-hour-before checklist
+2. Click **Try event demo** (or navigate to `/occasion/demo`)
+3. Review the rooftop dinner event context and inferred dress code
+4. Add wardrobe pieces from **My wardrobe** to receive complete combinations
+
+### Legacy YouCam walkthrough
+
+The original interview-focused YouCam walkthrough remains available directly at
+`/demo` for hackathon testing:
+
+1. Navigate to `/demo`
+2. The app pre-fills the Alex / Data Analytics / Meridian Financial Group scenario and runs analysis
+3. **Analysis page** — see inferred dress code (Business Professional), recommended colours, and cosmetic prep notes
+4. **Virtual Try-On page** — browse three ranked outfits and click **Try on** to generate a VTO preview
+5. **Select** your preferred outfit and click **Continue to Final Plan**
+6. **Plan page** — review the 5-day countdown checklist, night-before checklist, and 1-hour-before checklist
 
 For the full scripted walkthrough see [`docs/demo-script.md`](docs/demo-script.md).
 
