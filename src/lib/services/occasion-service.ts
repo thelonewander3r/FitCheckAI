@@ -11,6 +11,10 @@ import {
   preferencesFromProfile,
 } from "@/lib/services/style-service";
 import { formalityLevelToLabel, getVenueProvider } from "@/lib/venue";
+import {
+  colorsForSkinTonePreference,
+  parseColorPreferences,
+} from "@/lib/occasion/preferences";
 import type { OccasionIntake, OccasionSession } from "@/types/occasion";
 
 export async function createOccasion(
@@ -19,6 +23,7 @@ export async function createOccasion(
   const venue = await getVenueProvider().lookupVenue({
     venueName: intake.venueName,
     eventType: intake.eventType,
+    location: intake.location,
   });
 
   const items = await listItems();
@@ -32,8 +37,22 @@ export async function createOccasion(
     );
   }
   const profile = buildStyleProfile(wornRecords);
-  const preferences = preferencesFromProfile(profile);
-  const palette = [...new Set(venue.palette.map((c) => c.toLowerCase()))];
+  const profilePreferences = preferencesFromProfile(profile);
+  const requestedColors = parseColorPreferences(intake.colorPreference);
+  const skinToneColors = colorsForSkinTonePreference(intake.skinTonePreference);
+  const preferenceColors = [
+    ...new Set([...requestedColors, ...skinToneColors]),
+  ];
+  const preferences = {
+    ...profilePreferences,
+    colors: [...new Set([...(profilePreferences.colors ?? []), ...preferenceColors])],
+  };
+  const palette = [
+    ...new Set([
+      ...venue.palette.map((c) => c.toLowerCase()),
+      ...preferenceColors,
+    ]),
+  ];
   const season = "any";
   const composed = composeOutfits(items, {
     formality: formalityLevelToLabel(venue.formalityLevel),

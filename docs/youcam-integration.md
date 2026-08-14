@@ -1,9 +1,14 @@
 # YouCam Integration Guide
 
-FitCheck AI integrates with two YouCam APIs:
+FitCheck AI currently integrates with two YouCam APIs:
 
 - **Skin AI** — cosmetic appearance analysis from an optional user photo
 - **AI Clothes Virtual Try-On (VTO)** — renders a garment reference onto a user photo
+
+The planned makeup extension can add:
+
+- **AI Makeup VTO** — renders a selected makeup look on a user image
+- **AI Makeup Transfer** — transfers a reference makeup look to a user image
 
 YouCam supplies the visual analysis and rendering layer. It does **not** infer a
 user's event, discover their wardrobe, or compose a multi-piece outfit from
@@ -14,12 +19,23 @@ Official references:
 
 - [AI Skin Analysis](https://docs.perfectcorp.com/reference/ai_skin_analysis)
 - [AI Clothes Virtual Try-On](https://docs.perfectcorp.com/reference/ai_clothes)
+- [AI Makeup VTO](https://docs.perfectcorp.com/reference/makeup_vto)
+- [AI Makeup Transfer](https://docs.perfectcorp.com/reference/ai_makeup_transfer)
 
 The current product path therefore stays wardrobe-first: infer a broad context
 from the user's event, compose from saved wardrobe pieces, and use YouCam only
 when a user photo and valid visual input are available. A future shopping flow
 can provide garment reference images for AI Clothes VTO; the current built-in
 templates do not yet have that ingestion path.
+
+### Future event-to-makeup flow
+
+FitCheck should use the researched event context and selected outfit to choose a
+makeup recommendation first (for example, a restrained daytime look versus an
+evening look). YouCam AI Makeup VTO or AI Makeup Transfer can then render that
+chosen look using the required user/reference images. The API is a rendering
+step, not the event classifier or recommendation engine; it should not receive
+unbounded web text as a styling prompt.
 
 ---
 

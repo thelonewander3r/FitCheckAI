@@ -13,7 +13,7 @@ purchasing are intentionally deferred to a later phase.
 ## Hackathon Context
 
 Built for the **[YouCam API Skin AI & Apparel VTO Hackathon](https://youcam.com)**.  
-This project demonstrates how YouCam's cosmetic and fashion AI APIs can support a practical, wardrobe-first outfit check: the app handles event inference and closet composition, while YouCam adds optional Skin AI guidance and visual try-on when valid image inputs are available.
+This project demonstrates how YouCam's cosmetic and fashion AI APIs can support a practical, wardrobe-first outfit check: FitCheck AI gathers event context and composes from the closet, while YouCam adds optional Skin AI guidance and visual try-on when valid image inputs are available.
 
 ---
 
@@ -34,10 +34,15 @@ Describe the event in one sentence
 Next.js App Router  ─────────────────────────────────────────┐
   /api/occasions (POST)                                       │
        │                                                      │
-       ├─► Situation Inference                                │
-       │     ├── Plain-language occasion classification       │
-       │     ├── Curated venue/context rules                  │
-       │     └── Dress-code + colour recommendations          │
+       ├─► Event Inference + Detail Assessment               │
+       │     ├── Plain-language event classification        │
+       │     ├── Ask for restaurant / venue / company when │
+       │     │   the request is sparse                     │
+       │     └── Optional color + manual skin-tone palette │
+       │                                                      │
+       ├─► Event Context Provider                            │
+       │     ├── Curated mock context today                 │
+       │     └── Bounded web research adapter later         │
        │                                                      │
        ├─► Wardrobe Composer                                 │
        │     ├── Existing pieces + worn-style history        │
@@ -115,9 +120,9 @@ By default the app runs in **mock mode** — no YouCam API keys are required. Th
 npm run dev
 ```
 
-Skin AI, AI Clothes VTO, and event context lookup use deterministic mock data. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
+Skin AI, AI Clothes VTO, and event context lookup use deterministic mock data. Sparse event prompts reveal follow-up questions for location, dress code, and optional color guidance. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
 
-Start at [`http://localhost:3000`](http://localhost:3000) and choose **Check my outfit** to describe an event in one sentence, or click **Load demo scenario** to see the full interview-focused flow instantly.
+Start at [`http://localhost:3000`](http://localhost:3000) and choose **Check my outfit** to describe an event in one sentence. If the event is too general, FitCheck asks for useful context before creating the outfit check. Or click **Load demo scenario** to see the full interview-focused flow instantly.
 
 ---
 
@@ -154,8 +159,8 @@ See [`docs/privacy-and-safety.md`](docs/privacy-and-safety.md) for the full poli
 
 - **Mock mode is the reliable/default demo path.** Live Skin AI has been credentialed-tested locally; live Apparel VTO is intentionally not enabled in the default wardrobe flow.
 - **Live Apparel VTO needs garment reference images.** The current built-in outfit templates and try-on route do not ingest or submit those assets; a future shopping/garment flow will add that input.
-- **Situation inference is intentionally lightweight.** The current classifier uses plain-language keyword rules plus curated context data; it is not a general-purpose vision or LLM stylist.
-- **Live venue lookup is deferred.** The app uses curated mock context data; the live provider intentionally fails closed until a real venue API is configured.
+- **Event context is intentionally bounded.** The current classifier uses plain-language keyword rules plus curated mock context data; it is not a general-purpose vision or LLM stylist.
+- **Web event research is deferred.** The live provider is a fail-closed seam until a real search/place API and a sanitized, cited research adapter are configured.
 - **Video capture is deferred.** Video interview guidance exists, but the app does not capture or upload video.
 - **Prisma persistence is deferred.** The MVP uses `.data/sessions.json` and related file stores; Prisma schema/migrations are retained for a later adapter-backed migration.
 - **Outfit templates are static.** The six templates are hand-curated; wardrobe composition becomes more useful as users add pieces and worn history.

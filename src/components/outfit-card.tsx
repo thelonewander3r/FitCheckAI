@@ -130,7 +130,7 @@ export function OutfitCard({
             score={outfit.scores.roleAppropriateness}
           />
           <ScoreBar
-            label="Situation fit"
+            label="Event fit"
             score={outfit.scores.interviewFormatSuitability}
           />
           <ScoreBar
