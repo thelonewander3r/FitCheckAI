@@ -33,3 +33,67 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@keyframes wardrobe-top-shift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes wardrobe-bottom-shift {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes prompt-shuffle-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wardrobe-rail {
+  display: flex;
+  width: max-content;
+  gap: 0.75rem;
+}
+
+.wardrobe-rail-top {
+  animation: wardrobe-top-shift 24s linear infinite;
+}
+
+.wardrobe-rail-bottom {
+  animation: wardrobe-bottom-shift 28s linear infinite;
+}
+
+.wardrobe-rail.motion-reduced {
+  animation: none;
+}
+
+.prompt-card {
+  animation: prompt-shuffle-in 420ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wardrobe-rail,
+  .prompt-card {
+    animation: none;
+  }
+
+  .transition,
+  .transition-colors,
+  .transition-transform {
+    transition-duration: 0.01ms !important;
+  }
+}

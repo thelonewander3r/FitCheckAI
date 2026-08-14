@@ -11,6 +11,17 @@ export interface VenueLookupInput {
 
 export type DressCodeLabel = WardrobeFormality;
 
+export interface VenueSource {
+  title: string;
+  url: string;
+}
+
+export interface VenueResearch {
+  provider: "openai-web-search";
+  fetchedAt: string;
+  sources: VenueSource[];
+}
+
 export interface VenueContext {
   dressCode: DressCodeLabel;
   formalityLevel: number; // casual=0 ... formal=4
@@ -19,6 +30,7 @@ export interface VenueContext {
   confidence: number; // 0..1
   isMock: boolean;
   source: string; // e.g. "mock:curated" | "mock:keyword" | "mock:event-default"
+  research?: VenueResearch;
 }
 
 export interface VenueProvider {

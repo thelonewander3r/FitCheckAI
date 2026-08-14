@@ -17,14 +17,12 @@ The primary flow is intentionally staged so the first screen stays simple:
 3. **Clarify only when needed:** sparse requests ask for the restaurant,
    venue, company, city, dress code, vibe, and optional manual color or
    skin-tone preferences.
-4. **Research event context:** the venue/research provider uses the event and
-   location anchor to gather structured facts. Mock mode is deterministic today;
-   a future live adapter must return source URLs and freshness metadata.
+4. **Research event context when useful:** the default venue provider is deterministic mock data. With `VENUE_MODE=openai` and a server-side `OPENAI_API_KEY`, concrete venue/location anchors use the Responses web-search tool and return structured dress context plus up to three source URLs.
 5. **Compose wardrobe outfits:** rank combinations from owned pieces using event
    formality, researched palette, worn history, and explicit preferences.
 6. **Visualize optionally:** send valid image/reference inputs to the relevant
-   YouCam capability. Event text and web research guide FitCheck's decision;
-   they are not a substitute for YouCam's required media inputs.
+   YouCam capability. Event text and web research guide FitCheck&apos;s decision;
+   they are not a substitute for YouCam&apos;s required media inputs.
 
 Web results are untrusted content. The live adapter must limit domains/query
 scope, sanitize retrieved text, preserve citations, and keep raw page content

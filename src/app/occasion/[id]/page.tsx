@@ -302,6 +302,27 @@ export default function OccasionDetailPage({ params }: Props) {
                 ? "Mock event inference"
                 : `Source: ${venueContext.source}`}
             </p>
+            {venueContext.research && venueContext.research.sources.length > 0 && (
+              <div className="border-t border-[#edf1f3] pt-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#718096]">
+                  Research sources
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {venueContext.research.sources.map((source) => (
+                    <li key={source.url}>
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-[#2a6f7f] hover:underline"
+                      >
+                        {source.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 

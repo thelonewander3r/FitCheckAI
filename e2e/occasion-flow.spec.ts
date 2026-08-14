@@ -3,8 +3,22 @@ import { test, expect } from '@playwright/test'
 test.describe('Occasion flow', () => {
   test('landing page opens the event intake', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('link', { name: 'Plan my event outfit', exact: true }).click()
-    await page.waitForURL(/\/occasion$/)
+    await expect(
+      page.getByRole('heading', { name: /Where are you heading/ }),
+    ).toBeVisible()
+    await page.getByRole('link', { name: 'Start with an occasion', exact: true }).click()
+    await expect(page).toHaveURL(/#occasion-demo$/)
+    await expect(page.getByTestId('landing-occasion-input')).toBeVisible()
+  })
+
+  test('landing page submits an open-ended occasion prompt', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByTestId('wardrobe-tile-showcase')).toBeVisible()
+    await page
+      .getByTestId('landing-occasion-input')
+      .fill('a rooftop dinner with friends')
+    await page.getByRole('button', { name: 'Build my look' }).click()
+    await page.waitForURL(/\/occasion\/[^/]+$/, { timeout: 30_000 })
     await expect(
       page.getByRole('heading', { name: 'Check your whole outfit' }),
     ).toBeVisible()
@@ -12,7 +26,7 @@ test.describe('Occasion flow', () => {
 
   test('landing page opens the event demo', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('link', { name: 'Try event demo', exact: true }).click()
+    await page.getByRole('link', { name: 'See an event example →', exact: true }).click()
     await page.waitForURL(/\/occasion\/[^/]+$/)
     await expect(
       page.getByText('Skyline Rooftop Bar · Dinner', { exact: true }),
