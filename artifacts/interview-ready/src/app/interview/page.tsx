@@ -173,7 +173,7 @@ export default function InterviewPage() {
             href="/"
             className="font-serif text-lg text-[#0f2744] hover:opacity-70 transition-opacity"
           >
-            Vogue × Career
+            FitCheckAI
           </Link>
           <Link href="/" className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]/60 hover:text-[#0f2744] transition-colors">
             Cancel

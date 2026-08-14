@@ -14,7 +14,7 @@ export default function HomePage() {
       <header className="fixed top-0 w-full z-50 mix-blend-difference text-white px-6 py-6 transition-all duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <span className="font-serif text-xl font-normal tracking-wide">
-            Vogue × Career
+            FitCheckAI
           </span>
           <div className="flex gap-6 items-center">
             <Link href="/demo" className="text-sm font-medium tracking-widest uppercase hover:opacity-70 transition-opacity">
@@ -46,7 +46,7 @@ export default function HomePage() {
             transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="text-white/70 text-[10px] uppercase tracking-[0.3em] font-medium mb-6">
-              InterviewReady AI
+              FitCheckAI
             </p>
             <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.85] tracking-tight mb-8">
               Dress for <br />
@@ -205,9 +205,9 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-[#f9f6f0] border-t border-[#0f2744]/10 py-12 px-6 md:px-12">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <span className="font-serif text-2xl text-[#0f2744]">Vogue × Career</span>
+          <span className="font-serif text-2xl text-[#0f2744]">FitCheckAI</span>
           <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 text-center md:text-left">
-            InterviewReady AI — Outfit guidance only, not professional styling.
+            FitCheckAI — Outfit guidance only, not professional styling.
           </p>
         </div>
       </footer>

@@ -151,7 +151,7 @@ export default function WardrobePage() {
       <header className="border-b border-[#0f2744]/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <Link href="/" className="font-serif text-lg text-[#0f2744] hover:opacity-70 transition-opacity">
-            Vogue × Career
+            FitCheckAI
           </Link>
           <Link href="/occasion" className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]/60 hover:text-[#0f2744] transition-colors">
             Plan Occasion
