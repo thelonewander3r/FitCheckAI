@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "InterviewReady AI"
+description = "An AI-powered interview outfit guidance web app. Users enter their job description, interview format, and budget, then get tailored outfit recommendations complete with virtual try-ons and a day-by-day preparation plan. Designed for job seekers who want to walk into their interview dressed with confidence."
+version = "1.0.0"
+id = "artifacts/interview-ready"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23798
+
+[services.development]
+run = "pnpm --filter @workspace/interview-ready run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/interview-ready", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/interview-ready/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23798"
+BASE_PATH = "/"

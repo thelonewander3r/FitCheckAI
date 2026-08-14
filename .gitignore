@@ -27,6 +27,9 @@ node_modules
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# User data & session storage — never commit PII or uploaded photos
+.data/
+
 # misc
 /.sass-cache
 /connect.lock
