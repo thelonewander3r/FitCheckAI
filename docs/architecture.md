@@ -26,13 +26,13 @@ graph TD
         ContextEngine["Interview Context Engine\ninterviewcontext-engine.ts\n─ keyword detection\n─ formality resolution\n─ dress-code + colours"]
         OutfitRanking["Outfit Ranking Engine\noutfits/ranking.ts\n─ scoreBudgetFit\n─ scoreRoleAppropriateness\n─ scoreFormatSuitability\n─ selectTopOutfits"]
         SafetyLayer["Safety Layer\nsafety/skin-safety.ts\n─ prohibited-term filter\n─ applySkinSafety\n─ COSMETIC_DISCLAIMER"]
-        YouCamProvider["YouCam Provider\nyoucam/\n─ MockYouCamProvider\n─ LiveYouCamProvider (stub)\n─ Skin AI\n─ Apparel VTO"]
+        YouCamProvider["YouCam Provider\nyoucam/\n─ MockYouCamProvider (default, verified)\n─ LiveYouCamProvider (implemented; no credentialed smoke test)\n─ Skin AI\n─ Apparel VTO"]
         PlanGen["Preparation Plan Generator\nprep/plan-generator.ts\n─ 5-day checklist\n─ night-before / 1-hr-before"]
     end
 
     subgraph Persistence["Persistence"]
-        FileStore["File Session Store\n.data/sessions.json\n(MVP)"]
-        PrismaSchema["Prisma Schema (ready)\nprisma/schema.prisma\nSQLite migrations"]
+        FileStore["File Session Store\n.data/sessions.json\n(MVP runtime)"]
+        PrismaSchema["Prisma Schema / Migrations\n(SQLite; deferred runtime migration)"]
     end
 
     UI -->|"intake form"| SessionsAPI
@@ -114,7 +114,7 @@ POST /api/sessions/:id/plan
 
 ## Prisma Models
 
-The `prisma/schema.prisma` defines the following models (SQLite, migrations applied):
+The `prisma/schema.prisma` defines the following SQLite models and migration path; Prisma is not used for MVP runtime persistence:
 
 | Model | Purpose |
 |---|---|
@@ -129,7 +129,7 @@ The `prisma/schema.prisma` defines the following models (SQLite, migrations appl
 
 ### MVP persistence note
 
-Prisma 7 requires a **driver adapter** for SQLite (e.g. `@prisma/adapter-better-sqlite3`). For the hackathon MVP the app uses a lightweight **file-based session store** (`src/lib/session-store.ts`) that reads/writes `.data/sessions.json`. Switching to the Prisma client is a one-file change in `src/lib/db.ts` once an adapter is added.
+Prisma 7 requires a **driver adapter** for SQLite (e.g. `@prisma/adapter-better-sqlite3`). The schema and migration remain available, but Prisma persistence is deferred for the MVP: the app uses lightweight file stores such as `src/lib/session-store.ts` and `.data/sessions.json`.
 
 ---
 
@@ -137,19 +137,23 @@ Prisma 7 requires a **driver adapter** for SQLite (e.g. `@prisma/adapter-better-
 
 ```
 YouCamProvider (interface)
-  ├── MockYouCamProvider   ← default; deterministic, no credentials needed
-  └── LiveYouCamProvider   ← stub; throws until official schema is confirmed
+  ├── MockYouCamProvider   ← default and verified; deterministic, no credentials
+  └── LiveYouCamProvider   ← implemented upload/task-polling client; not credential-smoke-tested
 ```
 
 The active provider is selected at runtime:
 
 ```ts
-// src/lib/youcam/index.ts
+// src/lib/youcam/client.ts
 const provider =
-  process.env.YOUCAM_MODE === 'live'
+  process.env.YOUCAM_MODE === "live"
     ? new LiveYouCamProvider(config)
-    : new MockYouCamProvider()
+    : new MockYouCamProvider();
 ```
+
+The live provider currently implements Skin AI and Apparel VTO transport, including file upload, task creation, polling, response mapping, and URL validation. Live Skin AI still needs a credentialed smoke test. Live Apparel VTO additionally requires both a user image and a garment reference image; the current built-in outfit flow does not ingest those garment assets.
+
+The venue provider follows the same pattern, but only the mock venue lookup is currently available. Video capture is not implemented, and Prisma persistence remains deferred in favor of the file stores.
 
 ---
 
@@ -176,7 +180,7 @@ src/
     safety/         ← skin-safety
     services/       ← session-service (orchestrator)
     validation/     ← Zod schemas
-    youcam/         ← provider interface + mock + live stub
+    youcam/         ← provider interface + mock + implemented live client
   types/            ← shared TypeScript domain types
 prisma/             ← schema.prisma + migrations
 docs/               ← this documentation

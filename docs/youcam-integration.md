@@ -18,14 +18,14 @@ export interface YouCamProvider {
 }
 ```
 
-The active provider is resolved at startup in `src/lib/youcam/index.ts`:
+The active provider is resolved in `src/lib/youcam/client.ts`; it defaults to mock mode and selects the live provider only when `YOUCAM_MODE=live`:
 
 ```typescript
 export function getYouCamProvider(): YouCamProvider {
   if (process.env.YOUCAM_MODE === 'live') {
     return new LiveYouCamProvider({
       apiKey: process.env.YOUCAM_API_KEY ?? '',
-      baseUrl: process.env.YOUCAM_BASE_URL ?? '',
+      baseUrl: process.env.YOUCAM_BASE_URL ?? 'https://yce-api-01.makeupar.com',
     })
   }
   return new MockYouCamProvider()
@@ -53,118 +53,66 @@ export function getYouCamProvider(): YouCamProvider {
 |---|---|---|
 | `YOUCAM_MODE` | — | Set to `live` to activate the live provider |
 | `YOUCAM_API_KEY` | Yes | API key obtained from the YouCam developer portal |
-| `YOUCAM_BASE_URL` | Yes | Base URL for YouCam endpoints (e.g. `https://api.youcam.example.com`) |
+| `YOUCAM_BASE_URL` | No | HTTPS base URL; defaults to `https://yce-api-01.makeupar.com` when omitted |
 
 Set these in `.env.local` (never commit real keys):
 
 ```
 YOUCAM_MODE=live
 YOUCAM_API_KEY=your_key_here
-YOUCAM_BASE_URL=https://api.youcam.example.com
+# Optional; defaults to https://yce-api-01.makeupar.com
+YOUCAM_BASE_URL=https://yce-api-01.makeupar.com
 ```
 
 ---
 
-## Input / Output Types (with TODOs)
+## Current Input / Output Types
 
-### `SkinAnalysisInput`
+The domain types in `src/lib/youcam/types.ts` are the contract used by both providers:
 
 ```typescript
-// src/lib/youcam/types.ts
 export interface SkinAnalysisInput {
-  /** Base64-encoded JPEG or PNG — TODO: confirm format with YouCam */
+  /** Base64-encoded JPEG, PNG, or WebP (raw or data URL) */
   imageBase64: string
-  /** Optional locale hint — TODO: confirm supported values */
   locale?: string
 }
-```
 
-**TODO:** Confirm the exact image encoding format (JPEG vs PNG), maximum image size, and whether the field name is `imageBase64` or something else in the official SDK.
-
-### `ApparelTryOnInput`
-
-```typescript
 export interface ApparelTryOnInput {
-  /** Base64-encoded user photo — TODO: confirm format and size constraints */
-  userImageBase64: string
-  /**
-   * Garment asset identifier as registered in the YouCam system.
-   * TODO: confirm asset registration flow and ID format.
-   */
+  /** Optional for mock mode; required for live AI Clothes */
+  userImageBase64?: string
+  /** App-level identifier; never sent as a YouCam file ID */
   garmentAssetId: string
-  /** Optional render resolution — TODO: confirm supported values */
+  /** Required for live AI Clothes */
+  garmentImageBase64?: string
+  garmentCategory?: GarmentCategory
   outputResolution?: { width: number; height: number }
 }
-```
 
-**TODO:** Confirm the garment asset registration flow — how do outfits get assigned IDs in the YouCam system, and what format do those IDs take?
-
-### `ApparelTryOnResult`
-
-```typescript
 export interface ApparelTryOnResult {
-  /**
-   * Try-on image as a data URL or hosted URL.
-   * TODO: confirm whether live API returns base64 data URLs or hosted CDN URLs.
-   */
   renderedImageUrl: string
   isMock: boolean
-  /** TODO: confirm field name for processing time in live response */
   processingTimeMs?: number
 }
 ```
 
----
+## Live Provider Status
 
-## Where to Insert Official Schemas
+`src/lib/youcam/live-provider.ts` contains the live implementation. It uses the current Perfect Corp transport flow: upload a base64 image, create a task, poll for completion, map the response into the app types, and validate result URLs. Skin AI uses the skin-analysis task; Apparel VTO uses the cloth-v4 task. The implementation uses `fetch` and Bearer authentication without logging credentials, IDs, signed URLs, or image payloads.
 
-All placeholder `// TODO: replace with official schema` comments are in:
+The live provider has unit coverage with mocked HTTP responses, but it has **not** had a credentialed smoke test. Mock mode remains the verified/default submission path.
 
-```
-src/lib/youcam/types.ts
-```
+## Live Requirements and Caveats
 
-Once official YouCam SDK documentation is available:
+1. Set `YOUCAM_MODE=live` and provide `YOUCAM_API_KEY`.
+2. `YOUCAM_BASE_URL` is optional; when omitted, the client uses `https://yce-api-01.makeupar.com`. It must be an HTTPS URL without embedded credentials.
+3. Supply valid JPEG, PNG, or WebP base64 data. Live Skin AI validates image dimensions before upload.
+4. Live Apparel VTO requires both `userImageBase64` and `garmentImageBase64`. `garmentAssetId` is only an app identifier and cannot substitute for the garment reference image.
+5. The current built-in outfit templates and `/api/sessions/:id/try-on` route do not ingest garment reference assets, so live Apparel VTO remains unavailable for the default outfit flow until asset ingestion is added.
 
-1. Replace the placeholder field names and types with the authoritative schema
-2. Update `src/lib/youcam/live-provider.ts` to use the correct request/response shapes
-3. Remove all `// TODO` comments once confirmed
-
----
-
-## Live Provider Stub
-
-`src/lib/youcam/live-provider.ts` currently throws on every call:
-
-```typescript
-export class LiveYouCamProvider implements YouCamProvider {
-  async analyzeSkin(_input: SkinAnalysisInput): Promise<SkinAnalysisResult> {
-    throw new Error(
-      'LiveYouCamProvider.analyzeSkin is not yet implemented. ' +
-      'Fill in src/lib/youcam/live-provider.ts once official API schemas are confirmed.'
-    )
-  }
-
-  async generateApparelTryOn(
-    _input: ApparelTryOnInput,
-  ): Promise<ApparelTryOnResult> {
-    throw new Error(
-      'LiveYouCamProvider.generateApparelTryOn is not yet implemented. ' +
-      'Fill in src/lib/youcam/live-provider.ts once official API schemas are confirmed.'
-    )
-  }
-}
-```
-
-**To implement live mode:**
-
-1. Install the official YouCam SDK (once available), or use `fetch` with the correct base URL
-2. Map `SkinAnalysisInput` → SDK request shape
-3. Map SDK response → `SkinAnalysisResult` (the domain type used throughout the app)
-4. Always pass the result through `applySkinSafety()` before returning
-5. Repeat for `ApparelTryOnInput` → `ApparelTryOnResult`
+Optional live tuning variables are `YOUCAM_TIMEOUT_MS`, `YOUCAM_POLL_INTERVAL_MS`, and `YOUCAM_SKIN_ACTIONS`. Keep real credentials in `.env.local`; never commit them.
 
 ---
+
 
 ## Safety Contract
 

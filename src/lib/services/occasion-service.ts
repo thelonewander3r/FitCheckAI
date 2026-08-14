@@ -76,7 +76,10 @@ export async function createOccasion(
 
   const outfits = composed.outfits.map((o) => ({
     ...o,
-    items: o.items.map(({ imageBase64: _omit, ...rest }) => rest),
+    items: o.items.map(({ imageBase64: _omit, ...rest }) => {
+      void _omit;
+      return rest;
+    }),
   })) as typeof composed.outfits;
 
   return storeCreate({

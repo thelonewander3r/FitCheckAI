@@ -1,31 +1,34 @@
 # Implementation Plan — InterviewReady AI
 
-## Repository inspection (pre-change)
-
-| Item | Finding |
-|------|---------|
-| **Project root** | `C:\Users\E_man\Documents\Projects\InterviewReadyAI` |
-| **Existing stack** | None — empty git repository only (`.git`) |
-| **Package manager** | **npm** (Node v24.15.0 / npm 11.12.1) |
-| **Git branch** | `feature/mvp-foundation` (created from empty `master`) |
-| **Uncommitted work** | None at inspection time |
-
-## Status
+## Current status
 
 | Phase | Status |
 |-------|--------|
 | Phase 1 — Foundation | Complete |
-| Phase 2 — Mock working product | Complete |
-| Phase 3 — Live YouCam integration | Deferred (stubs + docs ready) |
-| Phase 4 — Quality / submission prep | Mostly complete (lint, typecheck, unit, e2e, build green) |
+| Phase 2 — Mock working product | Complete and verified as the default demo path |
+| Phase 3 — Live YouCam integration | Partially implemented; credentialed smoke test deferred |
+| Phase 4 — Quality / submission prep | Verification complete; packaging and manual rehearsal pending |
 
-## Persistence note
+## Quality gates
 
-Prisma schema + SQLite migration exist under `prisma/`. Prisma 7 requires a SQLite driver adapter, so the MVP uses a file session store (`.data/sessions.json`) for reliable demos. Swap to Prisma when the adapter is wired.
+| Command | Result |
+|---------|--------|
+| `npm test -- --run` | Passed — 155/155 tests |
+| `npm run typecheck` | Passed |
+| `npm run lint` | Passed — no errors or warnings |
+| `npm run build` | Passed — Next.js 16.2.10 production build |
+| `npm run test:e2e` | Passed — 3/3 tests |
 
-## Remaining Phase 3 steps
+## Current integration boundaries
 
-1. Obtain official YouCam Skin AI + Apparel VTO request/response schemas.
-2. Fill TODOs in `src/lib/youcam/types.ts` and `live-provider.ts`.
-3. Implement auth headers, polling (if async), timeouts, and rate-limit handling.
-4. Keep `YOUCAM_MODE=mock` as the default for credential-free demos.
+- Mock mode is the verified/default demo path and requires no credentials.
+- Image upload exists for interview selfies and wardrobe pieces.
+- `LiveYouCamProvider` is implemented with authenticated upload/task polling, but has not had a credentialed smoke test.
+- Live Apparel VTO still requires user and garment reference images; the current outfit flow does not ingest garment assets.
+- Live venue lookup, video capture, and Prisma-backed persistence remain deferred. The MVP uses file-based stores under `.data/`.
+
+## Deferred follow-up
+
+1. Run a credentialed live Skin AI smoke test when safe credentials are available.
+2. Add garment reference asset ingestion before enabling live Apparel VTO in the default flow.
+3. Implement live venue lookup, video capture, application authentication, and Prisma persistence only as separate scoped work.

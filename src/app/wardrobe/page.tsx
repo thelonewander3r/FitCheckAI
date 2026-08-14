@@ -100,8 +100,11 @@ export default function WardrobePage() {
   }
 
   useEffect(() => {
-    void fetchItems();
-    void fetchWorn();
+    async function loadInitialData() {
+      await Promise.all([fetchItems(), fetchWorn()]);
+    }
+
+    void loadInitialData();
   }, []);
 
   async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {

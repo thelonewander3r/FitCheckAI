@@ -33,15 +33,15 @@ dressing.
 Unlocks every later phase. Cheap, incremental on the existing intake.
 
 - Add to intake: **body type / size + weight** (fit scoring), **skin tone**
-  (manual picker now; auto-derive from selfie later), **gender/presentation**
-  (female-forward default; templates already partly female-oriented — make it
-  explicit), **company culture** (from job description + light web lookup of
-  the company for dress-culture signals, e.g. startup vs. bank).
+  (optional manual picker), **gender/presentation** (female-forward default;
+  templates already partly female-oriented — make it explicit), **company
+  culture** (from job description + light web lookup of the company for
+  dress-culture signals, e.g. startup vs. bank).
 - Thread person attributes into `ranking.ts` scoring (fit, color flattery,
   culture-adjusted formality) and into the VTO mock (tint/label uses
   recommended palette).
-- Skin tone from selfie: mock provider can sample dominant skin pixels from
-  the downscaled selfie (no new deps, server-side) → flattering color palette.
+- Do not infer skin tone or demographics from uploaded images; any future
+  personalization must remain user-provided or use non-demographic signals.
 
 **Exit criteria:** changing weight/skin tone/culture visibly changes the
 top-3 and the palette, with tests.

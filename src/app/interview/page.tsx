@@ -41,68 +41,6 @@ const EMPTY_FORM: FormState = {
   companyCulture: "",
 };
 
-type DetectedSkinTone = "fair" | "light" | "medium" | "tan" | "deep";
-
-function rgbToLightness(r: number, g: number, b: number): number {
-  const rn = r / 255;
-  const gn = g / 255;
-  const bn = b / 255;
-  const max = Math.max(rn, gn, bn);
-  const min = Math.min(rn, gn, bn);
-  return ((max + min) / 2) * 100;
-}
-
-function classifySkinToneFromCanvas(
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-): DetectedSkinTone | null {
-  const boxW = Math.max(1, Math.round(width * 0.2));
-  const boxH = Math.max(1, Math.round(height * 0.2));
-  const sx = Math.round((width - boxW) / 2);
-  const sy = Math.round((height - boxH) / 2);
-  const { data } = ctx.getImageData(sx, sy, boxW, boxH);
-
-  let rSum = 0;
-  let gSum = 0;
-  let bSum = 0;
-  const pixels = data.length / 4;
-  for (let i = 0; i < data.length; i += 4) {
-    rSum += data[i]!;
-    gSum += data[i + 1]!;
-    bSum += data[i + 2]!;
-  }
-  const r = rSum / pixels;
-  const g = gSum / pixels;
-  const b = bSum / pixels;
-  const lightness = rgbToLightness(r, g, b);
-
-  if (lightness < 18 || lightness > 92) return null;
-  if (lightness < 25) return "deep";
-  if (lightness < 35) return "tan";
-  if (lightness < 50) return "medium";
-  if (lightness < 60) return "light";
-  return "fair";
-}
-
-async function sampleSkinToneFromBase64(
-  base64: string,
-): Promise<DetectedSkinTone | null> {
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const el = new Image();
-    el.onload = () => resolve(el);
-    el.onerror = () => reject(new Error("decode failed"));
-    el.src = `data:image/jpeg;base64,${base64}`;
-  });
-  const canvas = document.createElement("canvas");
-  canvas.width = img.width;
-  canvas.height = img.height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-  ctx.drawImage(img, 0, 0);
-  return classifySkinToneFromCanvas(ctx, img.width, img.height);
-}
-
 export default function InterviewPage() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -112,18 +50,12 @@ export default function InterviewPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [skinToneDetected, setSkinToneDetected] = useState(false);
-  const skinToneManualRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleChange(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) {
     const { name, value } = e.target;
-    if (name === "skinTone") {
-      skinToneManualRef.current = true;
-      setSkinToneDetected(false);
-    }
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof FormState]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -150,16 +82,6 @@ export default function InterviewPage() {
       const base64 = await downscaleToBase64(file); // default maxEdge=1024 for YouCam SD skin short-side
       if (!base64) throw new Error("empty result");
       setImageBase64(base64);
-
-      try {
-        const detected = await sampleSkinToneFromBase64(base64);
-        if (detected && !skinToneManualRef.current) {
-          setForm((prev) => ({ ...prev, skinTone: detected }));
-          setSkinToneDetected(true);
-        }
-      } catch {
-        // Skin-tone sampling is best-effort; never clear a valid upload.
-      }
     } catch {
       // Fail closed: never upload an unprocessed (potentially huge or
       // unsupported-format) file. The full-size original would defeat the
@@ -201,9 +123,7 @@ export default function InterviewPage() {
         fitSize: form.fitSize || undefined,
         weightLbs:
           !isNaN(weightParsed) && weightParsed > 0 ? weightParsed : undefined,
-        skinTone: (form.skinTone || undefined) as
-          | DetectedSkinTone
-          | undefined,
+        skinTone: (form.skinTone || undefined) as IntakeInput["skinTone"],
         presentation: (form.presentation || undefined) as
           | "feminine"
           | "masculine"
@@ -471,11 +391,6 @@ export default function InterviewPage() {
                     { value: "deep", label: "Deep" },
                   ]}
                 />
-                {skinToneDetected && form.skinTone && (
-                  <p className="text-xs text-[#718096]">
-                    (detected from photo — you can change it)
-                  </p>
-                )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="presentation">Presentation</Label>
@@ -517,7 +432,8 @@ export default function InterviewPage() {
               <Label>Photo (optional)</Label>
               <p className="text-xs text-[#718096]">
                 Upload a selfie to enable personalised skin analysis and virtual
-                try-on. Stored only for this session.
+                try-on. Stored in the local session store and may remain until
+                local data is cleared.
               </p>
               <div
                 className="flex items-center gap-3 rounded-lg border border-dashed border-[#c3ccd6] bg-[#f4f6f8] p-4 cursor-pointer hover:border-[#2a6f7f] transition-colors"

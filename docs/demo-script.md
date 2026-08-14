@@ -101,4 +101,4 @@ Point to the **Copy summary** button.
 | `/demo` redirects to `/interview` | Check dev server is running with `npm run dev` |
 | Outfit images show empty | Expected in mock mode — VTO previews are placeholder SVGs |
 | "Mock mode" badge appears | Normal in mock mode; set `YOUCAM_MODE=live` for live credentials |
-| Session not found error | Delete `.data/sessions.json` and reload |
+| Session not found error | The local `.data/` store persists with no TTL. Prefer a disposable clean checkout; otherwise back up `.data`, confirm it contains no needed data, then clear local `.data/` and reload. |
