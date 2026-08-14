@@ -12,7 +12,7 @@
 
 > "When you're preparing for a high-stakes interview, 'dress professionally' isn't enough.
 > Is it a suit or a blazer? What colours work on video? What does the company actually expect?
-> InterviewReady AI answers all of that in under two minutes."
+> FitCheck AI answers all of that in under two minutes."
 
 ---
 
@@ -65,7 +65,7 @@ Click **"Select"** on the recommended outfit.
 
 Click **"Continue to Final Plan"**.
 
-> "InterviewReady AI generates a day-by-day preparation plan. Day 1 is for sourcing the outfit. Day 5 is for hanging the complete look so nothing gets forgotten. The night-before checklist covers pressing the jacket and laying everything out. The one-hour checklist covers dressing, a final mirror check, and arriving early — camera setup only appears for video interviews, and this demo is onsite."
+> "FitCheck AI generates a day-by-day preparation plan. Day 1 is for sourcing the outfit. Day 5 is for hanging the complete look so nothing gets forgotten. The night-before checklist covers pressing the jacket and laying everything out. The one-hour checklist covers dressing, a final mirror check, and arriving early — camera setup only appears for video interviews, and this demo is onsite."
 
 Point to the **Copy summary** button.
 

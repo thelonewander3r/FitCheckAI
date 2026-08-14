@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { RankedOutfit } from "@/types/interview";
 import type { ApparelTryOnResult } from "@/lib/youcam/types";
@@ -72,11 +71,14 @@ export function OutfitCard({
         {/* VTO image or placeholder */}
         <div className="relative h-48 w-full rounded-lg overflow-hidden bg-[#f4f6f8] flex items-center justify-center">
           {vtoResult?.renderedImageUrl && !imageError ? (
-            <Image
+            // Mock VTO returns a data URL and live VTO returns an app-owned
+            // proxy path; a native image element supports both forms.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={vtoResult.renderedImageUrl}
               alt={`Virtual try-on: ${outfit.name}`}
-              fill
-              className="object-contain"
+              data-testid="try-on-image"
+              className="h-full w-full object-contain"
               onError={() => setImageError(true)}
             />
           ) : (
@@ -128,10 +130,9 @@ export function OutfitCard({
             score={outfit.scores.roleAppropriateness}
           />
           <ScoreBar
-            label="Format suitability"
+            label="Situation fit"
             score={outfit.scores.interviewFormatSuitability}
           />
-          <ScoreBar label="Budget fit" score={outfit.scores.budgetFit} />
           <ScoreBar
             label="Camera readiness"
             score={outfit.scores.cameraReadiness}
@@ -142,14 +143,8 @@ export function OutfitCard({
         <p className="text-xs text-[#718096] italic">{outfit.explanation}</p>
 
         <div className="mt-auto pt-2">
-          <p className="text-xs font-semibold text-[#0f2744]">
-            Est.{" "}
-            <span className="text-[#2a6f7f]">
-              ${outfit.estimatedPrice.toFixed(0)}
-            </span>
-          </p>
           {outfit.genderNeutralNote && (
-            <p className="mt-1 text-[10px] text-[#718096] italic">
+            <p className="text-[10px] text-[#718096] italic">
               {outfit.genderNeutralNote}
             </p>
           )}

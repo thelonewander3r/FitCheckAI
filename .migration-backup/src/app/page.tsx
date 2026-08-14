@@ -2,52 +2,61 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col min-h-screen">
-      {/* Nav */}
+    <main className="flex min-h-screen flex-col">
       <header className="border-b border-[#e2e8f0] bg-white px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <span className="font-serif text-lg font-semibold text-[#0f2744]">
-            InterviewReady AI
-          </span>
           <Link
-            href="/interview"
-            className="rounded-lg bg-[#0f2744] px-4 py-2 text-sm font-medium text-white hover:bg-[#0a1d35] transition-colors"
+            href="/"
+            className="font-serif text-lg font-semibold text-[#0f2744]"
           >
-            Start now
+            FitCheck AI
           </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/wardrobe"
+              className="hidden text-sm text-[#2a6f7f] hover:underline sm:inline"
+            >
+              My wardrobe
+            </Link>
+            <Link
+              href="/occasion"
+              className="rounded-lg bg-[#0f2744] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0a1d35]"
+            >
+              Check an outfit
+            </Link>
+          </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center bg-white">
+      <section className="flex flex-1 flex-col items-center justify-center bg-white px-6 py-20 text-center">
         <div className="mx-auto max-w-2xl space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#e8f4f6] bg-[#e8f4f6] px-3 py-1 text-xs font-medium text-[#2a6f7f]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#2a6f7f]" />
-            Powered by AI analysis
+            Start with what you already own
           </div>
 
-          <p className="font-serif text-sm font-semibold tracking-wide text-[#2a6f7f] uppercase">
-            InterviewReady AI
+          <p className="font-serif text-sm font-semibold uppercase tracking-wide text-[#2a6f7f]">
+            FitCheck AI
           </p>
 
           <h1 className="font-serif text-4xl font-semibold leading-tight text-[#0f2744] sm:text-5xl">
-            Walk into your interview
+            Know what to wear,
             <br />
-            <span className="text-[#2a6f7f]">dressed for the role.</span>
+            <span className="text-[#2a6f7f]">using what you own.</span>
           </h1>
 
-          <p className="text-base text-[#4a5568] leading-relaxed max-w-xl mx-auto">
-            InterviewReady AI analyses your job description, infers the dress
-            code, and recommends tailored outfits — complete with virtual
-            try-ons and a day-by-day preparation plan.
+          <p className="mx-auto max-w-xl text-base leading-relaxed text-[#4a5568]">
+            Tell us where you&apos;re going in one sentence. FitCheck AI infers
+            the setting, checks the whole outfit against it, and recommends a
+            coherent look from your wardrobe.
           </p>
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/interview"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#0f2744] px-6 text-sm font-semibold text-white hover:bg-[#0a1d35] transition-colors"
+              href="/occasion"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#0f2744] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#0a1d35]"
             >
-              Start preparation
+              Check my outfit
               <svg
                 className="h-4 w-4"
                 fill="none"
@@ -63,48 +72,54 @@ export default function HomePage() {
               </svg>
             </Link>
             <Link
-              href="/occasion"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] hover:bg-[#f4f6f8] transition-colors"
+              href="/wardrobe"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] transition-colors hover:bg-[#f4f6f8]"
             >
-              Plan an occasion
+              Build my wardrobe
             </Link>
             <Link
               href="/demo"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] hover:bg-[#f4f6f8] transition-colors"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[#e2e8f0] bg-white px-6 text-sm font-semibold text-[#0f2744] transition-colors hover:bg-[#f4f6f8]"
             >
-              Load demo scenario
+              Load demo
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Features */}
       <section className="border-t border-[#e2e8f0] bg-[#f4f6f8] px-6 py-16">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-center font-serif text-2xl font-semibold text-[#0f2744] mb-10">
-            How it works
-          </h2>
+          <div className="mx-auto mb-10 max-w-xl text-center">
+            <h2 className="font-serif text-2xl font-semibold text-[#0f2744]">
+              Less form. More useful advice.
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#4a5568]">
+              No stage, format, presentation, or budget questionnaire. Give us
+              the situation; your wardrobe and style history do the rest.
+            </p>
+          </div>
+
           <div className="grid gap-6 sm:grid-cols-3">
             {[
               {
                 step: "01",
-                title: "Tell us about your interview",
-                body: "Enter your job title, company, interview format, and a brief description. Takes about two minutes.",
+                title: "Describe the situation",
+                body: "Write a venue, event, or one-sentence plan such as “rooftop dinner with my team.”",
               },
               {
                 step: "02",
-                title: "AI infers dress expectations",
-                body: "We analyse the role, industry, and format to infer the most appropriate dress code and colour palette.",
+                title: "Use your wardrobe",
+                body: "Add photos of pieces you already own once. FitCheck learns from your real closet and worn looks.",
               },
               {
                 step: "03",
-                title: "Virtual try-on + day plan",
-                body: "See ranked outfit recommendations, try them on virtually, and receive a step-by-step preparation plan.",
+                title: "Check the whole look",
+                body: "See complete combinations, why they work, what is missing, and a visual try-on when available.",
               },
             ].map((feature) => (
               <div
                 key={feature.step}
-                className="rounded-xl border border-[#e2e8f0] bg-white p-6 space-y-3"
+                className="space-y-3 rounded-xl border border-[#e2e8f0] bg-white p-6"
               >
                 <span className="font-serif text-3xl font-bold text-[#e2e8f0]">
                   {feature.step}
@@ -112,12 +127,21 @@ export default function HomePage() {
                 <h3 className="font-serif text-base font-semibold text-[#0f2744]">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-[#4a5568] leading-relaxed">
+                <p className="text-sm leading-relaxed text-[#4a5568]">
                   {feature.body}
                 </p>
               </div>
             ))}
           </div>
+
+          <p className="mt-8 text-center text-xs text-[#718096]">
+            Interview prep is still available as a focused mode when you need
+            it.
+            {" "}
+            <Link href="/interview" className="text-[#2a6f7f] hover:underline">
+              Open interview mode
+            </Link>
+          </p>
         </div>
       </section>
     </main>

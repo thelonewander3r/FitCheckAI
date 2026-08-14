@@ -21,8 +21,6 @@ export interface OccasionIntake {
   venueName: string;
   location?: string;
   eventDate?: string;
-  presentation?: "feminine" | "masculine" | "neutral";
-  skinTone?: "fair" | "light" | "medium" | "tan" | "deep";
 }
 
 export interface OccasionSession {

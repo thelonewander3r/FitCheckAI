@@ -192,7 +192,7 @@ export default function OccasionDetailPage({ params }: Props) {
             onClick={() => router.push("/occasion")}
             className="mt-4 text-sm text-[#2a6f7f] hover:underline"
           >
-            Plan another occasion
+            Check another outfit
           </button>
         </div>
       </div>
@@ -241,7 +241,7 @@ export default function OccasionDetailPage({ params }: Props) {
             href="/"
             className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors"
           >
-            InterviewReady AI
+            FitCheck AI
           </Link>
           {isMockMode && (
             <Badge variant="outline" className="text-xs">
@@ -254,7 +254,7 @@ export default function OccasionDetailPage({ params }: Props) {
       <div className="mx-auto max-w-3xl px-6 pt-8 space-y-8">
         <div>
           <h1 className="font-serif text-2xl font-semibold text-[#0f2744]">
-            Your occasion outfits
+            Check your whole outfit
           </h1>
           <p className="mt-1 text-sm text-[#718096]">
             {labelize(intake.eventType)}
@@ -268,7 +268,7 @@ export default function OccasionDetailPage({ params }: Props) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="font-serif text-lg font-semibold text-[#0f2744]">
-                  Venue context
+                  Situation context
                 </h2>
                 <p className="text-sm text-[#718096] mt-0.5">
                   {intake.venueName} · {labelize(intake.eventType)}
@@ -294,12 +294,12 @@ export default function OccasionDetailPage({ params }: Props) {
             )}
 
             <p className="text-xs text-[#718096]">
-              Venue lookup confidence:{" "}
+              Situation confidence:{" "}
               {Math.round(venueContext.confidence * 100)}%
             </p>
             <p className="text-xs text-[#718096]">
               {venueContext.isMock
-                ? "Mock venue lookup"
+                ? "Mock situation inference"
                 : `Source: ${venueContext.source}`}
             </p>
           </div>
@@ -448,7 +448,7 @@ export default function OccasionDetailPage({ params }: Props) {
             {gaps.length > 0 && (
               <section className="rounded-xl border border-[#e2e8f0] bg-white p-6 space-y-3">
                 <h2 className="font-serif text-base font-semibold text-[#0f2744]">
-                  Missing pieces
+                  What is missing from your wardrobe
                 </h2>
                 <ul className="space-y-1.5">
                   {gaps.map((gap) => (
@@ -471,7 +471,7 @@ export default function OccasionDetailPage({ params }: Props) {
             href="/occasion"
             className="text-sm text-[#718096] hover:text-[#0f2744] transition-colors"
           >
-            Plan another occasion
+            Check another outfit
           </Link>
           <Link
             href="/wardrobe"

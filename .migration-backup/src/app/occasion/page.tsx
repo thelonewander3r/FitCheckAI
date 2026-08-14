@@ -6,35 +6,16 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { OCCASION_TYPES, type OccasionType } from "@/types/occasion";
 
 interface FormState {
-  eventType: OccasionType;
   venueName: string;
-  location: string;
   theme: string;
-  eventDate: string;
-  presentation: "" | "feminine" | "masculine" | "neutral";
-  skinTone: "" | "fair" | "light" | "medium" | "tan" | "deep";
 }
 
 const EMPTY_FORM: FormState = {
-  eventType: "dinner",
   venueName: "",
-  location: "",
   theme: "",
-  eventDate: "",
-  presentation: "",
-  skinTone: "",
 };
-
-function labelize(value: string): string {
-  return value
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
 
 export default function OccasionIntakePage() {
   const router = useRouter();
@@ -71,26 +52,8 @@ export default function OccasionIntakePage() {
 
     try {
       const payload = {
-        eventType: form.eventType,
         venueName: form.venueName.trim(),
-        location: form.location.trim() || undefined,
         theme: form.theme.trim() || undefined,
-        eventDate: form.eventDate || undefined,
-        presentation: (form.presentation || undefined) as
-          | "feminine"
-          | "masculine"
-          | "neutral"
-          | undefined,
-        ...(form.skinTone
-          ? {
-              skinTone: form.skinTone as
-                | "fair"
-                | "light"
-                | "medium"
-                | "tan"
-                | "deep",
-            }
-          : {}),
       };
 
       const res = await fetch("/api/occasions", {
@@ -127,7 +90,7 @@ export default function OccasionIntakePage() {
             href="/"
             className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors"
           >
-            InterviewReady AI
+            FitCheck AI
           </Link>
           <Link
             href="/wardrobe"
@@ -141,108 +104,41 @@ export default function OccasionIntakePage() {
       <div className="mx-auto max-w-2xl px-6 pt-8">
         <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
           <h1 className="font-serif text-2xl font-semibold text-[#0f2744] mb-1">
-            Plan an occasion
+            Check your whole outfit
           </h1>
           <p className="text-sm text-[#718096] mb-8">
-            Describe the event and venue — we&apos;ll infer dress context and
-            compose outfits from your wardrobe.
+            Tell us where you&apos;re going in your own words. We&apos;ll infer the
+            setting and build the best look from what you already own.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div className="space-y-1.5">
-              <Label htmlFor="eventType">Event type</Label>
-              <Select
-                id="eventType"
-                name="eventType"
-                value={form.eventType}
-                onChange={handleChange}
-                options={OCCASION_TYPES.map((t) => ({
-                  value: t,
-                  label: labelize(t),
-                }))}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="venueName">Venue / company name *</Label>
+              <Label htmlFor="venueName">What are you dressing for? *</Label>
               <Input
                 id="venueName"
                 name="venueName"
                 value={form.venueName}
                 onChange={handleChange}
-                placeholder="e.g. Skyline Rooftop Bar"
+                placeholder="e.g. rooftop dinner with my team"
                 className={errors.venueName ? "border-red-400" : ""}
+                data-testid="occasion-situation"
               />
+              <p className="text-xs text-[#718096]">
+                A venue, event, or one-sentence situation is enough.
+              </p>
               {errors.venueName && (
                 <p className="text-xs text-red-500">{errors.venueName}</p>
               )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="location">Location (optional)</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  value={form.location}
-                  onChange={handleChange}
-                  placeholder="e.g. Downtown"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="eventDate">Event date (optional)</Label>
-                <Input
-                  id="eventDate"
-                  name="eventDate"
-                  type="date"
-                  value={form.eventDate}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
             <div className="space-y-1.5">
-              <Label htmlFor="theme">Theme (optional)</Label>
+              <Label htmlFor="theme">Anything else we should know? (optional)</Label>
               <Input
                 id="theme"
                 name="theme"
                 value={form.theme}
                 onChange={handleChange}
-                placeholder="e.g. team celebration"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="presentation">Presentation</Label>
-              <Select
-                id="presentation"
-                name="presentation"
-                value={form.presentation}
-                onChange={handleChange}
-                options={[
-                  { value: "", label: "Prefer not to say" },
-                  { value: "feminine", label: "Feminine" },
-                  { value: "masculine", label: "Masculine" },
-                  { value: "neutral", label: "Neutral" },
-                ]}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="skinTone">Skin tone (optional)</Label>
-              <Select
-                id="skinTone"
-                name="skinTone"
-                value={form.skinTone}
-                onChange={handleChange}
-                options={[
-                  { value: "", label: "Not set" },
-                  { value: "fair", label: "Fair" },
-                  { value: "light", label: "Light" },
-                  { value: "medium", label: "Medium" },
-                  { value: "tan", label: "Tan" },
-                  { value: "deep", label: "Deep" },
-                ]}
+                placeholder="e.g. I want to look polished but still feel like myself"
               />
             </div>
 
@@ -259,7 +155,7 @@ export default function OccasionIntakePage() {
               className="w-full"
               disabled={submitting}
             >
-              {submitting ? "Planning…" : "Compose outfits"}
+              {submitting ? "Checking…" : "Check my outfit"}
             </Button>
           </form>
         </div>

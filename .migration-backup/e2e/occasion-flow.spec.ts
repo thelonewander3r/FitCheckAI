@@ -31,22 +31,23 @@ test.describe('Occasion flow', () => {
 
     await page.goto('/occasion')
     await expect(
-      page.getByRole('heading', { name: 'Plan an occasion' }),
+      page.getByRole('heading', { name: 'Check your whole outfit' }),
     ).toBeVisible()
-    await expect(page.getByLabel('Event type')).toHaveValue('dinner')
+    await expect(page.getByLabel('Event type')).toHaveCount(0)
+    await expect(page.getByLabel('Presentation')).toHaveCount(0)
 
-    await page.getByLabel('Venue / company name *').fill('Skyline Rooftop Bar')
-    await page.getByLabel('Location (optional)').fill('Downtown')
-    await page.getByLabel('Theme (optional)').fill('team celebration')
-    await page.getByRole('button', { name: 'Compose outfits' }).click()
+    await page
+      .getByLabel('What are you dressing for? *')
+      .fill('rooftop dinner with my team')
+    await page.getByRole('button', { name: 'Check my outfit' }).click()
 
     await page.waitForURL(/\/occasion\/[^/]+$/, { timeout: 30_000 })
 
     await expect(
-      page.getByRole('heading', { name: 'Your occasion outfits' }),
+      page.getByRole('heading', { name: 'Check your whole outfit' }),
     ).toBeVisible()
     await expect(
-      page.getByText('Skyline Rooftop Bar · Dinner', { exact: true }),
+      page.getByText('rooftop dinner with my team · Dinner', { exact: true }),
     ).toBeVisible()
     await expect(page.getByText('Smart Casual', { exact: true })).toBeVisible()
     await expect(
@@ -55,9 +56,8 @@ test.describe('Occasion flow', () => {
         { exact: true },
       ),
     ).toBeVisible()
-    await expect(page.getByText('Mock venue lookup', { exact: true })).toBeVisible()
     await expect(
-      page.getByText('Dinner · team celebration · Downtown', { exact: true }),
+      page.getByText('Mock situation inference', { exact: true }),
     ).toBeVisible()
     await expect(
       page.getByRole('heading', { name: 'Add your pieces first', exact: true }),

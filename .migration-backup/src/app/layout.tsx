@@ -17,9 +17,9 @@ const sourceSerif4 = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "InterviewReady AI — Dress with confidence",
+  title: "FitCheck AI — Dress for the situation",
   description:
-    "AI-powered interview outfit guidance. Understand dress expectations, see virtual try-ons, and walk in confident.",
+    "AI-powered outfit checks built from your wardrobe. Describe the situation, see what works, and understand what is missing.",
 };
 
 export default function RootLayout({
@@ -35,7 +35,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col antialiased">
         {children}
         <footer className="border-t border-[#e2e8f0] bg-white px-6 py-6 text-center text-xs text-[#718096]">
-          InterviewReady AI — outfit guidance only, not professional styling or
+          FitCheck AI — outfit guidance only, not professional styling or
           medical advice.
         </footer>
       </body>

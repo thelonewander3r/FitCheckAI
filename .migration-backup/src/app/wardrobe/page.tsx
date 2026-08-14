@@ -206,20 +206,20 @@ export default function WardrobePage() {
             href="/"
             className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors"
           >
-            InterviewReady AI
+            FitCheck AI
           </Link>
           <div className="flex items-center gap-4">
             <Link
               href="/occasion"
               className="text-sm text-[#2a6f7f] hover:underline"
             >
-              Plan an occasion
+              Check an outfit
             </Link>
             <Link
               href="/interview"
               className="text-sm text-[#2a6f7f] hover:underline"
             >
-              Start interview prep
+              Interview mode
             </Link>
           </div>
         </div>

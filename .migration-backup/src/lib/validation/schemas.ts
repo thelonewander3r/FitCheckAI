@@ -35,17 +35,18 @@ export const IntakeSchema = z.object({
   jobDescription: z
     .string()
     .min(20, "Job description must be at least 20 characters"),
-  interviewStage: z.enum(INTERVIEW_STAGES),
-  interviewFormat: z.enum(INTERVIEW_FORMATS),
+  interviewStage: z.enum(INTERVIEW_STAGES).default("first-round"),
+  interviewFormat: z.enum(INTERVIEW_FORMATS).default("onsite"),
   /** ISO 8601 date or datetime string */
   interviewDate: z
     .string()
     .regex(
       /^\d{4}-\d{2}-\d{2}/,
       "interviewDate must be an ISO date string (YYYY-MM-DD…)",
-    ),
-  budget: z.number().positive("Budget must be a positive number"),
-  stylePreference: z.enum(STYLE_PREFERENCES),
+    )
+    .optional(),
+  budget: z.number().positive("Budget must be a positive number").optional(),
+  stylePreference: z.enum(STYLE_PREFERENCES).default("classic"),
   candidateName: z.string().optional(),
   fitSize: z.string().max(20).optional(),
   weightLbs: z.number().positive().max(1000).optional(),

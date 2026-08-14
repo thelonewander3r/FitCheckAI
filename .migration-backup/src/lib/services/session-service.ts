@@ -3,6 +3,7 @@ import { OUTFIT_TEMPLATES } from "@/lib/outfits/templates";
 import { selectTopOutfits } from "@/lib/outfits/ranking";
 import { generatePreparationPlan } from "@/lib/prep/plan-generator";
 import { runApparelVto } from "@/lib/youcam/apparel-vto";
+import { MockYouCamProvider } from "@/lib/youcam/mock-provider";
 import { runSkinAnalysis } from "@/lib/youcam/skin-analysis";
 import {
   YouCamApiError,
@@ -200,8 +201,12 @@ export async function tryOnOutfit(
     if (live) {
       throw err;
     }
-    // Mock mode: fail soft with an empty mock result.
-    vtoResult = { renderedImageUrl: "", isMock: true, processingTimeMs: 0 };
+    // Mock mode must always leave a visible preview behind, even if a local
+    // provider call is interrupted or receives an unusual image payload.
+    vtoResult = await new MockYouCamProvider().generateApparelTryOn({
+      userImageBase64: userImage,
+      garmentAssetId: outfitId,
+    });
   }
 
   const updated = await storeUpdate(id, (curr) => ({

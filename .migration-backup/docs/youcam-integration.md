@@ -1,9 +1,25 @@
 # YouCam Integration Guide
 
-InterviewReady AI integrates with two YouCam APIs:
+FitCheck AI integrates with two YouCam APIs:
 
-- **Skin AI** — cosmetic appearance analysis from a candidate photo
-- **Apparel Virtual Try-On (VTO)** — renders a garment asset onto a user photo
+- **Skin AI** — cosmetic appearance analysis from an optional user photo
+- **AI Clothes Virtual Try-On (VTO)** — renders a garment reference onto a user photo
+
+YouCam supplies the visual analysis and rendering layer. It does **not** infer a
+user's situation, discover their wardrobe, or compose a multi-piece outfit from
+inventory; those decisions belong to FitCheck AI's situation inference and
+wardrobe composer.
+
+Official references:
+
+- [AI Skin Analysis](https://docs.perfectcorp.com/reference/ai_skin_analysis)
+- [AI Clothes Virtual Try-On](https://docs.perfectcorp.com/reference/ai_clothes)
+
+The current product path therefore stays wardrobe-first: infer a broad context
+from the user's text, compose from saved wardrobe pieces, and use YouCam only
+when a user photo and valid visual input are available. A future shopping flow
+can provide garment reference images for AI Clothes VTO; the current built-in
+templates do not yet have that ingestion path.
 
 ---
 
@@ -97,9 +113,9 @@ export interface ApparelTryOnResult {
 
 ## Live Provider Status
 
-`src/lib/youcam/live-provider.ts` contains the live implementation. It uses the current Perfect Corp transport flow: upload a base64 image, create a task, poll for completion, map the response into the app types, and validate result URLs. Skin AI uses the skin-analysis task; Apparel VTO uses the cloth-v4 task. The implementation uses `fetch` and Bearer authentication without logging credentials, IDs, signed URLs, or image payloads.
+The live provider uses the current Perfect Corp transport flow: upload a base64 image, create a task, poll for completion, map the response into the app types, and validate result URLs. Skin AI uses the skin-analysis task; Apparel VTO uses the cloth-v4 task. The implementation uses `fetch` and Bearer authentication without logging credentials, IDs, signed URLs, or image payloads.
 
-The live provider has unit coverage with mocked HTTP responses, but it has **not** had a credentialed smoke test. Mock mode remains the verified/default submission path.
+The live provider has unit coverage with mocked HTTP responses. A credentialed local smoke test has also verified the full Skin AI path through FitCheck AI: metadata creation, signed upload, task creation, polling through success, session creation, and mapped non-mock results. Live Apparel VTO remains intentionally unverified because garment reference-image ingestion is not yet part of the default product flow. Mock mode remains the reliable/default submission path.
 
 ## Live Requirements and Caveats
 

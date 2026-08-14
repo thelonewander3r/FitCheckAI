@@ -1,6 +1,6 @@
 # Privacy & Safety Policy
 
-InterviewReady AI is a **cosmetic appearance guidance tool**. It does not diagnose medical conditions, predict hiring outcomes, or make inferences about a person's identity.
+FitCheck AI is a **cosmetic appearance guidance tool**. It does not diagnose medical conditions, predict hiring outcomes, or make inferences about a person's identity.
 
 ---
 
@@ -68,7 +68,7 @@ This text is exported as `COSMETIC_DISCLAIMER` from `src/lib/safety/skin-safety.
 
 ## Disallowed Outputs
 
-The following outputs are **never** permitted from any component of InterviewReady AI:
+The following outputs are **never** permitted from any component of FitCheck AI:
 
 1. **Medical diagnoses or treatment recommendations** of any kind
 2. **Statements about a candidate's likelihood of being hired** based on appearance
@@ -89,13 +89,13 @@ The following disclaimer must appear on every page that displays Skin AI output 
 
 Additional footer disclaimer (rendered in the app footer):
 
-> *"InterviewReady AI — outfit guidance only, not professional styling or medical advice."*
+> *"FitCheck AI — outfit guidance only, not professional styling or medical advice."*
 
 ---
 
 ## No Hiring Predictions
 
-InterviewReady AI explicitly does **not**:
+FitCheck AI explicitly does **not**:
 
 - Predict interview success or failure based on appearance
 - Score candidates against employer "preferences"
@@ -108,4 +108,4 @@ The dress-code inference engine provides guidance based on broad industry and fo
 
 ## Responsible Use
 
-Recruiters, hiring managers, or any party involved in hiring decisions must not use InterviewReady AI output as part of a hiring evaluation. This tool is intended solely for use by the **candidate themselves** to prepare for their own interview.
+Recruiters, hiring managers, or any party involved in hiring decisions must not use FitCheck AI output as part of a hiring evaluation. This tool is intended solely for use by the **candidate themselves** to prepare for their own interview.

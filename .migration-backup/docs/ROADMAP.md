@@ -1,126 +1,96 @@
-# InterviewReady AI — Product Roadmap (2026-08-11)
+# FitCheck AI — Product Roadmap
 
 ## North star
 
-InterviewReady AI becomes a **personal AI stylist for any occasion**: it knows
-*who you are* (body, skin tone, style, culture context), knows *what you own*
-(the wardrobe), and knows *where you are going* (venue/event), then recommends
-the best outfit — with alternatives — and keeps getting better as you use it.
+FitCheck AI helps someone decide what to wear for a real situation using the
+wardrobe they already own. The user should provide as little as possible: a
+plain-language description of where they are going. FitCheck infers a broad
+context, composes a coherent outfit from saved pieces, explains the tradeoffs,
+and improves as the user marks looks worn.
 
-The interview flow stays as the flagship demo (and the first use case), but the
-scope extends past interviews to events, themed occasions, and day-to-day
-dressing.
+The interview flow remains a focused use case and hackathon demo, not the
+product boundary.
 
 ## Principles
 
-- **Person-first:** recommendations adjust to body/weight, skin tone, gender
-  presentation (female-forward by default per product direction), and company
-  or venue culture — not just industry keywords.
-- **Wardrobe-first:** a recommendation is only useful if it can be built from
-  what the user owns. Gap-filling is a first-class output ("you need a
-  structured blazer — here is one in budget").
-- **Occasion-aware:** every recommendation starts from event type + theme +
-  location, with a light online lookup for venue/company culture signals.
-- **Capture once, use forever:** image upload builds the wardrobe piece by
-  piece; a later video pass auto-populates it from a closet walkthrough.
-- **Simplicity is the product:** fewer questions, fewer uploads, more leverage.
-  Favorites and history reduce repeat work.
+- **Wardrobe-first:** recommend what the user owns before suggesting purchases.
+- **Situation-aware:** infer useful context from one sentence plus lightweight
+  venue/context signals.
+- **Low-input:** stage, format, presentation, budget, and demographic inputs are
+  not required for the initial check.
+- **Private by default:** do not infer skin tone or demographics from images;
+  image-based YouCam features remain optional.
+- **Explain the gap:** show what is missing from the current wardrobe without
+  turning the first experience into a shopping funnel.
+- **Shopping later:** when purchase recommendations are added, they should be
+  a separate phase with explicit garment references and user control.
 
 ---
 
-## Phase 0 — Person profile (personalization inputs)
+## Phase 0 — Situation-first intake
 
-Unlocks every later phase. Cheap, incremental on the existing intake.
+**Status: SHIPPED.** The primary occasion flow now asks for one required
+situation sentence and one optional note. The server infers a broad occasion
+type from the text and applies curated context rules. The old event-type,
+stage, format, presentation, skin-tone, and budget questions are not rendered;
+legacy interview payloads remain accepted with safe defaults for compatibility.
 
-- Add to intake: **body type / size + weight** (fit scoring), **skin tone**
-  (optional manual picker), **gender/presentation** (female-forward default;
-  templates already partly female-oriented — make it explicit), **company
-  culture** (from job description + light web lookup of the company for
-  dress-culture signals, e.g. startup vs. bank).
-- Thread person attributes into `ranking.ts` scoring (fit, color flattery,
-  culture-adjusted formality) and into the VTO mock (tint/label uses
-  recommended palette).
-- Do not infer skin tone or demographics from uploaded images; any future
-  personalization must remain user-provided or use non-demographic signals.
+## Phase 1 — Wardrobe module
 
-**Exit criteria:** changing weight/skin tone/culture visibly changes the
-top-3 and the palette, with tests.
+**Status: SHIPPED / ACTIVE.** Users can add structured wardrobe pieces with
+images and quick attributes. The composer builds complete looks from owned tops,
+bottoms, dresses, outerwear, shoes, and accessories, then reports wardrobe
+gaps when a full combination is not possible.
 
-## Phase 1 — Wardrobe module (the core new component)
+Next improvements:
 
-The heart of the pivot. The app learns what you own.
+- make adding a piece faster on mobile;
+- allow editing and correcting inferred garment attributes;
+- let users favorite looks and mark them worn;
+- use worn history to improve color, category, and formality preferences.
 
-- **Data:** `WardrobeItem` — image (reuse downscale pipeline), category
-  (tops, bottoms, dresses, outerwear, shoes, accessories), color, formality
-  level, season, fit/size, favorite flag, acquired date.
-- **Capture:** piece-by-piece image upload with quick attribute tagging
-  (2–3 taps per item). API + UI under a "My Wardrobe" section.
-- **Composition:** given a context (interview/event/venue), compose full
-  outfits from owned pieces (rules on category/color/formality compatibility),
-  fall back to template suggestions for gaps. Outfit templates become
-  composition rules, not literal garment lists.
-- **Favorites:** star outfits; favorites reused across future occasions.
-- **Design for video later:** garment attributes must be structured so a
-  future vision pass can write them directly.
+## Phase 2 — Context and outfit checking
 
-**Open decision:** keep the file-based store for wardrobe MVP, or wire the
-Prisma/SQLite adapter now (real entities, queryable, migration path).
-**Decision (2026-08-11):** build wardrobe MVP on the file-store pattern
-(`.data/wardrobe.json`, same atomic/lock store as sessions) for zero native
-dependencies and demo velocity; the `WardrobeItem` type is structured so a
-Prisma/SQLite swap stays mechanical when the data model stabilizes.
+**Status: SHIPPED.** Occasion results combine inferred event type, curated venue
+signals, dress-code level, palette, and wardrobe composition. The result page
+presents the whole outfit first, then alternatives and wardrobe gaps.
 
-## Phase 2 — Occasion / venue intelligence
+Next improvements:
 
-**Status: SHIPPED (2026-08-11)** — occasion flow live: event type + venue name
-→ mock venue lookup (curated/keyword/event-default, formality floored at
-event-type level, word-boundary matching, live stub behind `VENUE_MODE`) →
-wardrobe composition with venue dress code + palette. Known limits: season is
-hardcoded "any"; theme is a hint, not a level input; venue lookup is mock-only.
+- replace deterministic keyword inference with a bounded language-model or
+  structured classifier when a reliable provider is available;
+- add weather and time-of-day only when they materially change the outfit;
+- show confidence and ask one follow-up only when the situation is ambiguous.
 
-- Intake becomes **occasion input**: event type (interview, gala, dinner,
-  casual outing, wedding…), theme (if any), location/venue name.
-- **Online lookup:** light web/place search for the venue/company (vibe,
-  dress code hints, photos) → "Event Context Engine" (same shape as the
-  existing interview context engine) producing dress code + palette +
-  culture-adjusted formality.
-- Output: best outfit from wardrobe + 2–3 alternatives, each with a
-  why-selected line.
+## Phase 3 — YouCam visual layer
 
-**Exit criteria:** picking "rooftop bar, The Rooftop at 123 Main" yields a
-distinct recommendation from "client meeting, bank HQ", with a cited venue
-signal.
+**Status: PARTIAL.** Skin AI is integrated and credentialed-tested locally.
+Mock mode provides a deterministic visual result. AI Clothes VTO is integrated
+behind the provider boundary, but live use requires both a user image and a
+clothing reference image; the default built-in templates do not yet ingest
+those garment assets.
 
-## Phase 3 — Outfit history & learning (fast-follow)
+## Phase 4 — Shopping and garment references
 
-**Status: SHIPPED (2026-08-11)** — mark outfits as worn from occasion pages;
-worn records persist, a style profile (top colors/categories, typical
-formality) is derived, and the composer applies bounded preference bonuses so
-recommendations learn. "Outfit of the day" calendar suggestion still a
-fast-follow.
+**Future.** Add a separate section for buying an outfit or filling a wardrobe
+gap. Each candidate product must provide a real garment reference image before
+live AI Clothes VTO can be used. This phase must not replace the wardrobe-first
+recommendation or silently turn a gap into a purchase.
 
-## Phase 4 — Video capture (later, high leverage)
+## Phase 5 — Capture and learning
 
-- User records a closet walkthrough (phone video) → vision pass detects and
-  classifies garments → auto-creates `WardrobeItem`s for review.
-- Same video pipeline can refresh/retire items (sold, worn out).
-- Requires a real vision model / API (YouCam live, or another provider);
-  design in Phase 1 so this can feed the same store.
+**Future.** Support closet walkthrough capture, garment detection with review,
+seasonal archive/retire actions, and stronger outfit history. Any vision pass
+must write into the same structured wardrobe store and require user review.
 
 ---
 
-## What does NOT change
+## What does not change
 
-- Mock-first: everything runs credential-free in mock mode; live providers
-  (YouCam, venue lookup, vision) slot in behind the existing provider
-  abstractions.
-- Safety layer stays: cosmetic-only, no medical/hiring claims.
-- Interview flow remains the polished demo path (hackathon submission), now
-  feeding the same wardrobe/person profile.
-
-## Immediate next slice (recommended)
-
-**P0 + P1**: person profile fields + wardrobe module with piece-by-piece
-image capture and wardrobe-aware composition, interview flow updated to use
-them. That makes the pivot real end-to-end; P2 (venue lookup) is a fun,
-standalone demo addition on top.
+- Mock mode remains credential-free and the reliable public demo path.
+- YouCam is used for optional visual analysis/rendering, not situation inference
+  or wardrobe discovery.
+- Safety remains cosmetic-only: no medical claims, hiring predictions, or
+  demographic inference.
+- The MVP continues to use local file stores; production auth, TTL, and
+  multi-user isolation remain separate work.

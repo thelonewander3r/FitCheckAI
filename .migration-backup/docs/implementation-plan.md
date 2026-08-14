@@ -1,4 +1,4 @@
-# Implementation Plan — InterviewReady AI
+# Implementation Plan — FitCheck AI
 
 ## Current status
 

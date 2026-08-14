@@ -8,37 +8,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
-import type { IntakeInput } from "@/lib/validation/schemas";
 import { downscaleToBase64 } from "@/lib/client/image-utils";
 
-type FormState = Omit<
-  IntakeInput,
-  "budget" | "weightLbs" | "skinTone" | "companyCulture" | "presentation"
-> & {
-  budget: string;
-  weightLbs: string;
-  skinTone: string;
-  companyCulture: string;
-  presentation: "" | "feminine" | "masculine" | "neutral";
-};
+interface FormState {
+  jobTitle: string;
+  companyName: string;
+  industry: string;
+  jobDescription: string;
+  interviewDate: string;
+  candidateName: string;
+  fitSize: string;
+}
 
 const EMPTY_FORM: FormState = {
   jobTitle: "",
   companyName: "",
   industry: "",
   jobDescription: "",
-  interviewStage: "first-round",
-  interviewFormat: "onsite",
   interviewDate: "",
-  budget: "",
-  stylePreference: "classic",
   candidateName: "",
   fitSize: "",
-  weightLbs: "",
-  skinTone: "",
-  presentation: "",
-  companyCulture: "",
 };
 
 export default function InterviewPage() {
@@ -99,9 +88,6 @@ export default function InterviewPage() {
     if (!form.companyName.trim()) newErrors.companyName = "Required";
     if (form.jobDescription.trim().length < 20)
       newErrors.jobDescription = "At least 20 characters";
-    if (!form.interviewDate) newErrors.interviewDate = "Required";
-    const budget = parseFloat(form.budget);
-    if (isNaN(budget) || budget <= 0) newErrors.budget = "Enter a positive number";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -114,28 +100,14 @@ export default function InterviewPage() {
     setSubmitError(null);
 
     try {
-      const weightParsed = form.weightLbs ? parseFloat(form.weightLbs) : NaN;
       const payload = {
-        ...form,
-        budget: parseFloat(form.budget),
-        industry: form.industry || undefined,
-        candidateName: form.candidateName || undefined,
-        fitSize: form.fitSize || undefined,
-        weightLbs:
-          !isNaN(weightParsed) && weightParsed > 0 ? weightParsed : undefined,
-        skinTone: (form.skinTone || undefined) as IntakeInput["skinTone"],
-        presentation: (form.presentation || undefined) as
-          | "feminine"
-          | "masculine"
-          | "neutral"
-          | undefined,
-        companyCulture: (form.companyCulture || undefined) as
-          | "corporate"
-          | "startup"
-          | "creative"
-          | "client-facing"
-          | "government"
-          | undefined,
+        jobTitle: form.jobTitle.trim(),
+        companyName: form.companyName.trim(),
+        industry: form.industry.trim() || undefined,
+        jobDescription: form.jobDescription.trim(),
+        interviewDate: form.interviewDate || undefined,
+        candidateName: form.candidateName.trim() || undefined,
+        fitSize: form.fitSize.trim() || undefined,
         imageBase64,
       };
 
@@ -169,7 +141,7 @@ export default function InterviewPage() {
             href="/"
             className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors"
           >
-            InterviewReady AI
+            FitCheck AI
           </Link>
         </div>
       </header>
@@ -179,11 +151,11 @@ export default function InterviewPage() {
 
         <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
           <h1 className="font-serif text-2xl font-semibold text-[#0f2744] mb-1">
-            Your interview details
+            What are you dressing for?
           </h1>
           <p className="text-sm text-[#718096] mb-8">
-            Tell us about the role and your preferences so we can tailor outfit
-            recommendations for you.
+            Give us the role and job description. We infer the dress context
+            and keep the rest of the intake lightweight.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -201,7 +173,7 @@ export default function InterviewPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="interviewDate">Interview date *</Label>
+                <Label htmlFor="interviewDate">Interview date (optional)</Label>
                 <Input
                   id="interviewDate"
                   name="interviewDate"
@@ -276,154 +248,14 @@ export default function InterviewPage() {
               )}
             </div>
 
-            {/* Interview specifics */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="interviewFormat">Interview format</Label>
-                <Select
-                  id="interviewFormat"
-                  name="interviewFormat"
-                  value={form.interviewFormat}
-                  onChange={handleChange}
-                  options={[
-                    { value: "video", label: "Video call" },
-                    { value: "onsite", label: "On-site" },
-                    { value: "recruiter", label: "Recruiter screen" },
-                    { value: "hiring-manager", label: "Hiring manager" },
-                    { value: "executive", label: "Executive panel" },
-                  ]}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="interviewStage">Interview stage</Label>
-                <Select
-                  id="interviewStage"
-                  name="interviewStage"
-                  value={form.interviewStage}
-                  onChange={handleChange}
-                  options={[
-                    { value: "phone-screen", label: "Phone screen" },
-                    { value: "first-round", label: "First round" },
-                    { value: "onsite", label: "On-site" },
-                    { value: "final", label: "Final round" },
-                    { value: "other", label: "Other" },
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="budget">Outfit budget (USD) *</Label>
-                <Input
-                  id="budget"
-                  name="budget"
-                  type="number"
-                  min="1"
-                  step="10"
-                  value={form.budget}
-                  onChange={handleChange}
-                  placeholder="e.g. 200"
-                  className={errors.budget ? "border-red-400" : ""}
-                />
-                {errors.budget && (
-                  <p className="text-xs text-red-500">{errors.budget}</p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="stylePreference">Style preference</Label>
-                <Select
-                  id="stylePreference"
-                  name="stylePreference"
-                  value={form.stylePreference}
-                  onChange={handleChange}
-                  options={[
-                    { value: "classic", label: "Classic" },
-                    { value: "modern", label: "Modern" },
-                    { value: "minimal", label: "Minimal" },
-                    { value: "creative", label: "Creative" },
-                  ]}
-                />
-              </div>
-            </div>
-
-            {/* Person profile */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="fitSize">Fit size (optional)</Label>
-                <Input
-                  id="fitSize"
-                  name="fitSize"
-                  value={form.fitSize ?? ""}
-                  onChange={handleChange}
-                  placeholder="e.g. US 6 or M"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="weightLbs">Weight (lbs, optional)</Label>
-                <Input
-                  id="weightLbs"
-                  name="weightLbs"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={form.weightLbs}
-                  onChange={handleChange}
-                  placeholder="e.g. 140"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="skinTone">Skin tone (optional)</Label>
-                <Select
-                  id="skinTone"
-                  name="skinTone"
-                  value={form.skinTone}
-                  onChange={handleChange}
-                  options={[
-                    { value: "", label: "Prefer not to say" },
-                    { value: "fair", label: "Fair" },
-                    { value: "light", label: "Light" },
-                    { value: "medium", label: "Medium" },
-                    { value: "tan", label: "Tan" },
-                    { value: "deep", label: "Deep" },
-                  ]}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="presentation">Presentation</Label>
-                <Select
-                  id="presentation"
-                  name="presentation"
-                  value={form.presentation}
-                  onChange={handleChange}
-                  options={[
-                    { value: "", label: "Prefer not to say" },
-                    { value: "feminine", label: "Feminine" },
-                    { value: "masculine", label: "Masculine" },
-                    { value: "neutral", label: "Neutral" },
-                  ]}
-                />
-              </div>
-            </div>
-
             <div className="space-y-1.5">
-              <Label htmlFor="companyCulture">Company culture (optional)</Label>
-              <Select
-                id="companyCulture"
-                name="companyCulture"
-                value={form.companyCulture}
+              <Label htmlFor="fitSize">Fit size (optional)</Label>
+              <Input
+                id="fitSize"
+                name="fitSize"
+                value={form.fitSize}
                 onChange={handleChange}
-                options={[
-                  { value: "", label: "Auto (from industry)" },
-                  { value: "corporate", label: "Corporate" },
-                  { value: "startup", label: "Startup" },
-                  { value: "creative", label: "Creative" },
-                  { value: "client-facing", label: "Client-facing" },
-                  { value: "government", label: "Government" },
-                ]}
+                placeholder="e.g. US 6 or M"
               />
             </div>
 
@@ -431,9 +263,10 @@ export default function InterviewPage() {
             <div className="space-y-1.5">
               <Label>Photo (optional)</Label>
               <p className="text-xs text-[#718096]">
-                Upload a selfie to enable personalised skin analysis and virtual
-                try-on. Stored in the local session store and may remain until
-                local data is cleared.
+                Optional: upload a photo for YouCam-powered skin analysis and a
+                visual try-on. The photo is not used to infer demographic traits.
+                Stored in the local session store and may remain until local data
+                is cleared.
               </p>
               <div
                 className="flex items-center gap-3 rounded-lg border border-dashed border-[#c3ccd6] bg-[#f4f6f8] p-4 cursor-pointer hover:border-[#2a6f7f] transition-colors"

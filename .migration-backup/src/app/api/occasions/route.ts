@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createOccasion } from "@/lib/services/occasion-service";
+import { inferOccasionType } from "@/lib/occasion/inference";
 import { OCCASION_TYPES } from "@/types/occasion";
 
 const OccasionIntakeSchema = z.object({
-  eventType: z.enum(OCCASION_TYPES),
-  venueName: z.string().trim().min(1, "Venue name is required").max(200),
+  eventType: z.enum(OCCASION_TYPES).optional(),
+  venueName: z.string().trim().min(1, "Situation is required").max(200),
   theme: z.string().max(200).optional(),
+  // Kept optional for old links/API clients; the new UI does not ask for it.
   location: z.string().max(200).optional(),
   eventDate: z.string().max(32).optional(),
-  presentation: z.enum(["feminine", "masculine", "neutral"]).optional(),
-  skinTone: z.enum(["fair", "light", "medium", "tan", "deep"]).optional(),
 });
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -30,7 +30,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const occasion = await createOccasion(parsed.data);
+    const inferredEventType =
+      parsed.data.eventType ??
+      inferOccasionType(
+        [parsed.data.venueName, parsed.data.theme, parsed.data.location]
+          .filter(Boolean)
+          .join(" "),
+      );
+    const occasion = await createOccasion({
+      ...parsed.data,
+      eventType: inferredEventType,
+    });
     return NextResponse.json({ occasionId: occasion.id }, { status: 201 });
   } catch (err) {
     console.error(

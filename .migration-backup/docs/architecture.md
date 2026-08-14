@@ -2,7 +2,7 @@
 
 ## Overview
 
-InterviewReady AI is a Next.js 16 (App Router) application. The server handles session creation and analysis; the client renders results and drives the try-on / plan flow.
+FitCheck AI is a Next.js 16 (App Router) application. The server handles situation checks, wardrobe composition, and legacy interview sessions; the client renders results and drives the try-on / plan flow.
 
 ---
 
@@ -78,7 +78,7 @@ POST /api/sessions
         │     └── returns InterviewContext { dressCode, recommendedColors, avoidPatterns, … }
         │
         ├─► selectTopOutfits()
-        │     ├── score each OutfitTemplate against context + budget + format
+        │     ├── score each OutfitTemplate against context + wardrobe history
         │     └── return top 3 RankedOutfit[]
         │
         └─► YouCam Skin AI (mock or live)
