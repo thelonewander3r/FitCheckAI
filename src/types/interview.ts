@@ -103,8 +103,8 @@ export interface IntakePayload {
   interviewStage: InterviewStage;
   interviewFormat: InterviewFormat;
   /** ISO date string */
-  interviewDate: string;
-  budget: number;
+  interviewDate?: string;
+  budget?: number;
   stylePreference: StylePreference;
   candidateName?: string;
   fitSize?: string;

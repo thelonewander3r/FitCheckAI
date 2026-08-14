@@ -27,6 +27,22 @@ describe('IntakeSchema — valid payloads', () => {
     expect(result.success).toBe(true)
   })
 
+  it('accepts a minimal situation-first payload and applies defaults', () => {
+    const result = IntakeSchema.safeParse({
+      jobTitle: 'Software Engineer',
+      companyName: 'Acme Corp',
+      jobDescription: 'Build and maintain web applications in a collaborative team.',
+      interviewDate: '2026-09-01',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.interviewStage).toBe('first-round')
+      expect(result.data.interviewFormat).toBe('onsite')
+      expect(result.data.stylePreference).toBe('classic')
+      expect(result.data.budget).toBeUndefined()
+    }
+  })
+
   it('accepts an optional candidateName field', () => {
     const result = IntakeSchema.safeParse({ ...DEMO_SCENARIO, candidateName: 'Jordan' })
     expect(result.success).toBe(true)
@@ -146,10 +162,10 @@ describe('IntakeSchema — invalid payloads', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejects a missing required field (budget)', () => {
+  it('accepts a payload without a budget', () => {
     const rest = { ...DEMO_SCENARIO } as Partial<typeof DEMO_SCENARIO>
     delete rest.budget
     const result = IntakeSchema.safeParse(rest)
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 })

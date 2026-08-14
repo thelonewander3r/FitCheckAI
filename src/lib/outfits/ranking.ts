@@ -146,6 +146,7 @@ function buildExplanation(
   scores: OutfitScores,
   context: InterviewContext,
   interviewFormat: InterviewFormat,
+  budget?: number,
 ): string {
   const parts: string[] = [];
 
@@ -163,12 +164,14 @@ function buildExplanation(
     parts.push(`A jacket is recommended for this context — this outfit includes one.`);
   }
 
-  if (scores.budgetFit < 80) {
-    parts.push(
-      `This outfit is slightly above your stated budget (budget fit: ${scores.budgetFit}/100).`,
-    );
-  } else {
-    parts.push(`This outfit fits comfortably within your budget.`);
+  if (budget !== undefined) {
+    if (scores.budgetFit < 80) {
+      parts.push(
+        `This outfit is slightly above your stated budget (budget fit: ${scores.budgetFit}/100).`,
+      );
+    } else {
+      parts.push(`This outfit fits comfortably within your budget.`);
+    }
   }
 
   parts.push(
@@ -185,7 +188,7 @@ function buildExplanation(
 export function rankOutfits(
   templates: OutfitTemplate[],
   context: InterviewContext,
-  budget: number,
+  budget: number | undefined,
   interviewFormat: InterviewFormat,
   person?: PersonProfile,
 ): RankedOutfit[] {
@@ -198,7 +201,8 @@ export function rankOutfits(
         outfit,
         interviewFormat,
       );
-      const budgetFit = scoreBudgetFit(outfit.estimatedPrice, budget);
+      const budgetFit =
+        budget === undefined ? 100 : scoreBudgetFit(outfit.estimatedPrice, budget);
       const versatility = Math.round(outfit.baseVersatility);
       const cameraReadiness = Math.round(outfit.baseCameraReadiness);
 
@@ -224,7 +228,13 @@ export function rankOutfits(
       return {
         ...outfit,
         scores,
-        explanation: buildExplanation(outfit, scores, context, interviewFormat),
+        explanation: buildExplanation(
+          outfit,
+          scores,
+          context,
+          interviewFormat,
+          budget,
+        ),
         ...(fitNote ? { fitNote } : {}),
       };
     })
@@ -234,7 +244,7 @@ export function rankOutfits(
 export function selectTopOutfits(
   templates: OutfitTemplate[],
   context: InterviewContext,
-  budget: number,
+  budget: number | undefined,
   interviewFormat: InterviewFormat,
   count = 3,
   person?: PersonProfile,

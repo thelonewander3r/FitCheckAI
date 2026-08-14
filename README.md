@@ -1,15 +1,19 @@
-# InterviewReady AI
+# FitCheck AI
 
-**Walk into your interview dressed for the role.**
+**Know what to wear, using what you own.**
 
-InterviewReady AI analyses your job description, infers the expected dress code, recommends tailored outfits with virtual try-ons, and generates a day-by-day preparation plan — all powered by YouCam's Skin AI and Apparel VTO APIs.
+FitCheck AI checks a complete outfit against a real situation. The user describes
+where they are going in one sentence, the app infers a broad dress context, and
+its wardrobe composer recommends coherent looks from pieces already owned. The
+interview flow remains available as a focused mode, while shopping and garment
+purchasing are intentionally deferred to a later phase.
 
 ---
 
 ## Hackathon Context
 
 Built for the **[YouCam API Skin AI & Apparel VTO Hackathon](https://youcam.com)**.  
-This project demonstrates how YouCam's cosmetic and fashion AI APIs can reduce interview anxiety by giving candidates clear, actionable appearance guidance before a high-stakes interview.
+This project demonstrates how YouCam's cosmetic and fashion AI APIs can support a practical, wardrobe-first outfit check: the app handles situation inference and closet composition, while YouCam adds optional Skin AI guidance and visual try-on when valid image inputs are available.
 
 ---
 
@@ -24,30 +28,30 @@ This project demonstrates how YouCam's cosmetic and fashion AI APIs can reduce i
 ## Architecture Overview
 
 ```
-Candidate fills intake form
+Describe the situation in one sentence
        │
        ▼
 Next.js App Router  ─────────────────────────────────────────┐
-  /api/sessions (POST)                                        │
+  /api/occasions (POST)                                       │
        │                                                      │
-       ├─► Interview Context Engine                           │
-       │     ├── Keyword-based industry inference             │
-       │     ├── Formality level resolution                   │
+       ├─► Situation Inference                                │
+       │     ├── Plain-language occasion classification       │
+       │     ├── Curated venue/context rules                  │
        │     └── Dress-code + colour recommendations          │
        │                                                      │
-       ├─► Outfit Ranking Engine                              │
-       │     ├── Templates scored: role fit, format,          │
-       │     │   budget, versatility, camera readiness        │
-       │     └── Top 3 returned to UI                         │
+       ├─► Wardrobe Composer                                 │
+       │     ├── Existing pieces + worn-style history        │
+       │     ├── Formality / palette compatibility            │
+       │     └── Complete looks + wardrobe gaps               │
        │                                                      │
        ├─► YouCam Provider (mock or live)                     │
        │     ├── Skin AI  → cosmetic prep notes               │
-       │     └── Apparel VTO → rendered outfit preview        │
+       │     └── AI Clothes VTO → visual garment preview      │
        │                                                      │
        ├─► Safety layer                                       │
        │     └── Strips medical/hiring language from output   │
        │                                                      │
-       └─► Session Store (file-based .data/sessions.json)     │
+       └─► File-based stores (.data/*)                        │
              └── Prisma schema/migrations exist; runtime use is deferred ─┘
 ```
 
@@ -111,15 +115,15 @@ By default the app runs in **mock mode** — no YouCam API keys are required. Th
 npm run dev
 ```
 
-Skin AI, Apparel VTO, and venue lookup use deterministic mock data. The mock badge appears in the top-right of each page. Image upload is implemented for the interview selfie and wardrobe pieces; uploads are downscaled before use.
+Skin AI, AI Clothes VTO, and situation lookup use deterministic mock data. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
 
-Visit [`http://localhost:3000`](http://localhost:3000) and click **Load demo scenario** to see the full flow instantly.
+Start at [`http://localhost:3000`](http://localhost:3000) and choose **Check my outfit** to describe a situation in one sentence, or click **Load demo scenario** to see the full interview-focused flow instantly.
 
 ---
 
 ## Live YouCam Integration
 
-> **Status:** `LiveYouCamProvider` is implemented with authenticated upload/task polling, but it has not had a credentialed smoke test. Keep mock mode as the verified demo path.
+> **Status:** `LiveYouCamProvider` is implemented with authenticated upload/task polling. A credentialed local smoke test verified the full live Skin AI path; mock mode remains the reliable/default demo path.
 
 1. Obtain credentials from the YouCam developer portal.
 2. Set environment variables in `.env.local`:
@@ -148,12 +152,13 @@ See [`docs/privacy-and-safety.md`](docs/privacy-and-safety.md) for the full poli
 
 ## Known Limitations
 
-- **Mock mode is the verified/default demo path.** Live YouCam provider code is implemented, but no credentialed smoke test has been completed.
-- **Live Apparel VTO needs garment reference images.** The current built-in outfit templates and try-on route do not ingest or submit those assets.
-- **Live venue lookup is deferred.** The app uses the mock venue provider; the live provider intentionally fails closed until a real venue API is configured.
+- **Mock mode is the reliable/default demo path.** Live Skin AI has been credentialed-tested locally; live Apparel VTO is intentionally not enabled in the default wardrobe flow.
+- **Live Apparel VTO needs garment reference images.** The current built-in outfit templates and try-on route do not ingest or submit those assets; a future shopping/garment flow will add that input.
+- **Situation inference is intentionally lightweight.** The current classifier uses plain-language keyword rules plus curated context data; it is not a general-purpose vision or LLM stylist.
+- **Live venue lookup is deferred.** The app uses curated mock context data; the live provider intentionally fails closed until a real venue API is configured.
 - **Video capture is deferred.** Video interview guidance exists, but the app does not capture or upload video.
 - **Prisma persistence is deferred.** The MVP uses `.data/sessions.json` and related file stores; Prisma schema/migrations are retained for a later adapter-backed migration.
-- **Outfit templates are static.** The six templates are hand-curated rather than pulled from a live garment catalogue.
+- **Outfit templates are static.** The six templates are hand-curated; wardrobe composition becomes more useful as users add pieces and worn history.
 
 ---
 

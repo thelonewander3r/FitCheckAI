@@ -13,28 +13,6 @@ import {
 import { formalityLevelToLabel, getVenueProvider } from "@/lib/venue";
 import type { OccasionIntake, OccasionSession } from "@/types/occasion";
 
-const FLATTERING_COLORS_BY_SKIN_TONE: Record<
-  NonNullable<OccasionIntake["skinTone"]>,
-  string[]
-> = {
-  fair: ["navy", "black", "white", "burgundy"],
-  light: ["navy", "charcoal", "sage", "cream"],
-  medium: ["navy", "olive", "rust", "cream"],
-  tan: ["black", "white", "gold", "deep green"],
-  deep: ["white", "emerald", "gold", "royal blue"],
-};
-
-function mergePalette(
-  venuePalette: string[],
-  skinTone?: OccasionIntake["skinTone"],
-): string[] {
-  const merged = [
-    ...venuePalette,
-    ...(skinTone ? FLATTERING_COLORS_BY_SKIN_TONE[skinTone] : []),
-  ].map((c) => c.toLowerCase());
-  return [...new Set(merged)];
-}
-
 export async function createOccasion(
   intake: OccasionIntake,
 ): Promise<OccasionSession> {
@@ -55,13 +33,12 @@ export async function createOccasion(
   }
   const profile = buildStyleProfile(wornRecords);
   const preferences = preferencesFromProfile(profile);
-  const palette = mergePalette(venue.palette, intake.skinTone);
+  const palette = [...new Set(venue.palette.map((c) => c.toLowerCase()))];
   const season = "any";
   const composed = composeOutfits(items, {
     formality: formalityLevelToLabel(venue.formalityLevel),
     palette,
     season,
-    presentation: intake.presentation ?? "neutral",
     preferences,
   });
 

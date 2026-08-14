@@ -119,7 +119,7 @@ export default function PlanPage({ params }: Props) {
             href="/"
             className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors"
           >
-            InterviewReady AI
+            FitCheck AI
           </Link>
           {isMockMode && (
             <Badge variant="outline" className="text-xs">

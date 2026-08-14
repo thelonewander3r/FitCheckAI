@@ -223,11 +223,8 @@ describe("tryOnOutfit live vs mock", () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     await tryOnOutfit(session.id, "outfit-001");
-    expect(stored).toEqual({
-      renderedImageUrl: "",
-      isMock: true,
-      processingTimeMs: 0,
-    });
+    expect(stored?.isMock).toBe(true);
+    expect(stored?.renderedImageUrl).toMatch(/^data:image\/svg\+xml;base64,/);
     errorSpy.mockRestore();
   });
 });

@@ -10,7 +10,7 @@ interface PlanInput {
   alternative: RankedOutfit;
   context: InterviewContext;
   interviewFormat: InterviewFormat;
-  interviewDate: string;
+  interviewDate?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ export function generatePreparationPlan(input: PlanInput): PreparationPlan {
   const { selected, alternative, context, interviewFormat, interviewDate } =
     input;
 
-  const daysAway = daysUntil(interviewDate);
+  const daysAway = interviewDate ? daysUntil(interviewDate) : 0;
 
   const fiveDayChecklist = buildFiveDayChecklist(selected, daysAway);
   const nightBeforeChecklist = buildNightBeforeChecklist(selected);

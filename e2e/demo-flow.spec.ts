@@ -47,8 +47,16 @@ test.describe('Demo flow', () => {
 
     // Outfit cards must load (the client fetches the session on mount)
     await expect(
-      page.getByText('Top 3 outfit recommendations', { exact: false }),
+      page.getByText('Recommendations are inferred from the role, context, and your wardrobe.', { exact: false }),
     ).toBeVisible({ timeout: 15_000 })
+
+    // Mock mode should still render a visible preview image.
+    await page.getByRole('button', { name: 'Virtual Try On' }).first().click()
+    const tryOnImage = page.getByTestId('try-on-image').first()
+    await expect(tryOnImage).toBeVisible({ timeout: 10_000 })
+    await expect
+      .poll(() => tryOnImage.evaluate((image) => (image as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0)
 
     // -----------------------------------------------------------------------
     // 5. Continue to Final Plan

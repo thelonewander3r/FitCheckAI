@@ -209,7 +209,7 @@ export default function TryOnPage({ params }: Props) {
             href="/"
             className="font-serif text-base font-semibold text-[#0f2744] hover:text-[#2a6f7f] transition-colors"
           >
-            InterviewReady AI
+            FitCheck AI
           </Link>
           {session.isMockMode && (
             <Badge variant="outline" className="text-xs">
@@ -227,8 +227,9 @@ export default function TryOnPage({ params }: Props) {
             Virtual Try-On
           </h1>
           <p className="mt-1 text-sm text-[#718096]">
-            Top 3 outfit recommendations ranked by role fit, format suitability,
-            and budget. Try on each one to preview, then select your favourite.
+            Recommendations are inferred from the role, context, and your
+            wardrobe. Try on each look to preview it, then select your
+            favourite.
           </p>
         </div>
 

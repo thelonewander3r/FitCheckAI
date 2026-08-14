@@ -7,8 +7,6 @@ const DEMO_OCCASION: OccasionIntake = {
   venueName: "Skyline Rooftop Bar",
   theme: "team celebration",
   location: "Downtown",
-  presentation: "feminine",
-  skinTone: "medium",
 };
 
 export async function POST(): Promise<NextResponse> {
