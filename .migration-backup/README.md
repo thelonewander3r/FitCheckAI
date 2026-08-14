@@ -105,6 +105,9 @@ cp .env.example .env.local
 
 | Variable | Required | Description |
 |---|---|---|
+| `VENUE_MODE` | No | Set to `openai` to enable optional OpenAI web research for concrete venue/location anchors; omit for deterministic mock context |
+| `OPENAI_API_KEY` | OpenAI research only | Server-side OpenAI API key; never expose it to the browser |
+| `OPENAI_WEB_SEARCH_MODEL` | No | OpenAI model used with the Responses web-search tool; defaults to `gpt-4o-mini` |
 | `YOUCAM_MODE` | No | Set to `live` to enable live YouCam calls; omit (or use any other value) for mock mode |
 | `YOUCAM_API_KEY` | Live only | Your YouCam API key |
 | `YOUCAM_BASE_URL` | No | Live API base URL; defaults to the official Perfect Corp host when omitted |
@@ -120,9 +123,9 @@ By default the app runs in **mock mode** — no YouCam API keys are required. Th
 npm run dev
 ```
 
-Skin AI, AI Clothes VTO, and event context lookup use deterministic mock data. Sparse event prompts reveal follow-up questions for location, dress code, and optional color guidance. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
+Skin AI, AI Clothes VTO, and event context lookup use deterministic mock data by default. If `VENUE_MODE=openai` is configured, concrete venue/location anchors can use a bounded OpenAI web-search request and store only structured style context plus up to three source URLs. Sparse event prompts reveal follow-up questions for location, dress code, and optional color guidance. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
 
-Start at [`http://localhost:3000`](http://localhost:3000) and choose **Plan my event outfit** to describe an event in one sentence. If the event is too general, FitCheck asks for useful context before creating the outfit check. Or click **Try event demo** to open the rooftop dinner event flow.
+Start at [`http://localhost:3000`](http://localhost:3000). Use **Start with an occasion** to jump to the open-ended event prompt, then submit a natural-language request. If you want to see a deterministic example, click **See an event example** to open the rooftop dinner event flow.
 
 ---
 
@@ -159,8 +162,8 @@ See [`docs/privacy-and-safety.md`](docs/privacy-and-safety.md) for the full poli
 
 - **Mock mode is the reliable/default demo path.** Live Skin AI has been credentialed-tested locally; live Apparel VTO is intentionally not enabled in the default wardrobe flow.
 - **Live Apparel VTO needs garment reference images.** The current built-in outfit templates and try-on route do not ingest or submit those assets; a future shopping/garment flow will add that input.
-- **Event context is intentionally bounded.** The current classifier uses plain-language keyword rules plus curated mock context data; it is not a general-purpose vision or LLM stylist.
-- **Web event research is deferred.** The live provider is a fail-closed seam until a real search/place API and a sanitized, cited research adapter are configured.
+- **Event context research is optional.** Set `VENUE_MODE=openai` with a server-side `OPENAI_API_KEY` to research concrete venue/location anchors through the Responses web-search tool; the default mock provider remains the reliable demo path. The app stores structured context and source URLs rather than raw web pages.
+- **YouCam is downstream of styling.** FitCheck composes outfits from wardrobe items; YouCam can analyze or render valid user/garment images, but it does not discover a wardrobe or select a multi-piece outfit.
 - **Video capture is deferred.** Video interview guidance exists, but the app does not capture or upload video.
 - **Prisma persistence is deferred.** The MVP uses `.data/sessions.json` and related file stores; Prisma schema/migrations are retained for a later adapter-backed migration.
 - **Outfit templates are static.** The six templates are hand-curated; wardrobe composition becomes more useful as users add pieces and worn history.
@@ -172,7 +175,7 @@ See [`docs/privacy-and-safety.md`](docs/privacy-and-safety.md) for the full poli
 ### Event demo from the landing page
 
 1. Open [`http://localhost:3000`](http://localhost:3000)
-2. Click **Try event demo** (or navigate to `/occasion/demo`)
+2. Click **See an event example** (or navigate to `/occasion/demo`)
 3. Review the rooftop dinner event context and inferred dress code
 4. Add wardrobe pieces from **My wardrobe** to receive complete combinations
 
