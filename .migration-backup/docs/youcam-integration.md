@@ -6,8 +6,8 @@ FitCheck AI integrates with two YouCam APIs:
 - **AI Clothes Virtual Try-On (VTO)** — renders a garment reference onto a user photo
 
 YouCam supplies the visual analysis and rendering layer. It does **not** infer a
-user's situation, discover their wardrobe, or compose a multi-piece outfit from
-inventory; those decisions belong to FitCheck AI's situation inference and
+user's event, discover their wardrobe, or compose a multi-piece outfit from
+inventory; those decisions belong to FitCheck AI's event inference and
 wardrobe composer.
 
 Official references:
@@ -16,7 +16,7 @@ Official references:
 - [AI Clothes Virtual Try-On](https://docs.perfectcorp.com/reference/ai_clothes)
 
 The current product path therefore stays wardrobe-first: infer a broad context
-from the user's text, compose from saved wardrobe pieces, and use YouCam only
+from the user's event, compose from saved wardrobe pieces, and use YouCam only
 when a user photo and valid visual input are available. A future shopping flow
 can provide garment reference images for AI Clothes VTO; the current built-in
 templates do not yet have that ingestion path.

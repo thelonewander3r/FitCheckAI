@@ -2,9 +2,9 @@
 
 ## North star
 
-FitCheck AI helps someone decide what to wear for a real situation using the
+FitCheck AI helps someone decide what to wear for a real event using the
 wardrobe they already own. The user should provide as little as possible: a
-plain-language description of where they are going. FitCheck infers a broad
+plain-language description of the event they are attending. FitCheck infers a broad
 context, composes a coherent outfit from saved pieces, explains the tradeoffs,
 and improves as the user marks looks worn.
 
@@ -27,11 +27,11 @@ product boundary.
 
 ---
 
-## Phase 0 — Situation-first intake
+## Phase 0 — Event-first intake
 
-**Status: SHIPPED.** The primary occasion flow now asks for one required
-situation sentence and one optional note. The server infers a broad occasion
-type from the text and applies curated context rules. The old event-type,
+**Status: SHIPPED.** The primary occasion flow now asks for one required event
+prompt and one optional note. The server infers a broad occasion type from the
+text and applies curated context rules. The old event-type,
 stage, format, presentation, skin-tone, and budget questions are not rendered;
 legacy interview payloads remain accepted with safe defaults for compatibility.
 
@@ -60,7 +60,7 @@ Next improvements:
 - replace deterministic keyword inference with a bounded language-model or
   structured classifier when a reliable provider is available;
 - add weather and time-of-day only when they materially change the outfit;
-- show confidence and ask one follow-up only when the situation is ambiguous.
+- show confidence and ask one follow-up only when the event is ambiguous.
 
 ## Phase 3 — YouCam visual layer
 
@@ -88,7 +88,7 @@ must write into the same structured wardrobe store and require user review.
 ## What does not change
 
 - Mock mode remains credential-free and the reliable public demo path.
-- YouCam is used for optional visual analysis/rendering, not situation inference
+- YouCam is used for optional visual analysis/rendering, not event inference
   or wardrobe discovery.
 - Safety remains cosmetic-only: no medical claims, hiring predictions, or
   demographic inference.

@@ -17,6 +17,14 @@ const EMPTY_FORM: FormState = {
   theme: "",
 };
 
+const EVENT_EXAMPLES = [
+  { label: "Wedding guest", prompt: "what should I wear to a wedding?" },
+  { label: "Dinner date", prompt: "what should I wear to a dinner date?" },
+  { label: "Conference", prompt: "what should I wear to a tech conference?" },
+  { label: "Weekend brunch", prompt: "what should I wear to brunch with friends?" },
+  { label: "Job interview", prompt: "what should I wear to a job interview?" },
+];
+
 export default function OccasionIntakePage() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -34,6 +42,11 @@ export default function OccasionIntakePage() {
     if (errors[name as keyof FormState]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+  }
+
+  function applyExample(prompt: string) {
+    setForm((prev) => ({ ...prev, venueName: prompt }));
+    setErrors((prev) => ({ ...prev, venueName: undefined }));
   }
 
   function validate(): boolean {
@@ -107,32 +120,50 @@ export default function OccasionIntakePage() {
             Check your whole outfit
           </h1>
           <p className="text-sm text-[#718096] mb-8">
-            Tell us where you&apos;re going in your own words. We&apos;ll infer the
-            setting and build the best look from what you already own.
+            Start with the event. Tell us what you&apos;re going to, and we&apos;ll
+            recommend a complete look from what you already own.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div className="space-y-1.5">
-              <Label htmlFor="venueName">What are you dressing for? *</Label>
+              <Label htmlFor="event">What event are you dressing for? *</Label>
               <Input
-                id="venueName"
+                id="event"
                 name="venueName"
                 value={form.venueName}
                 onChange={handleChange}
-                placeholder="e.g. rooftop dinner with my team"
+                placeholder="e.g. a wedding, dinner date, or work conference"
                 className={errors.venueName ? "border-red-400" : ""}
-                data-testid="occasion-situation"
+                data-testid="occasion-event"
               />
               <p className="text-xs text-[#718096]">
-                A venue, event, or one-sentence situation is enough.
+                Ask naturally — include the setting, dress code, or anything
+                you want the outfit to feel like.
               </p>
+              <div className="space-y-2 pt-1">
+                <p className="text-xs font-medium text-[#4a5568]">
+                  Need a starting point?
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {EVENT_EXAMPLES.map((example) => (
+                    <button
+                      key={example.label}
+                      type="button"
+                      onClick={() => applyExample(example.prompt)}
+                      className="rounded-full border border-[#cbd5e0] px-3 py-1.5 text-xs text-[#2a6f7f] transition-colors hover:border-[#2a6f7f] hover:bg-[#e8f4f6]"
+                    >
+                      {example.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {errors.venueName && (
                 <p className="text-xs text-red-500">{errors.venueName}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="theme">Anything else we should know? (optional)</Label>
+              <Label htmlFor="theme">Details that matter (optional)</Label>
               <Input
                 id="theme"
                 name="theme"

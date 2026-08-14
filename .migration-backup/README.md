@@ -2,8 +2,8 @@
 
 **Know what to wear, using what you own.**
 
-FitCheck AI checks a complete outfit against a real situation. The user describes
-where they are going in one sentence, the app infers a broad dress context, and
+FitCheck AI checks a complete outfit against a real event. The user describes
+what they are attending in one sentence, the app infers a broad dress context, and
 its wardrobe composer recommends coherent looks from pieces already owned. The
 interview flow remains available as a focused mode, while shopping and garment
 purchasing are intentionally deferred to a later phase.
@@ -13,7 +13,7 @@ purchasing are intentionally deferred to a later phase.
 ## Hackathon Context
 
 Built for the **[YouCam API Skin AI & Apparel VTO Hackathon](https://youcam.com)**.  
-This project demonstrates how YouCam's cosmetic and fashion AI APIs can support a practical, wardrobe-first outfit check: the app handles situation inference and closet composition, while YouCam adds optional Skin AI guidance and visual try-on when valid image inputs are available.
+This project demonstrates how YouCam's cosmetic and fashion AI APIs can support a practical, wardrobe-first outfit check: the app handles event inference and closet composition, while YouCam adds optional Skin AI guidance and visual try-on when valid image inputs are available.
 
 ---
 
@@ -28,7 +28,7 @@ This project demonstrates how YouCam's cosmetic and fashion AI APIs can support 
 ## Architecture Overview
 
 ```
-Describe the situation in one sentence
+Describe the event in one sentence
        │
        ▼
 Next.js App Router  ─────────────────────────────────────────┐
@@ -115,9 +115,9 @@ By default the app runs in **mock mode** — no YouCam API keys are required. Th
 npm run dev
 ```
 
-Skin AI, AI Clothes VTO, and situation lookup use deterministic mock data. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
+Skin AI, AI Clothes VTO, and event context lookup use deterministic mock data. The mock badge appears in the top-right of each page. Image upload is implemented for the optional interview selfie and wardrobe pieces; uploads are downscaled before use.
 
-Start at [`http://localhost:3000`](http://localhost:3000) and choose **Check my outfit** to describe a situation in one sentence, or click **Load demo scenario** to see the full interview-focused flow instantly.
+Start at [`http://localhost:3000`](http://localhost:3000) and choose **Check my outfit** to describe an event in one sentence, or click **Load demo scenario** to see the full interview-focused flow instantly.
 
 ---
 

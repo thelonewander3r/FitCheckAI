@@ -46,9 +46,9 @@ export default function HomePage() {
           </h1>
 
           <p className="mx-auto max-w-xl text-base leading-relaxed text-[#4a5568]">
-            Tell us where you&apos;re going in one sentence. FitCheck AI infers
-            the setting, checks the whole outfit against it, and recommends a
-            coherent look from your wardrobe.
+            Tell us what event you&apos;re dressing for in one sentence. FitCheck AI
+            infers the setting, checks the whole outfit against it, and
+            recommends a coherent look from your wardrobe.
           </p>
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -95,7 +95,7 @@ export default function HomePage() {
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#4a5568]">
               No stage, format, presentation, or budget questionnaire. Give us
-              the situation; your wardrobe and style history do the rest.
+              the event; your wardrobe and style history do the rest.
             </p>
           </div>
 
@@ -103,8 +103,8 @@ export default function HomePage() {
             {[
               {
                 step: "01",
-                title: "Describe the situation",
-                body: "Write a venue, event, or one-sentence plan such as “rooftop dinner with my team.”",
+                title: "Describe the event",
+                body: "Ask what to wear to a wedding, dinner date, conference, interview, or any other event.",
               },
               {
                 step: "02",

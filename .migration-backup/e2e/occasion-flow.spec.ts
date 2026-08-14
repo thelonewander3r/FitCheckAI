@@ -34,10 +34,20 @@ test.describe('Occasion flow', () => {
       page.getByRole('heading', { name: 'Check your whole outfit' }),
     ).toBeVisible()
     await expect(page.getByLabel('Event type')).toHaveCount(0)
-    await expect(page.getByLabel('Presentation')).toHaveCount(0)
+    await expect(page.getByLabel('Role title')).toHaveCount(0)
+    await expect(page.getByLabel('Company')).toHaveCount(0)
+    await expect(
+      page.getByRole('button', { name: 'Wedding guest', exact: true }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Dinner date', exact: true }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Conference', exact: true }),
+    ).toBeVisible()
 
     await page
-      .getByLabel('What are you dressing for? *')
+      .getByLabel('What event are you dressing for? *')
       .fill('rooftop dinner with my team')
     await page.getByRole('button', { name: 'Check my outfit' }).click()
 
@@ -57,7 +67,7 @@ test.describe('Occasion flow', () => {
       ),
     ).toBeVisible()
     await expect(
-      page.getByText('Mock situation inference', { exact: true }),
+      page.getByText('Mock event inference', { exact: true }),
     ).toBeVisible()
     await expect(
       page.getByRole('heading', { name: 'Add your pieces first', exact: true }),

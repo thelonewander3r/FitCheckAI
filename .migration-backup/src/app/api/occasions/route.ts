@@ -6,7 +6,7 @@ import { OCCASION_TYPES } from "@/types/occasion";
 
 const OccasionIntakeSchema = z.object({
   eventType: z.enum(OCCASION_TYPES).optional(),
-  venueName: z.string().trim().min(1, "Situation is required").max(200),
+  venueName: z.string().trim().min(1, "Event is required").max(200),
   theme: z.string().max(200).optional(),
   // Kept optional for old links/API clients; the new UI does not ask for it.
   location: z.string().max(200).optional(),
