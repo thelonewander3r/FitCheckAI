@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useLocation } from "wouter";
 import type { OccasionType } from "@/types/occasion";
+import { decisionForEventType } from "@/lib/wardrobe/showcase";
+import type { DecisionRequest } from "@/components/decision-demo";
 
 const STARTER_PROMPTS = [
   "I’m heading to a rooftop dinner with my team after work.",
@@ -9,6 +10,10 @@ const STARTER_PROMPTS = [
   "I’m meeting friends for brunch and want an easy outfit from my wardrobe.",
   "I’m attending a conference and need a confident look that travels well.",
 ];
+
+function labelize(value: string): string {
+  return value.split("-").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+}
 
 function inferEventType(text: string): OccasionType {
   const normalized = text.toLowerCase();
@@ -33,8 +38,20 @@ function inferVenue(text: string): string {
   return "Your event";
 }
 
-export function OccasionDemoForm() {
-  const [, setLocation] = useLocation();
+function inferTimeWeather(text: string): string {
+  const normalized = text.toLowerCase();
+  if (/(tonight|evening|after work|dinner)/.test(normalized)) return "Evening · mild";
+  if (/(morning|brunch|lunch)/.test(normalized)) return "Morning · mild";
+  return "Daytime · mild";
+}
+
+function inferConstraint(text: string): string {
+  const normalized = text.toLowerCase();
+  if (/(walk|commute|travel|flight|carry)/.test(normalized)) return "On foot — easy move";
+  return "No new shopping";
+}
+
+export function OccasionDemoForm({ onDecide }: { onDecide: (request: DecisionRequest) => void }) {
   const [eventText, setEventText] = useState("");
   const [promptIndex, setPromptIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -57,7 +74,7 @@ export function OccasionDemoForm() {
     return () => window.clearInterval(timer);
   }, [reducedMotion]);
 
-  async function handleSubmit(event: FormEvent) {
+  function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const description = eventText.trim();
     if (!description) {
@@ -67,35 +84,34 @@ export function OccasionDemoForm() {
 
     setSubmitting(true);
     setError(null);
-    try {
-      const response = await fetch("/api/occasions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eventType: inferEventType(description),
-          venueName: inferVenue(description),
-          theme: description.slice(0, 200),
-          demo: true,
-        }),
+
+    const eventType = inferEventType(description);
+    const venue = inferVenue(description);
+    const decision = decisionForEventType(eventType);
+
+    // Short beat so the button state reads as a real response.
+    window.setTimeout(() => {
+      onDecide({
+        moment: description,
+        context: [
+          labelize(eventType),
+          venue,
+          inferTimeWeather(description),
+          inferConstraint(description),
+        ],
+        headline: decision.headline,
+        note: decision.note,
+        variantId: decision.variantId,
       });
-      const data = (await response.json()) as { occasionId?: string; error?: string };
-      if (!response.ok || !data.occasionId) {
-        setError(data.error ?? "We couldn’t build that look yet.");
-        return;
-      }
-      setLocation(`/occasion/${data.occasionId}`);
-    } catch {
-      setError("Network error — please try again.");
-    } finally {
       setSubmitting(false);
-    }
+    }, 650);
   }
 
   const prompt = STARTER_PROMPTS[promptIndex]!;
 
   return (
     <div className="space-y-4" data-testid="occasion-demo-form">
-      <form onSubmit={(event) => void handleSubmit(event)} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <label htmlFor="landing-event" className="sr-only">Where are you heading, or what’s the occasion?</label>
         <textarea
           id="landing-event"
@@ -128,7 +144,7 @@ export function OccasionDemoForm() {
         {!reducedMotion && <span className="text-xs uppercase tracking-[0.14em] text-[#7a7068]">shuffles gently</span>}
       </div>
 
-      <p className="text-xs leading-5 text-[#7a7068]">Demo wardrobe loaded with permission-cleared editorial clothing photos. We&apos;ll return a lead outfit, two backups, and one practical move before you leave.</p>
+      <p className="text-xs leading-5 text-[#7a7068]">Demo wardrobe loaded with permission-cleared editorial clothing photos. You’ll get the lead look, why it works, two backups, and feedback controls — all in this page, no account or API needed.</p>
       {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
     </div>
   );
