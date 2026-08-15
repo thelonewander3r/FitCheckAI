@@ -75,6 +75,7 @@ export function OccasionDemoForm() {
           eventType: inferEventType(description),
           venueName: inferVenue(description),
           theme: description.slice(0, 200),
+          demo: true,
         }),
       });
       const data = (await response.json()) as { occasionId?: string; error?: string };
@@ -127,7 +128,7 @@ export function OccasionDemoForm() {
         {!reducedMotion && <span className="text-xs uppercase tracking-[0.14em] text-[#7a7068]">shuffles gently</span>}
       </div>
 
-      <p className="text-xs leading-5 text-[#7a7068]">We&apos;ll return a lead outfit, two backups, and one practical move before you leave.</p>
+      <p className="text-xs leading-5 text-[#7a7068]">Demo wardrobe loaded with permission-cleared editorial clothing photos. We&apos;ll return a lead outfit, two backups, and one practical move before you leave.</p>
       {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
     </div>
   );

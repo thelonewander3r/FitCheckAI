@@ -3,6 +3,7 @@ import { z } from "zod";
 import { OCCASION_TYPES } from "../types/occasion.js";
 import { createOccasion, getOccasion } from "../lib/services/occasion-service.js";
 import { getUserId } from "../lib/req-session.js";
+import { ensureDemoWardrobe } from "../lib/demo-wardrobe.js";
 import type { Request, Response } from "express";
 
 const router = Router();
@@ -16,6 +17,7 @@ const OccasionIntakeSchema = z.object({
   eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   presentation: z.enum(["feminine", "masculine", "neutral"]).optional(),
   skinTone: z.enum(["fair", "light", "medium", "tan", "deep"]).optional(),
+  demo: z.boolean().optional(),
 });
 
 // POST /api/occasions
@@ -27,7 +29,9 @@ router.post("/occasions", async (req: Request, res: Response) => {
     return;
   }
   try {
-    const occasion = await createOccasion(userId, parsed.data);
+    if (parsed.data.demo) await ensureDemoWardrobe(userId);
+    const { demo: _demo, ...intake } = parsed.data;
+    const occasion = await createOccasion(userId, intake);
     res.status(201).json({ occasionId: occasion.id });
   } catch (err) {
     req.log.error({ err }, "POST /occasions failed");
