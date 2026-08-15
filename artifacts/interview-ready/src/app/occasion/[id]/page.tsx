@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import type { OccasionSession } from "@/types/occasion";
-import type { WardrobeItem, WardrobeFormality } from "@/types/wardrobe";
+import type { WardrobeItem } from "@/types/wardrobe";
 import type { ComposedOutfit } from "@/lib/wardrobe/composer";
 
 const DRESS_CODE_LABELS: Record<string, string> = {
@@ -17,21 +17,11 @@ function labelize(value: string): string {
   return value.split("-").map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
 }
 
-/** Derive a display name from wardrobe items */
 function outfitDisplayName(outfit: ComposedOutfit): string {
   if (outfit.items.length === 0) return "Outfit";
   return outfit.items
-    .slice(0, 2)
-    .map((i) => labelize(i.category))
-    .join(" + ");
-}
-
-/** Derive the formality from the outfit's items (take the lowest for realism) */
-function outfitFormality(outfit: ComposedOutfit): WardrobeFormality {
-  const order: WardrobeFormality[] = ["casual", "smart-casual", "business-casual", "business-professional", "formal"];
-  const levels = outfit.items.map((i) => order.indexOf(i.formality));
-  const minLevel = Math.min(...levels.filter((l) => l >= 0));
-  return order[minLevel] ?? "business-casual";
+    .map((item) => item.name || labelize(item.category))
+    .join(" · ");
 }
 
 function ItemThumbnail({ item, imageById, sizeClass }: {
@@ -49,8 +39,10 @@ function ItemThumbnail({ item, imageById, sizeClass }: {
       />
     );
   }
-  return <div className={`${sizeClass} shrink-0 bg-[#0f2744]/5 flex items-center justify-center`} aria-hidden>
-    <span className="text-[10px] uppercase tracking-widest text-[#0f2744]/30">{labelize(item.category)}</span>
+  return <div className={`${sizeClass} shrink-0 rounded-xl border border-[#d8e1e5] bg-gradient-to-br from-[#e8f3f1] to-[#f5eadf] p-3`} aria-label={`${item.name || item.category} wardrobe piece`}>
+    <span className="block text-[9px] uppercase tracking-widest text-[#2a6f7f]">{labelize(item.category)}</span>
+    <span className="mt-2 block text-xs font-semibold leading-tight text-[#0f2744]">{item.name || "Wardrobe piece"}</span>
+    <span className="mt-1 block text-[10px] capitalize text-[#718096]">{item.color}</span>
   </div>;
 }
 
@@ -163,12 +155,12 @@ export default function OccasionDetailPage() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="max-w-2xl"
           >
-            <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4 border-b border-[#0f2744]/10 pb-2 inline-block">Occasion Plan</p>
+            <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-4 border-b border-[#0f2744]/10 pb-2 inline-block">Your answer</p>
             <h1 className="font-serif text-5xl md:text-6xl text-[#0f2744] leading-tight mb-4">
-              {labelize(intake.eventType)}
+              Your {labelize(intake.eventType).toLowerCase()} outfit plan.
             </h1>
             <p className="text-xl font-serif italic text-[#0f2744]/80 leading-relaxed">
-              at {intake.venueName}{intake.location ? `, ${intake.location}` : ""}
+              For {intake.venueName}{intake.location ? `, ${intake.location}` : ""}
             </p>
             {intake.theme && (
               <p className="mt-4 text-sm font-serif italic text-[#0f2744]/50">
@@ -224,19 +216,18 @@ export default function OccasionDetailPage() {
             className="space-y-12"
           >
             <div className="flex items-center justify-between border-b border-[#0f2744]/10 pb-4">
-              <h2 className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]">Curated Looks</h2>
+              <h2 className="text-[10px] uppercase tracking-widest font-medium text-[#0f2744]">Wear this + strong backups</h2>
             </div>
             
             <div className="grid gap-12 lg:gap-16 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
               {outfits.map((outfit) => {
                 const displayName = outfitDisplayName(outfit);
-                const formality = outfitFormality(outfit);
-                
+
                 return (
                   <div key={outfit.id} className="group relative bg-white border border-[#0f2744]/10 p-6 md:p-8 flex flex-col h-full hover:shadow-lg hover:border-[#0f2744]/30 transition-all duration-500">
                     
                     <div className="flex flex-col mb-8">
-                      <p className="text-[10px] uppercase tracking-widest text-[#0f2744]/50 mb-3">{labelize(formality)}</p>
+                      <p className="text-[10px] uppercase tracking-widest text-[#2a6f7f] mb-3">{outfit.id === outfits[0]?.id ? "Wear this" : "Strong backup"}</p>
                       <h3 className="font-serif text-2xl text-[#0f2744] leading-tight mb-4">{displayName}</h3>
                       {outfit.why && outfit.why.length > 0 && (
                         <p className="text-sm font-serif italic text-[#0f2744]/70 leading-relaxed">{outfit.why[0]}</p>
@@ -304,6 +295,23 @@ export default function OccasionDetailPage() {
               </ul>
             </div>
           </motion.section>
+        )}
+
+        {outfits.length > 0 && (
+          <section className="mt-16 grid gap-6 md:grid-cols-2">
+            <div className="border border-[#c7ddd9] bg-[#e8f3f1] p-8">
+              <p className="text-[10px] uppercase tracking-widest text-[#2a6f7f]">One move before you go</p>
+              <h2 className="mt-3 font-serif text-2xl text-[#0f2744]">Keep the plan easy to wear.</h2>
+              <p className="mt-4 text-sm leading-6 text-[#53616d]">Lay out every piece, including shoes, then take your outer layer if the setting may change. The goal is confidence, not more content.</p>
+              {venueContext?.cultureHints[0] && <p className="mt-4 border-t border-[#2a6f7f]/15 pt-4 text-sm font-medium leading-6 text-[#0f2744]">{venueContext.cultureHints[0]}</p>}
+            </div>
+            <div className="border border-[#d8e1e5] bg-white p-8">
+              <p className="text-[10px] uppercase tracking-widest text-[#2a6f7f]">Optional finishing check</p>
+              <h2 className="mt-3 font-serif text-2xl text-[#0f2744]">Make the whole look feel ready.</h2>
+              <p className="mt-4 text-sm leading-6 text-[#53616d]">FitCheck&apos;s live demo path can hand a permitted photo to YouCam Skin AI for a separate skin observation check. Nothing is inferred from wardrobe images.</p>
+              <Link href="/interview" className="mt-5 inline-block border-b border-[#0f2744]/30 pb-1 text-[10px] font-medium uppercase tracking-widest text-[#0f2744] hover:text-[#2a6f7f]">Open Skin AI check →</Link>
+            </div>
+          </section>
         )}
 
         <motion.div 

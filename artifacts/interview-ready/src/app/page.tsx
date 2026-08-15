@@ -3,84 +3,95 @@ import { motion } from "framer-motion";
 import { OccasionDemoForm } from "@/components/occasion-demo-form";
 import WardrobePhotoShowcase from "@/components/wardrobe-photo-showcase";
 
-const eventTypes = ["Weddings", "Dates", "Conferences", "Brunches", "Birthdays"];
+const DECISION_OUTPUTS = [
+  "One lead outfit you can actually wear",
+  "Two backups when the first mood is wrong",
+  "One last-mile move before you leave",
+];
+
+const HOW_IT_WORKS = [
+  ["01", "Tell us the moment", "Write the way you would text a friend: rooftop dinner, wedding in August, first day at a new job."],
+  ["02", "We work your closet", "FitCheck ranks complete combinations from saved pieces before it suggests anything new."],
+  ["03", "Leave with a decision", "Get the look, the reason it works, and the one thing to do before the event starts."],
+];
 
 export default function HomePage() {
   return (
     <motion.main
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.55 }}
-      className="min-h-screen overflow-hidden bg-[#fbf8f2] text-[#0f2744]"
+      transition={{ duration: 0.45 }}
+      className="min-h-screen overflow-hidden bg-[#f4f6f8] text-[#0f2744]"
     >
-      <header className="border-b border-[#0f2744]/10 bg-[#fbf8f2]/90 px-6 py-5 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="font-serif text-xl font-semibold tracking-tight">
-            FitCheck AI
-          </Link>
-          <nav className="flex items-center gap-5 text-xs font-semibold uppercase tracking-[0.16em]">
-            <Link href="/wardrobe" className="text-[#53616d] transition hover:text-[#0f2744]">My wardrobe</Link>
-            <Link href="/occasion" className="rounded-full bg-[#0f2744] px-4 py-2 text-white transition hover:bg-[#0a1d35]">Start an event check</Link>
+      <header className="border-b border-[#e2e8f0] bg-white/95 px-6 py-4 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between">
+          <Link href="/" className="font-serif text-lg font-semibold tracking-tight">FitCheck AI</Link>
+          <nav className="flex items-center gap-4" aria-label="Primary navigation">
+            <a href="#how-it-works" className="hidden text-sm font-medium text-[#53616d] hover:text-[#0f2744] sm:inline">How it works</a>
+            <Link href="/wardrobe" className="hidden text-sm font-medium text-[#2a6f7f] hover:underline sm:inline">My wardrobe</Link>
+            <Link href="/occasion" className="rounded-lg bg-[#0f2744] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0a1d35]">Get my outfit plan</Link>
           </nav>
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16 lg:pt-20">
-        <div className="max-w-xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#2a6f7f]">FitCheck AI · event wardrobe intelligence</p>
-          <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-tight text-[#0f2744] sm:text-6xl lg:text-7xl">
-            Dress for what’s next,
-            <span className="block italic text-[#2a6f7f]">using what you own.</span>
-          </h1>
-          <p className="mt-6 max-w-lg text-lg leading-8 text-[#53616d]">
-            Describe the event in your own words. FitCheck checks your wardrobe, reads the dress-code signal, and helps you build a look that feels like you.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            {eventTypes.map((event) => <span key={event} className="rounded-full border border-[#d9cdbd] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#53616d]">{event}</span>)}
-          </div>
-        </div>
-        <WardrobePhotoShowcase />
-      </section>
-
-      <section className="border-y border-[#e4d9ca] bg-[#f1e7da] px-6 py-20">
-        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#2a6f7f]">Start with the occasion</p>
-            <h2 className="mt-4 font-serif text-4xl leading-tight text-[#0f2744] sm:text-5xl">
-              Where are you heading,
-              <span className="block italic">or what’s the occasion?</span>
-            </h2>
-            <p className="mt-5 max-w-md text-base leading-7 text-[#53616d]">
-              Give us the unfiltered version. Location, dress code, and vibe can be added when they help — no questionnaire required.
+      <section className="relative border-b border-[#e4d8ca] bg-[#f7f1e9] px-6 py-12 sm:py-20">
+        <div className="pointer-events-none absolute -left-28 top-10 h-72 w-72 rounded-full bg-[#e2c9b9]/35 blur-3xl" />
+        <div className="pointer-events-none absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-[#c6d9d2]/45 blur-3xl" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d9c8b8] bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#63716f]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#2a6f7f]" />
+              The last-mile wardrobe copilot
+            </div>
+            <h1 className="mt-7 font-serif text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl">
+              Stop staring at your closet.
+              <span className="mt-2 block text-[#2a6f7f]">Know what to wear.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-[#53616d]">
+              Tell FitCheck the moment. It picks one complete outfit from what you own, explains why it works, and gives you the one move that makes leaving easy.
             </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/occasion" className="inline-flex h-12 items-center rounded-xl bg-[#0f2744] px-5 text-sm font-semibold text-white shadow-lg shadow-[#0f2744]/15 hover:bg-[#0a1d35]">Get my outfit plan ↘</Link>
+              <Link href="/occasion" className="inline-flex h-12 items-center rounded-xl border border-[#d9c8b8] bg-white/80 px-5 text-sm font-semibold text-[#0f2744] hover:bg-white">Try a real event</Link>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#63716f]">
+              <span>✓ Closet first</span><span>✓ No shopping rabbit hole</span><span>✓ Optional YouCam Skin AI finish</span>
+            </div>
           </div>
-          <div className="rounded-[1.75rem] border border-[#dfd1bf] bg-[#fbf8f2]/85 p-5 shadow-[0_20px_55px_rgba(68,54,42,0.10)] sm:p-8">
-            <OccasionDemoForm />
-            <p className="mt-5 text-center text-xs leading-5 text-[#7a7068]">Mock event context is the default demo path. Your saved wardrobe remains the source for recommendations.</p>
+          <WardrobePhotoShowcase />
+        </div>
+      </section>
+
+      <section className="border-b border-[#173250] bg-[#0f2744] px-6 py-16 text-white sm:py-20" id="try-it">
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#9ed4d0]">Start with the real problem</p>
+            <h2 className="mt-4 font-serif text-4xl leading-tight sm:text-5xl">Give us the moment. We&apos;ll give you a plan.</h2>
+            <p className="mt-5 max-w-md text-base leading-7 text-[#dbe8eb]">No style vocabulary required. The event is enough to start, and details only appear when they improve the decision.</p>
+            <ul className="mt-8 space-y-4">
+              {DECISION_OUTPUTS.map((output) => <li key={output} className="flex gap-3 text-sm text-[#edf6f7]"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#9ed4d0]" />{output}</li>)}
+            </ul>
+          </div>
+          <div className="rounded-3xl border border-white/20 bg-[#f7f1e9] p-6 text-[#0f2744] shadow-2xl sm:p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2a6f7f]">Try your next event</p>
+            <h2 className="mt-3 font-serif text-2xl font-semibold">What are you dressing for?</h2>
+            <p className="mt-2 text-sm text-[#53616d]">Example: “A rooftop dinner in Brooklyn — polished, but I still want to be comfortable.”</p>
+            <div className="mt-5"><OccasionDemoForm /></div>
+            <p className="mt-5 text-xs leading-5 text-[#718096]">Start with the event. We&apos;ll return a lead outfit, two backups, and one practical move before you leave.</p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-10 px-6 py-20 sm:grid-cols-3">
-        {[
-          ["01", "Describe the moment", "Start with a plain-language event description instead of a long intake form."],
-          ["02", "Use your wardrobe", "FitCheck ranks combinations from pieces you already own."],
-          ["03", "Refine the look", "Save what works, mark pieces as worn, and keep building your style history."],
-        ].map(([number, title, copy]) => (
-          <div key={number} className="border-t border-[#0f2744]/20 pt-5">
-            <p className="text-xs font-semibold tracking-[0.2em] text-[#2a6f7f]">{number}</p>
-            <h3 className="mt-3 font-serif text-2xl text-[#0f2744]">{title}</h3>
-            <p className="mt-3 text-sm leading-6 text-[#53616d]">{copy}</p>
-          </div>
-        ))}
+      <section className="mx-auto max-w-6xl px-6 py-20" id="how-it-works">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#2a6f7f]">A better answer than “it depends”</p>
+        <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight sm:text-5xl">From closet paralysis to a plan you can trust.</h2>
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {HOW_IT_WORKS.map(([number, title, copy]) => <article key={number} className="rounded-2xl border border-[#d8e1e5] bg-white p-6"><p className="text-3xl font-serif text-[#cdd8de]">{number}</p><h3 className="mt-8 font-serif text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-6 text-[#53616d]">{copy}</p></article>)}
+        </div>
+        <div className="mt-8 flex flex-col justify-between gap-4 rounded-2xl border border-[#c7ddd9] bg-[#e8f3f1] p-6 sm:flex-row sm:items-center"><div><p className="font-serif text-lg font-semibold">The goal is confidence, not more content.</p><p className="mt-1 text-sm text-[#53616d]">Save what you wore. Come back when the next event lands on your calendar.</p></div><Link href="/occasion" className="text-sm font-semibold text-[#2a6f7f] hover:underline">Start an event check →</Link></div>
       </section>
 
-      <footer className="border-t border-[#0f2744]/10 px-6 py-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 text-xs text-[#7a7068] sm:flex-row sm:items-center sm:justify-between">
-          <span className="font-serif text-lg font-semibold text-[#0f2744]">FitCheck AI</span>
-          <span>Outfit guidance for real events, built from your wardrobe.</span>
-        </div>
-      </footer>
+      <footer className="border-t border-[#e2e8f0] bg-white px-6 py-8"><div className="mx-auto flex max-w-6xl flex-col gap-3 text-xs text-[#718096] sm:flex-row sm:items-center sm:justify-between"><span className="font-serif text-lg font-semibold text-[#0f2744]">FitCheck AI</span><span>Event intelligence for the wardrobe you already own.</span></div></footer>
     </motion.main>
   );
 }

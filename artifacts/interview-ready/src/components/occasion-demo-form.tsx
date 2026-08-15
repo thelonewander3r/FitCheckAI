@@ -61,7 +61,7 @@ export function OccasionDemoForm() {
     event.preventDefault();
     const description = eventText.trim();
     if (!description) {
-      setError("Tell us where you’re heading or what the occasion is.");
+      setError("Tell us the moment you are dressing for so we can build the plan.");
       return;
     }
 
@@ -101,7 +101,7 @@ export function OccasionDemoForm() {
           data-testid="landing-occasion-input"
           value={eventText}
           onChange={(event) => setEventText(event.target.value)}
-          placeholder="Try: I’m going to a rooftop dinner and want something polished from my wardrobe."
+          placeholder="Try: A rooftop dinner in Brooklyn — polished, but still comfortable"
           rows={4}
           className="w-full resize-none rounded-2xl border border-[#d9cdbd] bg-white px-5 py-4 text-base leading-7 text-[#263d5b] shadow-[0_16px_32px_rgba(68,54,42,0.08)] outline-none transition focus:border-[#2a6f7f] focus:ring-2 focus:ring-[#2a6f7f]/20"
         />
@@ -110,12 +110,12 @@ export function OccasionDemoForm() {
           disabled={submitting}
           className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#0f2744] px-5 text-sm font-semibold text-white transition hover:bg-[#0a1d35] disabled:cursor-wait disabled:opacity-60"
         >
-          {submitting ? "Building your look…" : "Build my look"}
+          {submitting ? "Building your plan…" : "Get my outfit plan"}
         </button>
       </form>
 
       <div className="flex flex-wrap items-center gap-2 text-sm text-[#53616d]">
-        <span className="font-semibold text-[#263d5b]">Questions to get you started:</span>
+        <span className="font-semibold text-[#263d5b]">Try a real situation:</span>
         <button
           type="button"
           onClick={() => setEventText(prompt)}
@@ -127,6 +127,7 @@ export function OccasionDemoForm() {
         {!reducedMotion && <span className="text-xs uppercase tracking-[0.14em] text-[#7a7068]">shuffles gently</span>}
       </div>
 
+      <p className="text-xs leading-5 text-[#7a7068]">We&apos;ll return a lead outfit, two backups, and one practical move before you leave.</p>
       {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
     </div>
   );
