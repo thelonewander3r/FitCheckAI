@@ -242,3 +242,40 @@
     inset: -1px;
   }
 }
+
+@keyframes wardrobe-top-shift {
+  0%, 14% { transform: translateX(0); }
+  50%, 64% { transform: translateX(-18%); }
+  100% { transform: translateX(-36%); }
+}
+
+@keyframes wardrobe-bottom-shift {
+  0%, 14% { transform: translateX(-30%); }
+  50%, 64% { transform: translateX(-12%); }
+  100% { transform: translateX(6%); }
+}
+
+.wardrobe-rail {
+  display: flex;
+  width: max-content;
+  gap: 0.75rem;
+}
+
+.wardrobe-rail-top {
+  animation: wardrobe-top-shift 28s linear infinite;
+}
+
+.wardrobe-rail-bottom {
+  animation: wardrobe-bottom-shift 28s linear infinite;
+}
+
+.wardrobe-rail.motion-reduced {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wardrobe-rail-top,
+  .wardrobe-rail-bottom {
+    animation: none;
+  }
+}
