@@ -44,11 +44,11 @@ const pieceLabel: Record<ShowcasePiece["category"], string> = {
   accessory: "Accessory",
 };
 
-const leadEditorialImages = [
-  "/demo-assets/wardrobe/shirt-edit.jpg",
-  "/demo-assets/wardrobe/color-rack.jpg",
-  "/demo-assets/wardrobe/boardroom-rack.jpg",
-  "/demo-assets/wardrobe/weekend-flatlay.jpg",
+const leadOwnedDemoPieces = [
+  { name: "Ivory oxford shirt", category: "top", imageSrc: "/demo-assets/wardrobe/owned-ivory-oxford.svg" },
+  { name: "Charcoal tailored trousers", category: "trousers", imageSrc: "/demo-assets/wardrobe/owned-charcoal-trousers.svg" },
+  { name: "Camel blazer", category: "blazer", imageSrc: "/demo-assets/wardrobe/owned-camel-blazer.svg" },
+  { name: "Black leather loafers", category: "accessory", imageSrc: "/demo-assets/wardrobe/owned-black-loafers.svg" },
 ] as const;
 
 function PieceTile({ piece }: { piece: ShowcasePiece }) {
@@ -146,10 +146,10 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
                   <h3 className="mt-2 font-serif text-4xl leading-none sm:text-5xl">{headline}</h3>
                   <p className="mt-4 text-sm leading-6 text-[#dce6e5]">{note}</p>
                   <div className="mt-5 flex flex-wrap items-center gap-3"><button type="button" onClick={() => selectFeedback("Wear it")} className="bg-[#d9aa84] px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-[#172b3a] hover:bg-[#f0c4a0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d9aa84]">Wear it</button><span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#a8c1bd]">Demo session only</span></div>
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-white/15 bg-white/[0.04] px-3 py-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Seeded demo look metadata</p><p className="mt-1 text-xs text-[#dce6e5]">No user-owned pieces loaded · demo wardrobe references shown below</p></div><a href="/wardrobe" className="border-b border-[#d9aa84]/60 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9aa84] hover:border-[#d9aa84]">Import your pieces →</a></div>
-                  <div className="mt-4 border border-white/15 bg-white/[0.03] p-2"><p className="px-1 pb-2 text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Demo wardrobe references · editorial images</p><div className="grid grid-cols-2 gap-2">{[look.top, look.bottom, look.blazer, look.accessory].map((piece, pieceIndex) => <div key={piece.id} className="overflow-hidden border border-white/15"><img src={leadEditorialImages[pieceIndex]} alt={`${piece.name} editorial outfit reference`} className="aspect-[4/3] w-full object-cover" /><div className="px-2 py-2"><p className="text-[9px] uppercase tracking-[0.15em] text-[#a8c1bd]">Demo inventory role · {pieceLabel[piece.category]}</p><p className="mt-1 text-xs font-semibold text-white">{piece.name}</p><p className="mt-1 text-[10px] text-[#a8c1bd]">Photo is an editorial reference, not an isolated garment</p></div></div>)}</div></div>
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-white/15 bg-white/[0.04] px-3 py-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Seeded demo-owned wardrobe · permission-cleared illustrations</p><p className="mt-1 text-xs text-[#dce6e5]">No user-owned pieces loaded · demo wardrobe references shown below</p></div><a href="/wardrobe" className="border-b border-[#d9aa84]/60 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9aa84] hover:border-[#d9aa84]">Import your pieces →</a></div>
+                  <div className="mt-4 border border-white/15 bg-white/[0.03] p-2"><p className="px-1 pb-2 text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Seeded demo-owned pieces · tied to this look</p><div className="grid grid-cols-2 gap-2">{leadOwnedDemoPieces.map((piece) => <div key={piece.name} className="overflow-hidden border border-white/15"><img src={piece.imageSrc} alt={`${piece.name} seeded demo-owned piece`} className="aspect-[4/3] w-full object-cover" /><div className="px-2 py-2"><p className="text-[9px] uppercase tracking-[0.15em] text-[#a8c1bd]">Seeded demo-owned · {pieceLabel[piece.category]}</p><p className="mt-1 text-xs font-semibold text-white">{piece.name}</p><p className="mt-1 text-[10px] text-[#a8c1bd]">Permission-cleared original illustration</p></div></div>)}</div></div>
                 </div>
-                <p className="mt-6 border-t border-white/15 pt-4 text-xs text-[#a8c1bd]">Editorial outfit references · no isolated garment claim</p>
+                <p className="mt-6 border-t border-white/15 pt-4 text-xs text-[#a8c1bd]">Seeded demo-owned illustrations · tied to the Wear this decision</p>
               </div>
             </div>
           </article>
@@ -158,8 +158,8 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
             <div className="bg-[#faf8f5] p-6"><WhyThisWorks look={look} /></div>
             <div className="border border-[#cfc4b8] bg-[#e4eee9] p-6">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#45766f]">Demo wardrobe insight</p>
-              <h3 className="mt-2 font-serif text-2xl text-[#172b3a]">No extra shirt in this reference set.</h3>
-              <p className="mt-2 text-sm leading-6 text-[#53615f]">This demo set already includes several tops; import your own pieces to get a personal wardrobe-gap read.</p>
+              <h3 className="mt-2 font-serif text-2xl text-[#172b3a]">Gap signal: no knit layer in the seeded set.</h3>
+              <p className="mt-2 text-sm leading-6 text-[#53615f]">The seeded demo wardrobe covers shirts, trousers, outerwear, and shoes; a lightweight knit layer is the next useful addition. Import your own pieces for a personal wardrobe-gap read.</p>
             </div>
             <div className="border border-[#d6c1a8] bg-[#f8eee3] p-6">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a15e35]">Feedback · this demo session</p>

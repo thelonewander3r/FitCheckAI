@@ -6,7 +6,11 @@
     {"path":"/demo-assets/wardrobe/weekend-flatlay.jpg","sourceUrl":"https://images.unsplash.com/photo-1525507119028-ed4c629a60a3","license":"Unsplash License"},
     {"path":"/demo-assets/wardrobe/shirt-edit.jpg","sourceUrl":"https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf","license":"Unsplash License"},
     {"path":"/demo-assets/wardrobe/color-rack.jpg","sourceUrl":"https://images.unsplash.com/photo-1532453288672-3a27e9be9efd","license":"Unsplash License"},
-    {"path":"/demo-assets/wardrobe/sage-rack.jpg","sourceUrl":"https://images.unsplash.com/photo-1523381210434-271e8be1f52b","license":"Unsplash License"}
+    {"path":"/demo-assets/wardrobe/sage-rack.jpg","sourceUrl":"https://images.unsplash.com/photo-1523381210434-271e8be1f52b","license":"Unsplash License"},
+    {"path":"/demo-assets/wardrobe/owned-ivory-oxford.svg","sourceUrl":"original in-repo illustration","license":"Project-created original"},
+    {"path":"/demo-assets/wardrobe/owned-charcoal-trousers.svg","sourceUrl":"original in-repo illustration","license":"Project-created original"},
+    {"path":"/demo-assets/wardrobe/owned-camel-blazer.svg","sourceUrl":"original in-repo illustration","license":"Project-created original"},
+    {"path":"/demo-assets/wardrobe/owned-black-loafers.svg","sourceUrl":"original in-repo illustration","license":"Project-created original"}
   ],
   "processing": "Downloaded from exact source URLs and locally resized/recompressed; no retailer or model images used."
 }
