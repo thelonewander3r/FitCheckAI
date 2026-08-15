@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, useSyncExternalStore, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,11 @@ export default function OccasionIntakePage() {
   const [submitting, setSubmitting] = useState(false);
   const [showDetailQuestions, setShowDetailQuestions] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   function handleChange(
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -142,18 +147,23 @@ export default function OccasionIntakePage() {
       <div className="mx-auto max-w-2xl px-6 pt-8">
         <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-sm">
           <h1 className="font-serif text-2xl font-semibold text-[#0f2744] mb-1">
-            Check your whole outfit
+            Plan your event
           </h1>
           <p className="text-sm text-[#718096] mb-3">
-            Start with the event. Tell us what you&apos;re going to, and we&apos;ll
-            recommend a complete look from what you already own.
+            Get a complete plan from your existing wardrobe. We&apos;ll show the lead look, the backups, and the one decision that makes it work.
           </p>
           <p className="mb-8 text-xs text-[#718096]">
             Current mode: use your wardrobe. Finding new pieces that suit you
             will come in a later phase.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6"
+            noValidate
+            data-testid="occasion-intake-form"
+            data-ready={hydrated ? "true" : "false"}
+          >
             <div className="space-y-1.5">
               <Label htmlFor="event">What event are you dressing for? *</Label>
               <Input
@@ -280,10 +290,10 @@ export default function OccasionIntakePage() {
               disabled={submitting}
             >
               {submitting
-                ? "Checking…"
+                ? "Building…"
                 : needsMoreDetails
                   ? "Add useful details"
-                  : "Check my outfit"}
+                  : "Build my plan"}
             </Button>
           </form>
         </div>

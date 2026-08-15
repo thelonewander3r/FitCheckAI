@@ -47,7 +47,7 @@ export default function EventDemoPage() {
         </svg>
       </div>
       <p className="font-serif text-base font-medium text-[#0f2744]">
-        Preparing event demo…
+        Opening a finished plan…
       </p>
       <p className="text-sm text-[#718096]">
         Setting up a rooftop dinner outfit check.

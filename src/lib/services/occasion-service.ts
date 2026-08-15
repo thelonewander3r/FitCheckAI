@@ -16,9 +16,19 @@ import {
   parseColorPreferences,
 } from "@/lib/occasion/preferences";
 import type { OccasionIntake, OccasionSession } from "@/types/occasion";
+import type { WardrobeItem } from "@/types/wardrobe";
+
+export interface OccasionCreationOptions {
+  /** Deterministic wardrobe used by the public demo; real users use their store. */
+  wardrobeItems?: WardrobeItem[];
+  /** Editorial reference images used only by the public demo result. */
+  previewImageUrls?: string[];
+  isDemo?: boolean;
+}
 
 export async function createOccasion(
   intake: OccasionIntake,
+  options: OccasionCreationOptions = {},
 ): Promise<OccasionSession> {
   const venue = await getVenueProvider().lookupVenue({
     venueName: intake.venueName,
@@ -26,7 +36,7 @@ export async function createOccasion(
     location: intake.location,
   });
 
-  const items = await listItems();
+  const items = options.wardrobeItems ?? (await listItems());
   let wornRecords: Awaited<ReturnType<typeof listRecords>> = [];
   try {
     wornRecords = await listRecords();
@@ -70,13 +80,22 @@ export async function createOccasion(
     }
   }
 
-  const outfits = composed.outfits.map((o) => ({
-    ...o,
-    items: o.items.map(({ imageBase64: _omit, ...rest }) => {
-      void _omit;
-      return rest;
-    }),
-  })) as typeof composed.outfits;
+  const outfits = composed.outfits.map((o, index) => {
+    const previewImageUrl = options.previewImageUrls?.[index];
+    return {
+      ...o,
+      ...(previewImageUrl
+        ? {
+            previewImageUrl,
+            previewImageAlt: `Editorial reference for ${intake.eventType} outfit ${index + 1}`,
+          }
+        : {}),
+      items: o.items.map(({ imageBase64: _omit, ...rest }) => {
+        void _omit;
+        return rest;
+      }),
+    };
+  }) as unknown as typeof composed.outfits;
 
   return storeCreate({
     intake,
@@ -84,6 +103,7 @@ export async function createOccasion(
     outfits,
     gaps: composed.gaps,
     isMockMode: venue.isMock,
+    isDemo: options.isDemo,
   });
 }
 

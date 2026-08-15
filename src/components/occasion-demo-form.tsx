@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 const STARTER_PROMPTS = [
@@ -19,6 +19,11 @@ export function OccasionDemoForm() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -45,7 +50,7 @@ export function OccasionDemoForm() {
     event.preventDefault();
     const eventText = value.trim();
     if (!eventText) {
-      setError("Tell us where you are headed so we can start the look.");
+      setError("Tell us the moment you are dressing for so we can build the plan.");
       return;
     }
 
@@ -78,7 +83,11 @@ export function OccasionDemoForm() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-3xl" data-testid="occasion-demo-form">
+    <div
+      className="mx-auto w-full max-w-3xl"
+      data-testid="occasion-demo-form"
+      data-ready={hydrated ? "true" : "false"}
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:relative">
         <label htmlFor="landing-occasion" className="sr-only">
           Where are you heading, or what&apos;s the occasion?
@@ -90,7 +99,7 @@ export function OccasionDemoForm() {
             setValue(event.target.value);
             if (error) setError(null);
           }}
-          placeholder="e.g. A rooftop dinner in Brooklyn, a summer wedding, or brunch with friends"
+          placeholder="e.g. A rooftop dinner in Brooklyn — polished, but still comfortable"
           rows={3}
           className="w-full resize-none rounded-[1.35rem] border border-[#d9cdbd] bg-white px-5 py-4 text-base leading-7 text-[#263d5b] shadow-[0_16px_32px_rgba(68,54,42,0.08)] outline-none transition focus:border-[#2a6f7f] focus:ring-4 focus:ring-[#2a6f7f]/10 sm:pr-32"
           data-testid="landing-occasion-input"
@@ -100,14 +109,14 @@ export function OccasionDemoForm() {
           disabled={submitting}
           className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#0f2744] px-4 text-sm font-semibold text-white transition hover:bg-[#0a1d35] disabled:cursor-wait disabled:opacity-60 sm:absolute sm:bottom-3 sm:right-3 sm:w-auto"
         >
-          {submitting ? "Checking…" : "Build my look"}
+          {submitting ? "Building…" : "Get my outfit plan"}
         </button>
       </form>
 
       <div className="mt-5 text-left">
         <div className="mb-2 flex items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7b7167]">
-            Questions to get you started
+            Try a real situation
           </p>
           <span className="text-[0.68rem] text-[#9b9188]">
             {reducedMotion ? "Pick a prompt" : "Shuffling ideas"}
@@ -135,8 +144,7 @@ export function OccasionDemoForm() {
       )}
 
       <p className="mt-4 text-xs leading-5 text-[#7b7167]">
-        Start with your event. We&apos;ll use the details you share, your wardrobe,
-        and optional context research when it adds useful signal.
+        Start with the event. We&apos;ll return a lead outfit, two backups, and one practical move before you leave.
       </p>
     </div>
   );
