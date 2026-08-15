@@ -52,6 +52,10 @@ export default function DecisionDemo() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const look = variants[index]!;
   const alternatives = [variants[(index + 1) % variants.length]!, variants[(index + 2) % variants.length]!];
+  const alternativeImageSets = alternatives.map((alternative, alternativeIndex) => [
+    alternative.top.imageSrc,
+    variants[(index + 3 + alternativeIndex) % variants.length]!.top.imageSrc,
+  ]);
 
   function selectFeedback(value: Feedback) {
     setFeedback(value);
@@ -69,7 +73,7 @@ export default function DecisionDemo() {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2" aria-label="Current context">
-          {["Client coffee", "Soho · 10:30 AM", "68° · clear", "Polished, not corporate"].map((item) => <span key={item} className="border border-[#cfc4b8] bg-[#faf8f5] px-3 py-2 text-xs font-semibold text-[#42515a]">{item}</span>)}
+          {["Client coffee", "Soho · 10:30 AM", "68° · clear", "Client-ready polish"].map((item) => <span key={item} className="border border-[#cfc4b8] bg-[#faf8f5] px-3 py-2 text-xs font-semibold text-[#42515a]">{item}</span>)}
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -83,7 +87,7 @@ export default function DecisionDemo() {
               <div className="flex flex-col justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d9aa84]">Wear this</p>
-                  <h3 className="mt-2 font-serif text-4xl leading-none sm:text-5xl">{look.name}</h3>
+                  <h3 className="mt-2 font-serif text-4xl leading-none sm:text-5xl">Client-ready polish</h3>
                   <p className="mt-4 text-sm leading-6 text-[#dce6e5]">The easy yes: sharp enough for the room, relaxed enough to keep your day moving.</p>
                   <div className="mt-6 grid grid-cols-2 gap-2">
                     {[look.top, look.bottom, look.blazer, look.accessory].map((piece) => <div key={piece.id} className="border border-white/15 px-3 py-3"><p className="text-[9px] uppercase tracking-[0.15em] text-[#a8c1bd]">{pieceLabel[piece.category]}</p><p className="mt-1 text-xs font-semibold text-white">{piece.name}</p></div>)}
@@ -115,10 +119,10 @@ export default function DecisionDemo() {
           <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8a8076]">Not the mood?</p><p className="mt-1 text-sm text-[#59656b]">See two lower-stakes alternatives from the same wardrobe.</p></div>
           <button type="button" onClick={() => { setIndex((current) => (current + 1) % variants.length); setFeedback(null); }} className="self-start bg-[#172b3a] px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white hover:bg-[#25445a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a15e35]">Show another answer</button>
         </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">{alternatives.map((alternative) => <button type="button" key={alternative.id} onClick={() => { setIndex(variants.findIndex((item) => item.id === alternative.id)); setFeedback(null); }} className="group grid grid-cols-[7rem_1fr] gap-4 border border-[#d4cbc2] bg-[#faf8f5] p-3 text-left transition hover:border-[#a15e35]"><img src={alternative.top.imageSrc} alt={`${alternative.name} alternative`} className="h-24 w-28 object-cover" /><span><span className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#8a8076]">Alternative</span><span className="mt-1 block font-serif text-xl text-[#172b3a]">{alternative.name}</span><span className="mt-1 block text-xs text-[#6c716f]">{alternative.occasion} · owned pieces</span></span></button>)}</div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">{alternatives.map((alternative, alternativeIndex) => <button type="button" key={alternative.id} onClick={() => { setIndex(variants.findIndex((item) => item.id === alternative.id)); setFeedback(null); }} className="group grid grid-cols-[7rem_1fr] gap-4 border border-[#d4cbc2] bg-[#faf8f5] p-3 text-left transition hover:border-[#a15e35]"><span className="grid h-24 w-28 grid-cols-2 gap-1 overflow-hidden">{alternativeImageSets[alternativeIndex]!.map((imageSrc, imageIndex) => <img key={`${alternative.id}-${imageIndex}`} src={imageSrc} alt="" aria-hidden="true" className="h-full w-full object-cover" />)}</span><span><span className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#8a8076]">Alternative</span><span className="mt-1 block font-serif text-xl text-[#172b3a]">{alternative.name}</span><span className="mt-1 block text-xs text-[#6c716f]">{alternative.occasion} · two owned-piece references</span></span></button>)}</div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">
-          <article className="border border-[#c8d8d7] bg-[#eaf3f2] p-6"><div className="flex items-center justify-between gap-3"><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#39716e]">Skin AI · live-ready</p><span className="bg-[#39716e] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-white">Cosmetic only</span></div><h3 className="mt-3 font-serif text-2xl text-[#172b3a]">A calm finishing pass.</h3><p className="mt-2 text-sm leading-6 text-[#53615f]">Skin AI can turn a permitted selfie into appearance guidance for camera confidence. It does not diagnose, judge, or change the outfit decision.</p><p className="mt-4 text-xs font-semibold text-[#39716e]">Live provider seam · server-side only</p></article>
+          <article className="border border-[#c8d8d7] bg-[#eaf3f2] p-6"><div className="flex items-center justify-between gap-3"><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#39716e]">Skin AI · live-ready</p><span className="bg-[#39716e] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-white">Cosmetic only</span></div><h3 className="mt-3 font-serif text-2xl text-[#172b3a]">A calm finishing pass.</h3><p className="mt-2 text-sm leading-6 text-[#53615f]">Skin AI can turn a permitted selfie into appearance guidance for camera confidence. It does not diagnose, judge, or change the outfit decision.</p><div className="mt-4 flex flex-wrap items-center gap-4"><p className="text-xs font-semibold text-[#39716e]">Mock by default · live when configured</p><a href="/interview" className="border-b border-[#39716e]/40 pb-1 text-xs font-bold uppercase tracking-[0.12em] text-[#39716e] hover:border-[#39716e]">Open Skin AI →</a></div></article>
           <article className="border border-[#d4cbc2] bg-[#faf8f5] p-6"><div className="flex items-center justify-between gap-3"><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8a8076]">Apparel VTO · gated</p><span className="border border-[#b7aaa0] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-[#796f68]">Mock preview</span></div><h3 className="mt-3 font-serif text-2xl text-[#172b3a]">Try-on comes after the right reference.</h3><p className="mt-2 text-sm leading-6 text-[#6c716f]">A live render needs this selected garment’s isolated reference plus a permitted user image. These editorial wardrobe photos are demo references, not proof of a live VTO result.</p><p className="mt-4 text-xs font-semibold text-[#8a8076]">No live Apparel VTO claim in this demo</p></article>
         </div>
       </div>
