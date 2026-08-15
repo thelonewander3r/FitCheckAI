@@ -53,7 +53,7 @@ function PieceTile({ piece }: { piece: ShowcasePiece }) {
       <div className="px-3 py-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8a8076]">{pieceLabel[piece.category]}</p>
         <p className="mt-1 text-sm font-semibold text-[#172b3a]">{piece.name}</p>
-        <p className="mt-1 text-[11px] text-[#7b746d]">Owned piece · demo wardrobe</p>
+        <p className="mt-1 text-[11px] text-[#7b746d]">Demo wardrobe reference</p>
       </div>
     </div>
   );
@@ -113,7 +113,7 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#a15e35]">Today’s decision · 8:42 AM</p>
             <h2 className="mt-3 max-w-2xl font-serif text-4xl leading-[1.02] text-[#172b3a] sm:text-6xl">What should I wear right now?</h2>
           </div>
-          <p className="max-w-xs text-sm leading-6 text-[#6c716f]">A direct answer for the day ahead — built from what is already in your closet.</p>
+          <p className="max-w-xs text-sm leading-6 text-[#6c716f]">A direct answer for the day ahead — built from clearly labeled demo wardrobe references.</p>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2" aria-label="Current context">
@@ -121,7 +121,7 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
         </div>
         {custom && (
           <p className="mt-3 max-w-2xl text-xs italic leading-6 text-[#6c716f]">
-            From your prompt: “{custom.moment}” — demo answer assembled from owned pieces only.
+            From your prompt: “{custom.moment}” — demo answer assembled from labeled wardrobe references only.
           </p>
         )}
 
@@ -142,7 +142,7 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
                     {[look.top, look.bottom, look.blazer, look.accessory].map((piece) => <div key={piece.id} className="border border-white/15 px-3 py-3"><p className="text-[9px] uppercase tracking-[0.15em] text-[#a8c1bd]">{pieceLabel[piece.category]}</p><p className="mt-1 text-xs font-semibold text-white">{piece.name}</p></div>)}
                   </div>
                 </div>
-                <p className="mt-6 border-t border-white/15 pt-4 text-xs text-[#a8c1bd]">All four pieces are marked owned · no shopping required</p>
+                <p className="mt-6 border-t border-white/15 pt-4 text-xs text-[#a8c1bd]">Four demo wardrobe references · no shopping claim</p>
               </div>
             </div>
           </article>
@@ -168,7 +168,7 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
           <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8a8076]">Not the mood?</p><p className="mt-1 text-sm text-[#59656b]">See two lower-stakes alternatives from the same wardrobe.</p></div>
           <button type="button" onClick={() => { setIndex((current) => (current + 1) % variants.length); setFeedback(null); }} className="self-start bg-[#172b3a] px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white hover:bg-[#25445a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a15e35]">Show another answer</button>
         </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">{alternatives.map((alternative, alternativeIndex) => <button type="button" key={alternative.id} onClick={() => { setIndex(variants.findIndex((item) => item.id === alternative.id)); setFeedback(null); }} className="group grid grid-cols-[7rem_1fr] gap-4 border border-[#d4cbc2] bg-[#faf8f5] p-3 text-left transition hover:border-[#a15e35]"><span className="grid h-24 w-28 grid-cols-2 gap-1 overflow-hidden">{alternativeImageSets[alternativeIndex]!.map((imageSrc, imageIndex) => <img key={`${alternative.id}-${imageIndex}`} src={imageSrc} alt="" aria-hidden="true" className="h-full w-full object-cover" />)}</span><span><span className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#8a8076]">Alternative</span><span className="mt-1 block font-serif text-xl text-[#172b3a]">{alternative.name}</span><span className="mt-1 block text-xs text-[#6c716f]">{alternative.occasion} · two owned-piece references</span></span></button>)}</div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">{alternatives.map((alternative, alternativeIndex) => <button type="button" key={alternative.id} onClick={() => { setIndex(variants.findIndex((item) => item.id === alternative.id)); setFeedback(null); }} className="group grid grid-cols-[7rem_1fr] gap-4 border border-[#d4cbc2] bg-[#faf8f5] p-3 text-left transition hover:border-[#a15e35]"><span className="grid h-24 w-28 grid-cols-2 gap-1 overflow-hidden">{alternativeImageSets[alternativeIndex]!.map((imageSrc, imageIndex) => <img key={`${alternative.id}-${imageIndex}`} src={imageSrc} alt="" aria-hidden="true" className="h-full w-full object-cover" />)}</span><span><span className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#8a8076]">Alternative</span><span className="mt-1 block font-serif text-xl text-[#172b3a]">{alternative.name}</span><span className="mt-1 block text-xs text-[#6c716f]">{alternative.occasion} · two demo wardrobe references</span></span></button>)}</div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           <article className="border border-[#c8d8d7] bg-[#eaf3f2] p-6"><div className="flex items-center justify-between gap-3"><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#39716e]">Skin AI · live-ready</p><span className="bg-[#39716e] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-white">Cosmetic only</span></div><h3 className="mt-3 font-serif text-2xl text-[#172b3a]">A calm finishing pass.</h3><p className="mt-2 text-sm leading-6 text-[#53615f]">Skin AI can turn a permitted selfie into appearance guidance for camera confidence. It does not diagnose, judge, or change the outfit decision.</p><div className="mt-4 flex flex-wrap items-center gap-4"><p className="text-xs font-semibold text-[#39716e]">Mock by default · live when configured</p><span className="border-b border-[#39716e]/40 pb-1 text-xs font-bold uppercase tracking-[0.12em] text-[#39716e]">Server-only · no identity inference</span></div></article>
