@@ -138,7 +138,8 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d9aa84]">Wear this</p>
                   <h3 className="mt-2 font-serif text-4xl leading-none sm:text-5xl">{headline}</h3>
                   <p className="mt-4 text-sm leading-6 text-[#dce6e5]">{note}</p>
-                  <div className="mt-6 grid grid-cols-2 gap-2">
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-white/15 bg-white/[0.04] px-3 py-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Your wardrobe</p><p className="mt-1 text-xs text-[#dce6e5]">Not imported yet · demo references shown below</p></div><a href="/wardrobe" className="border-b border-[#d9aa84]/60 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9aa84] hover:border-[#d9aa84]">Import your pieces →</a></div>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
                     {[look.top, look.bottom, look.blazer, look.accessory].map((piece) => <div key={piece.id} className="border border-white/15 px-3 py-3"><p className="text-[9px] uppercase tracking-[0.15em] text-[#a8c1bd]">{pieceLabel[piece.category]}</p><p className="mt-1 text-xs font-semibold text-white">{piece.name}</p></div>)}
                   </div>
                 </div>
