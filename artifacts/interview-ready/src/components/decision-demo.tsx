@@ -84,7 +84,7 @@ interface DecisionDemoProps {
 
 export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
   const variants = useMemo(() => getShowcaseVariants(), []);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => Math.max(0, variants.findIndex((variant) => variant.id === "shirt-edit")));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [custom, setCustom] = useState<(DecisionRequest & { index: number }) | null>(null);
 
@@ -105,7 +105,7 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
 
   const context = custom?.context ?? DEFAULT_CONTEXT;
   const isRequestedLook = custom !== null && index === custom.index;
-  const headline = isRequestedLook ? custom!.headline : look.name;
+  const headline = isRequestedLook ? custom!.headline : look.id === "shirt-edit" ? "Client-ready polish" : look.name;
   const note = isRequestedLook ? custom!.note : DEFAULT_NOTE;
 
   function selectFeedback(value: Feedback) {
