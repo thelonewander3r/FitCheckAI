@@ -44,6 +44,13 @@ const pieceLabel: Record<ShowcasePiece["category"], string> = {
   accessory: "Accessory",
 };
 
+const leadReferenceImages = [
+  "/demo-assets/wardrobe/shirt-edit.jpg",
+  "/demo-assets/wardrobe/color-rack.jpg",
+  "/demo-assets/wardrobe/boardroom-rack.jpg",
+  "/demo-assets/wardrobe/weekend-flatlay.jpg",
+] as const;
+
 function PieceTile({ piece }: { piece: ShowcasePiece }) {
   return (
     <div className="group overflow-hidden border border-[#d9d1c7] bg-white">
@@ -140,7 +147,7 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
                   <p className="mt-4 text-sm leading-6 text-[#dce6e5]">{note}</p>
                   <div className="mt-5 flex flex-wrap items-center gap-3"><button type="button" onClick={() => selectFeedback("Wear it")} className="bg-[#d9aa84] px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-[#172b3a] hover:bg-[#f0c4a0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d9aa84]">Wear it</button><span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#a8c1bd]">Demo session only</span></div>
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border border-white/15 bg-white/[0.04] px-3 py-3"><div><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Seeded demo wardrobe</p><p className="mt-1 text-xs text-[#dce6e5]">Owned for this demo · editorial references shown below</p></div><a href="/wardrobe" className="border-b border-[#d9aa84]/60 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9aa84] hover:border-[#d9aa84]">Import your pieces →</a></div>
-                  <div className="mt-4 border border-white/15 bg-white/[0.03] p-2"><p className="px-1 pb-2 text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Selected owned demo wardrobe · four reference pieces</p><div className="grid grid-cols-2 gap-2">{[look.top, look.bottom, look.blazer, look.accessory].map((piece) => <div key={piece.id} className="overflow-hidden border border-white/15"><img src={piece.imageSrc} alt={`${piece.name} demo wardrobe reference`} className="aspect-[4/3] w-full object-cover" /><div className="px-2 py-2"><p className="text-[9px] uppercase tracking-[0.15em] text-[#a8c1bd]">{pieceLabel[piece.category]}</p><p className="mt-1 text-xs font-semibold text-white">{piece.name}</p></div></div>)}</div></div>
+                  <div className="mt-4 border border-white/15 bg-white/[0.03] p-2"><p className="px-1 pb-2 text-[9px] font-bold uppercase tracking-[0.18em] text-[#a8c1bd]">Selected owned demo wardrobe · four reference pieces</p><div className="grid grid-cols-2 gap-2">{[look.top, look.bottom, look.blazer, look.accessory].map((piece, pieceIndex) => <div key={piece.id} className="overflow-hidden border border-white/15"><img src={leadReferenceImages[pieceIndex]} alt={`${piece.name} demo wardrobe reference`} className="aspect-[4/3] w-full object-cover" /><div className="px-2 py-2"><p className="text-[9px] uppercase tracking-[0.15em] text-[#a8c1bd]">{pieceLabel[piece.category]}</p><p className="mt-1 text-xs font-semibold text-white">{piece.name}</p><p className="mt-1 text-[10px] text-[#a8c1bd]">Demo reference</p></div></div>)}</div></div>
                 </div>
                 <p className="mt-6 border-t border-white/15 pt-4 text-xs text-[#a8c1bd]">Four owned demo pieces · no shopping claim</p>
               </div>
