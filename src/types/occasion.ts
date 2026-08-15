@@ -1,5 +1,5 @@
 import type { VenueContext } from "@/lib/venue/types";
-import type { ComposedOutfit } from "@/lib/wardrobe/composer";
+import type { WardrobeItem } from "@/types/wardrobe";
 
 import type { OccasionSkinTone } from "@/lib/occasion/preferences";
 
@@ -29,11 +29,29 @@ export interface OccasionIntake {
   skinTonePreference?: OccasionSkinTone;
 }
 
+/**
+ * Wardrobe item as persisted inside an occasion session.
+ * Deliberately omits imageBase64: composed plans persist garment metadata and
+ * editorial references, never user wardrobe image bytes.
+ */
+export type PersistedWardrobeItem = Omit<WardrobeItem, "imageBase64">;
+
+/** Outfit as persisted inside an occasion session (no image bytes). */
+export interface PersistedOutfit {
+  id: string;
+  items: PersistedWardrobeItem[];
+  score: number;
+  why: string[];
+  /** Optional editorial preview used by the deterministic public demo only. */
+  previewImageUrl?: string;
+  previewImageAlt?: string;
+}
+
 export interface OccasionSession {
   id: string;
   intake: OccasionIntake;
   venueContext?: VenueContext;
-  outfits: ComposedOutfit[];
+  outfits: PersistedOutfit[];
   gaps: string[];
   isMockMode?: boolean;
   isDemo?: boolean;

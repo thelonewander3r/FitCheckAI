@@ -15,7 +15,12 @@ import {
   colorsForSkinTonePreference,
   parseColorPreferences,
 } from "@/lib/occasion/preferences";
-import type { OccasionIntake, OccasionSession } from "@/types/occasion";
+import type {
+  OccasionIntake,
+  OccasionSession,
+  PersistedOutfit,
+  PersistedWardrobeItem,
+} from "@/types/occasion";
 import type { WardrobeItem } from "@/types/wardrobe";
 
 export interface OccasionCreationOptions {
@@ -24,6 +29,16 @@ export interface OccasionCreationOptions {
   /** Editorial reference images used only by the public demo result. */
   previewImageUrls?: string[];
   isDemo?: boolean;
+}
+
+/**
+ * DTO boundary: persisted occasion outfits never carry wardrobe image bytes.
+ * The composed in-memory shape may include imageBase64; the stored shape may not.
+ */
+function toPersistedWardrobeItem(item: WardrobeItem): PersistedWardrobeItem {
+  const { imageBase64: _omit, ...rest } = item;
+  void _omit;
+  return rest;
 }
 
 export async function createOccasion(
@@ -80,22 +95,21 @@ export async function createOccasion(
     }
   }
 
-  const outfits = composed.outfits.map((o, index) => {
+  const outfits: PersistedOutfit[] = composed.outfits.map((o, index) => {
     const previewImageUrl = options.previewImageUrls?.[index];
     return {
-      ...o,
+      id: o.id,
+      score: o.score,
+      why: [...o.why],
+      items: o.items.map(toPersistedWardrobeItem),
       ...(previewImageUrl
         ? {
             previewImageUrl,
             previewImageAlt: `Editorial reference for ${intake.eventType} outfit ${index + 1}`,
           }
         : {}),
-      items: o.items.map(({ imageBase64: _omit, ...rest }) => {
-        void _omit;
-        return rest;
-      }),
     };
-  }) as unknown as typeof composed.outfits;
+  });
 
   return storeCreate({
     intake,

@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import type { OccasionSession } from "@/types/occasion";
+import type { OccasionSession, PersistedOutfit } from "@/types/occasion";
 import type { WardrobeItem } from "@/types/wardrobe";
-import type { ComposedOutfit } from "@/lib/wardrobe/composer";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -80,11 +79,11 @@ function SavePlanButton({
   error,
   onMark,
 }: {
-  outfit: ComposedOutfit;
+  outfit: PersistedOutfit;
   marked: boolean;
   pending?: boolean;
   error: string | null;
-  onMark: (outfit: ComposedOutfit) => void;
+  onMark: (outfit: PersistedOutfit) => void;
 }) {
   if (marked) {
     return <span className="text-sm font-semibold text-[#2a6f7f]">Saved to your plans ✓</span>;
@@ -108,7 +107,7 @@ function OutfitReference({
   outfit,
   isDemo,
 }: {
-  outfit: ComposedOutfit;
+  outfit: PersistedOutfit;
   isDemo?: boolean;
 }) {
   if (!outfit.previewImageUrl) return null;
@@ -170,7 +169,7 @@ export default function OccasionDetailPage({ params }: Props) {
       .catch(() => setLoadError("Failed to load your outfit plan."));
   }, [id]);
 
-  async function handleMarkWorn(outfit: ComposedOutfit) {
+  async function handleMarkWorn(outfit: PersistedOutfit) {
     if (!session || markedWorn[outfit.id] || markingWorn[outfit.id]) return;
     setMarkingWorn((previous) => ({ ...previous, [outfit.id]: true }));
     setWornErrors((previous) => {
