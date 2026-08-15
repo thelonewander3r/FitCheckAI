@@ -30,10 +30,10 @@ const DEFAULT_NOTE =
   "The easy yes: sharp enough for the room, relaxed enough to keep your day moving.";
 
 const feedbackCopy: Record<Feedback, string> = {
-  "Wear it": "Saved as your go-to for this kind of moment.",
-  "Not for me": "Got it — we’ll move away from this shape next time.",
-  "Too formal": "Noted — future picks will loosen the dress code.",
-  "Already wore it": "Logged — we’ll keep this look fresh for the next event.",
+  "Wear it": "Noted for this demo session.",
+  "Not for me": "Got it — this demo will show the response locally.",
+  "Too formal": "Noted for this demo session.",
+  "Already wore it": "Logged for this demo session.",
 };
 
 const pieceLabel: Record<ShowcasePiece["category"], string> = {
@@ -154,11 +154,11 @@ export default function DecisionDemo({ request }: DecisionDemoProps = {}) {
               <p className="mt-2 text-sm leading-6 text-[#53615f]">You have enough tops for this week. The missing move is a comfortable dark trouser — not another new arrival.</p>
             </div>
             <div className="border border-[#d6c1a8] bg-[#f8eee3] p-6">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a15e35]">Feedback trains the next call</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a15e35]">Feedback · this demo session</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {(Object.keys(feedbackCopy) as Feedback[]).map((value) => <button key={value} type="button" onClick={() => selectFeedback(value)} className="border border-[#c99f7d] bg-white/70 px-3 py-2 text-xs font-semibold text-[#70442b] transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a15e35]">{value}</button>)}
               </div>
-              <p className="mt-4 min-h-5 text-xs font-semibold text-[#70442b]" role="status" aria-live="polite">{feedback ? `✓ ${feedbackCopy[feedback]}` : "Tell us what to change and we’ll remember."}</p>
+              <p className="mt-4 min-h-5 text-xs font-semibold text-[#70442b]" role="status" aria-live="polite">{feedback ? `✓ ${feedbackCopy[feedback]}` : "Tell us what to change in this demo session."}</p>
             </div>
           </div>
         </div>
