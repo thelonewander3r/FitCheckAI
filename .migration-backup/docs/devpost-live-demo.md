@@ -1,10 +1,19 @@
 # Devpost live-demo path
 
-## Current recommendation
+## Current product story
 
-Use live Skin AI as the guaranteed judge-visible YouCam integration. The existing session analysis path accepts a permitted user photo, uploads it server-side, creates the Skin Analysis task, polls it, and stores mapped observations. The mock provider remains the default when `YOUCAM_MODE` is absent.
+FitCheck is a last-mile wardrobe copilot, not a fashion moodboard: it turns one real event into one outfit decision from the closet the person already owns. The judge should see a concrete user outcome before hearing about the API.
 
-Minimum live demo flow:
+## Suggested 1–3 minute narration
+
+1. **0:00–0:15 — State the customer problem.** “I am leaving for a rooftop dinner and do not want ten ideas; I want one outfit I can trust.” Show the landing page promise and the event-first intake.
+2. **0:15–0:45 — Run the guided plan.** Open the deterministic demo, show the event read, the lead “Wear this” look, the reason it works, and the two backups. Call out that the reference photo is editorial clothing imagery, not VTO output.
+3. **0:45–1:05 — Show the last-mile value.** Highlight “One move before you go,” save the plan, and explain that FitCheck starts with owned pieces before shopping recommendations.
+4. **1:05–1:35 — Show the YouCam integration.** Switch to the permitted-image Skin AI path with `YOUCAM_MODE=live` and server-only credentials. Show upload → task → polling → mapped observations. Explain that the public app remains mock-first so the outfit decision is reliable.
+5. **1:35–1:50 — State the boundary honestly.** Apparel VTO is provider-ready but not claimed from rack/flat-lay showcase imagery. A future VTO pass must map the selected outfit to a valid isolated garment reference and pass a live smoke test.
+6. **1:50–2:00 — Close on value.** “FitCheck is useful when it helps someone get dressed and leave — not when it generates another moodboard.”
+
+## Minimum live demo flow
 
 1. Start the public app with `YOUCAM_MODE=live`, `YOUCAM_API_KEY` supplied only through the server environment, and the official HTTPS base URL.
 2. Submit one permitted user/model image through the interview flow.

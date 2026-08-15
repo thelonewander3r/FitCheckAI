@@ -22,6 +22,9 @@ export interface ComposedOutfit {
   items: WardrobeItem[];
   score: number;
   why: string[];
+  /** Optional editorial preview used by the deterministic public demo only. */
+  previewImageUrl?: string;
+  previewImageAlt?: string;
 }
 
 export interface ComposeResult {

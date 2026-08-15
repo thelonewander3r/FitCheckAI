@@ -17,9 +17,9 @@ const sourceSerif4 = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "FitCheck AI — Dress for the event",
+  title: "FitCheck AI — Know what to wear",
   description:
-    "AI-powered outfit checks built from your wardrobe. Describe the event, see what works, and understand what is missing.",
+    "Turn any event into one outfit plan from the wardrobe you already own, with backups and a clear next move.",
 };
 
 export default function RootLayout({

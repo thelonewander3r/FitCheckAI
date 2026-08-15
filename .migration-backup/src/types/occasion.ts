@@ -36,6 +36,7 @@ export interface OccasionSession {
   outfits: ComposedOutfit[];
   gaps: string[];
   isMockMode?: boolean;
+  isDemo?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -54,7 +54,7 @@ export async function createOccasion(
     Partial<
       Pick<
         OccasionSession,
-        "venueContext" | "outfits" | "gaps" | "isMockMode"
+        "venueContext" | "outfits" | "gaps" | "isMockMode" | "isDemo"
       >
     >,
 ): Promise<OccasionSession> {
@@ -68,6 +68,7 @@ export async function createOccasion(
       outfits: input.outfits ?? [],
       gaps: input.gaps ?? [],
       isMockMode: input.isMockMode,
+      isDemo: input.isDemo,
       createdAt: now,
       updatedAt: now,
     };
