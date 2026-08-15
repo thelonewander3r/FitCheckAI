@@ -55,7 +55,7 @@ export default function HomePage() {
               <Link href="/occasion" className="inline-flex h-12 items-center rounded-xl border border-[#d9c8b8] bg-white/80 px-5 text-sm font-semibold text-[#0f2744] hover:bg-white">Try a real event</Link>
             </div>
             <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#63716f]">
-              <span>✓ Closet first</span><span>✓ No shopping rabbit hole</span><span>✓ Optional YouCam Skin AI finish</span>
+              <span>✓ Closet first</span><span>✓ No shopping rabbit hole</span><span>✓ Optional cosmetic prep</span>
             </div>
           </div>
           <WardrobePhotoShowcase />

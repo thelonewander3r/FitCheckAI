@@ -306,10 +306,10 @@ export default function OccasionDetailPage() {
               {venueContext?.cultureHints[0] && <p className="mt-4 border-t border-[#2a6f7f]/15 pt-4 text-sm font-medium leading-6 text-[#0f2744]">{venueContext.cultureHints[0]}</p>}
             </div>
             <div className="border border-[#d8e1e5] bg-white p-8">
-              <p className="text-[10px] uppercase tracking-widest text-[#2a6f7f]">Optional finishing check</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#2a6f7f]">Optional cosmetic prep</p>
               <h2 className="mt-3 font-serif text-2xl text-[#0f2744]">Make the whole look feel ready.</h2>
-              <p className="mt-4 text-sm leading-6 text-[#53616d]">FitCheck&apos;s live demo path can hand a permitted photo to YouCam Skin AI for a separate skin observation check. Nothing is inferred from wardrobe images.</p>
-              <Link href="/interview" className="mt-5 inline-block border-b border-[#0f2744]/30 pb-1 text-[10px] font-medium uppercase tracking-widest text-[#0f2744] hover:text-[#2a6f7f]">Open Skin AI check →</Link>
+              <p className="mt-4 text-sm leading-6 text-[#53616d]">YouCam Skin AI can analyze a permitted photo for cosmetic observations. FitCheck keeps that separate from wardrobe reasoning — no identity, attractiveness, or medical inferences.</p>
+              <Link href="/interview" className="mt-5 inline-block border-b border-[#0f2744]/30 pb-1 text-[10px] font-medium uppercase tracking-widest text-[#0f2744] hover:text-[#2a6f7f]">Open cosmetic prep →</Link>
             </div>
           </section>
         )}
