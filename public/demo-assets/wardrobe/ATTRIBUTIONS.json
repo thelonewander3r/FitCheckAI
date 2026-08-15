@@ -1,0 +1,12 @@
+{
+  "purpose": "Temporary FitCheckAI demo wardrobe imagery; optimized local copies for five visually distinct recipe studies.",
+  "license": "Unsplash License (permissive reuse; see https://unsplash.com/license)",
+  "assets": [
+    {"path":"/demo-assets/wardrobe/boardroom-rack.jpg","sourceUrl":"https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3","license":"Unsplash License","visual":"Neutral garment rack: green, camel, black, ivory, and denim layers."},
+    {"path":"/demo-assets/wardrobe/weekend-flatlay.jpg","sourceUrl":"https://images.unsplash.com/photo-1525507119028-ed4c629a60a3","license":"Unsplash License","visual":"Flat lay with white top, denim, striped garment, red flats, and accessories."},
+    {"path":"/demo-assets/wardrobe/shirt-edit.jpg","sourceUrl":"https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf","license":"Unsplash License","visual":"Distinct shirt edit laid out on a table."},
+    {"path":"/demo-assets/wardrobe/color-rack.jpg","sourceUrl":"https://images.unsplash.com/photo-1532453288672-3a27e9be9efd","license":"Unsplash License","visual":"Bright multicolor garment rack."},
+    {"path":"/demo-assets/wardrobe/sage-rack.jpg","sourceUrl":"https://images.unsplash.com/photo-1523381210434-271e8be1f52b","license":"Unsplash License","visual":"Close-up rack of sage/green garments."}
+  ],
+  "processing": "Downloaded from the exact source URLs above and locally resized/recompressed; no retailer images, model images, or unknown-license assets are used."
+}
