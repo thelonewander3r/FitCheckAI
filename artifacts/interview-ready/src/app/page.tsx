@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { OccasionDemoForm } from "@/components/occasion-demo-form";
-import { WardrobeTileShowcase } from "@/components/wardrobe-tile-showcase";
+import WardrobePhotoShowcase from "@/components/wardrobe-photo-showcase";
 
 const eventTypes = ["Weddings", "Dates", "Conferences", "Brunches", "Birthdays"];
 
@@ -39,7 +39,7 @@ export default function HomePage() {
             {eventTypes.map((event) => <span key={event} className="rounded-full border border-[#d9cdbd] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#53616d]">{event}</span>)}
           </div>
         </div>
-        <WardrobeTileShowcase />
+        <WardrobePhotoShowcase />
       </section>
 
       <section className="border-y border-[#e4d9ca] bg-[#f1e7da] px-6 py-20">
