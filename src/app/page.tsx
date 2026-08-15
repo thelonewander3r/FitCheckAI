@@ -75,7 +75,7 @@ export default function HomePage() {
             <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-[#63716f]">
               <span>✓ Closet first</span>
               <span>✓ No shopping rabbit hole</span>
-              <span>✓ Optional YouCam Skin AI finish</span>
+              <span>✓ Optional cosmetic prep</span>
             </div>
           </div>
 

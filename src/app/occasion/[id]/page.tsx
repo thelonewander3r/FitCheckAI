@@ -27,6 +27,12 @@ function labelize(value: string): string {
     .join(" ");
 }
 
+function matchLabel(score: number): string {
+  if (score >= 80) return "Strong match";
+  if (score >= 70) return "Good match";
+  return "Worth considering";
+}
+
 function ItemThumbnail({
   item,
   imageById,
@@ -311,7 +317,7 @@ export default function OccasionDetailPage({ params }: Props) {
                       {topOutfit.items.map((item) => item.name).filter(Boolean).join(" · ") || "Your lead look"}
                     </h2>
                   </div>
-                  <Badge variant="secondary" className="shrink-0">{topOutfit.score}/100 event fit</Badge>
+                  <Badge variant="secondary" className="shrink-0">{matchLabel(topOutfit.score)}</Badge>
                 </div>
 
                 <div className="mt-5">
@@ -381,7 +387,7 @@ export default function OccasionDetailPage({ params }: Props) {
                       <article key={outfit.id} className="rounded-2xl border border-[#d8e1e5] bg-white p-5 shadow-sm">
                         <div className="flex items-start justify-between gap-3">
                           <h3 className="font-serif text-lg font-semibold text-[#0f2744]">{name}</h3>
-                          <Badge variant="secondary" className="shrink-0">{outfit.score}</Badge>
+                          <Badge variant="secondary" className="shrink-0">{matchLabel(outfit.score)}</Badge>
                         </div>
                         <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
                           {outfit.items.map((item) => (
@@ -413,7 +419,7 @@ export default function OccasionDetailPage({ params }: Props) {
                     <h2 className="font-serif text-xl font-semibold text-[#0f2744]">{DRESS_CODE_LABELS[venueContext?.dressCode ?? ""] ?? "Your event context"}</h2>
                     <p className="mt-1 text-sm text-[#718096]">{intake.venueName} · {eventLabel}</p>
                   </div>
-                  {venueContext && <Badge variant="accent">{Math.round(venueContext.confidence * 100)}% context fit</Badge>}
+                  {venueContext && <Badge variant="accent">Event signal ready</Badge>}
                 </div>
                 {venueContext?.cultureHints.length ? (
                   <ul className="mt-5 space-y-2">
@@ -424,10 +430,10 @@ export default function OccasionDetailPage({ params }: Props) {
               </div>
 
               <div className="rounded-3xl border border-[#d8e1e5] bg-[#e8f3f1] p-6 sm:p-7" data-testid="skin-ai-next-step">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2a6f7f]">Optional finishing check</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2a6f7f]">Optional cosmetic prep</p>
                 <h2 className="mt-3 font-serif text-xl font-semibold text-[#0f2744]">Make the whole look feel ready.</h2>
-                <p className="mt-3 text-sm leading-6 text-[#53616d]">When you want a final pre-event check, FitCheck can send a permitted photo to YouCam Skin AI and return skin observations without guessing anything from your appearance.</p>
-                <Link href="/interview" className="mt-5 inline-flex h-10 items-center rounded-xl border border-[#2a6f7f]/30 bg-white px-4 text-sm font-semibold text-[#0f2744] hover:bg-[#f7fffe]">Open the Skin AI check →</Link>
+                <p className="mt-3 text-sm leading-6 text-[#53616d]">YouCam Skin AI can analyze a permitted photo for cosmetic observations. FitCheck keeps that separate from wardrobe reasoning — no identity, attractiveness, or medical inferences.</p>
+                <Link href="/interview" className="mt-5 inline-flex h-10 items-center rounded-xl border border-[#2a6f7f]/30 bg-white px-4 text-sm font-semibold text-[#0f2744] hover:bg-[#f7fffe]">Open cosmetic prep →</Link>
               </div>
             </section>
           </>
