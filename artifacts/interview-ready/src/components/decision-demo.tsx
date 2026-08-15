@@ -80,7 +80,7 @@ export default function DecisionDemo() {
           <article className="bg-[#172b3a] p-4 text-white shadow-[0_24px_70px_rgba(23,43,58,0.2)] sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#d9aa84]">The call</p>
-              <span className="border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#dce6e5]">{look.occasion}</span>
+              <span className="border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#dce6e5]">Client coffee</span>
             </div>
             <div className="mt-5 grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
               <div className="aspect-[4/5] overflow-hidden bg-[#d9d0c7]"><img src={look.top.imageSrc} alt={`${look.name} wardrobe reference`} className="h-full w-full object-cover" /></div>
