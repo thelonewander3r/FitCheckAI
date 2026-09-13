@@ -4,11 +4,14 @@ import { TEMP_BLOB_PREFIX } from "./keys";
 import type { BlobBackend, JsonBackend } from "./types";
 
 function dataDir(): string {
-  return path.join(process.cwd(), ".data");
+  return path.join(/* turbopackIgnore: true */ process.cwd(), ".data");
 }
 
 function tempDir(): string {
-  return process.env["UPLOAD_TEMP_DIR"] ?? path.join(process.cwd(), "uploads", "tmp");
+  return (
+    process.env["UPLOAD_TEMP_DIR"] ??
+    path.join(/* turbopackIgnore: true */ process.cwd(), "uploads", "tmp")
+  );
 }
 
 function jsonFileForKey(key: string): string {
@@ -16,7 +19,7 @@ function jsonFileForKey(key: string): string {
   return path.join(dataDir(), `${name}.json`);
 }
 
-function blobPathForKey(key: string): string {
+export function fsBlobFilePath(key: string): string {
   const relative = key.startsWith(TEMP_BLOB_PREFIX)
     ? key.slice(TEMP_BLOB_PREFIX.length)
     : key;
@@ -43,13 +46,13 @@ export const fsJsonBackend: JsonBackend = {
 
 export const fsBlobBackend: BlobBackend = {
   async put(key, bytes) {
-    const filePath = blobPathForKey(key);
+    const filePath = fsBlobFilePath(key);
     await mkdir(path.dirname(filePath), { recursive: true });
     await writeFile(filePath, bytes);
   },
   async get(key) {
     try {
-      const buf = await readFile(blobPathForKey(key));
+      const buf = await readFile(fsBlobFilePath(key));
       return { bytes: new Uint8Array(buf), contentType: "application/octet-stream" };
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
@@ -58,7 +61,7 @@ export const fsBlobBackend: BlobBackend = {
   },
   async delete(key) {
     try {
-      await unlink(blobPathForKey(key));
+      await unlink(fsBlobFilePath(key));
     } catch {
       // Best-effort cleanup
     }

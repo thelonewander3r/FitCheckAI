@@ -1,4 +1,5 @@
 import { TEMP_BLOB_PREFIX } from "./keys";
+import { fsBlobFilePath } from "./fs-backend";
 import { getBlobBackend, resolveStorageMode } from "./runtime";
 
 /** Keep temp blobs small so Free R2 Class A ops and Worker memory stay cheap. */
@@ -28,11 +29,7 @@ export async function putTempBlob(
   const backend = await getBlobBackend();
   await backend.put(key, bytes, contentType);
   if (resolveStorageMode() === "fs") {
-    const { join } = await import("node:path");
-    const dir =
-      process.env["UPLOAD_TEMP_DIR"] ??
-      join(process.cwd(), "uploads", "tmp");
-    return join(dir, key.slice(TEMP_BLOB_PREFIX.length));
+    return fsBlobFilePath(key);
   }
   return asHandle(key);
 }
