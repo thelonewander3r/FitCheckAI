@@ -76,14 +76,14 @@ export class MockYouCamProvider implements YouCamProvider {
           label: "Hydration level",
           severity: "low",
           guidance:
-            "Staying well-hydrated in the days before your interview can help skin appear more even and refreshed.",
+            "Staying well-hydrated in the days before your event can help skin appear more even and refreshed.",
         },
         {
           id: "mock-obs-002",
           label: "Under-eye appearance",
           severity: "low",
           guidance:
-            "Getting adequate sleep (7–9 hours) before your interview can reduce the appearance of under-eye shadows.",
+            "Getting adequate sleep (7–9 hours) beforehand can reduce the appearance of under-eye shadows.",
         },
         {
           id: "mock-obs-003",
@@ -94,11 +94,11 @@ export class MockYouCamProvider implements YouCamProvider {
         },
       ],
       preparationSuggestions: [
-        "Use a gentle, non-stripping cleanser the morning of your interview.",
+        "Use a gentle, non-stripping cleanser the morning of your event.",
         "Apply a lightweight moisturizer suited to your skin type about 20–30 minutes before any makeup or grooming products.",
         "If using concealer, choose a shade one level lighter than your foundation to brighten, not a heavy coverage product.",
-        "Blotting papers are useful for keeping shine at bay during a long onsite interview day.",
-        "For video interviews, a light powder or setting spray can reduce the appearance of shine under studio or overhead lighting.",
+        "Blotting papers are useful for keeping shine at bay during a long day out.",
+        "A light powder or setting spray can reduce the appearance of shine under bright indoor or overhead lighting.",
       ],
       lightingNotes: [
         "Warm-toned lighting (3000–4000 K) is generally flattering for most people on camera.",

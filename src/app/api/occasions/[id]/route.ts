@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getOccasion } from "@/lib/services/occasion-service";
+import { getOccasion, toPublicOccasion } from "@/lib/services/occasion-service";
 
 interface Context {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ export async function GET(
         { status: 404 },
       );
     }
-    return NextResponse.json(occasion);
+    return NextResponse.json(toPublicOccasion(occasion));
   } catch (err) {
     console.error(
       `[GET /api/occasions/${id}]`,

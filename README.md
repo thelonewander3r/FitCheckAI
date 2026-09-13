@@ -51,7 +51,9 @@ Next.js App Router  ────────────────────
        │                                                      │
        ├─► YouCam Provider (mock or live)                     │
        │     ├── Skin AI  → cosmetic prep notes               │
-       │     └── AI Clothes VTO → visual garment preview      │
+       │     └── AI Clothes VTO → renders a chosen wardrobe   │
+       │           piece onto the user's photo, using that     │
+       │           piece's own saved wardrobe image            │
        │                                                      │
        ├─► Safety layer                                       │
        │     └── Strips medical/hiring language from output   │
@@ -131,7 +133,7 @@ Start at [`http://localhost:3000`](http://localhost:3000). Use **Start with an o
 
 ## Live YouCam Integration
 
-> **Status:** `LiveYouCamProvider` is implemented with authenticated upload/task polling. A credentialed local smoke test verified the full live Skin AI path; mock mode remains the reliable/default demo path.
+> **Status:** `LiveYouCamProvider` is implemented with authenticated upload/task polling, and both APIs are wired into the wardrobe flow. A credentialed local smoke test verified the full live Skin AI path. Live Apparel VTO is wired end-to-end and covered by an integration test that drives the real provider against a stubbed Perfect Corp API; it has not yet been run against the live API with credentials.
 
 1. Obtain credentials from the YouCam developer portal.
 2. Set environment variables in `.env.local`:
@@ -141,9 +143,12 @@ Start at [`http://localhost:3000`](http://localhost:3000). Use **Start with an o
    # Optional; defaults to https://yce-api-01.makeupar.com
    YOUCAM_BASE_URL=https://yce-api-01.makeupar.com
    ```
-3. Provide a valid candidate image for Skin AI. Live Apparel VTO also requires a candidate image **and a garment reference image**; the current built-in outfit templates and try-on route do not ingest garment assets.
+3. Add wardrobe pieces with photos. Apparel VTO uses the photo already saved for
+   the chosen piece as the garment reference, so a real closet is the input — no
+   catalog assets required. Skin AI needs a selfie with a short side of at least
+   480px; the client downscales uploads before they are sent.
 
-The live provider uses the current Perfect Corp task endpoints and maps responses into the app's domain types. See [`docs/youcam-integration.md`](docs/youcam-integration.md) for requirements and current verification status.
+Both APIs are reachable from the occasion plan at `/occasion/[id]`: **See it on you** renders a selected wardrobe piece with AI Clothes, and **Optional cosmetic prep** runs Skin AI. See [`docs/youcam-integration.md`](docs/youcam-integration.md) for the request flow and verification status.
 
 ---
 
@@ -160,8 +165,9 @@ See [`docs/privacy-and-safety.md`](docs/privacy-and-safety.md) for the full poli
 
 ## Known Limitations
 
-- **Mock mode is the reliable/default demo path.** Live Skin AI has been credentialed-tested locally; live Apparel VTO is intentionally not enabled in the default wardrobe flow.
-- **Live Apparel VTO needs garment reference images.** The current built-in outfit templates and try-on route do not ingest or submit those assets; a future shopping/garment flow will add that input.
+- **Mock mode is the default so the app runs without credentials.** Live Skin AI has been credentialed-tested locally. Live Apparel VTO is wired end-to-end from the occasion plan and verified against a stubbed Perfect Corp API, but has not yet been exercised against the live API with a real key.
+- **Apparel VTO renders one piece at a time.** AI Clothes takes a single garment per task, so the app nominates the piece that defines the look (dress → outer layer → top → bottom) and lets the user switch pieces. It does not composite a whole multi-piece outfit in one render.
+- **Try-on needs a saved wardrobe photo.** Pieces without an image cannot be rendered in live mode; the guided demo closet has no photos, so live try-on there returns a clear "add a photo" state rather than a render.
 - **Event context research is optional.** Set `VENUE_MODE=openai` with a server-side `OPENAI_API_KEY` to research concrete venue/location anchors through the Responses web-search tool; the default mock provider remains the reliable demo path. The app stores structured context and source URLs rather than raw web pages.
 - **YouCam is downstream of styling.** FitCheck composes outfits from wardrobe items; YouCam can analyze or render valid user/garment images, but it does not discover a wardrobe or select a multi-piece outfit.
 - **Video capture is deferred.** Video interview guidance exists, but the app does not capture or upload video.
@@ -175,9 +181,11 @@ See [`docs/privacy-and-safety.md`](docs/privacy-and-safety.md) for the full poli
 ### Event demo from the landing page
 
 1. Open [`http://localhost:3000`](http://localhost:3000)
-2. Click **See an event example** (or navigate to `/occasion/demo`)
-3. Review the rooftop dinner event context and inferred dress code
-4. Add wardrobe pieces from **My wardrobe** to receive complete combinations
+2. Click **See a finished plan** (or navigate to `/occasion/demo`)
+3. Review the rooftop dinner event context, the inferred dress code, and the lead outfit
+4. In **See it on you**, pick a piece and upload a full-length photo to get a YouCam AI Clothes render
+5. In **Optional cosmetic prep**, upload a selfie to run YouCam Skin AI
+6. Add your own pieces from **My wardrobe** to compose from a real closet
 
 ### Legacy YouCam walkthrough
 

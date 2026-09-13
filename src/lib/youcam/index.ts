@@ -6,9 +6,15 @@ export {
   LiveYouCamProvider,
   assertLiveApiBaseUrl,
   assertTrustedYceHttpsUrl,
+  inspectImageBase64,
   isTrustedYceStorageHost,
   parseHttpsUrlNoCredentials,
 } from "./live-provider";
+export {
+  TryOnPhotoRejectedError,
+  assertTryOnSourcePhoto,
+  isUsableGarmentPhoto,
+} from "./try-on-photo-gate";
 export { MockYouCamProvider } from "./mock-provider";
 export { runSkinAnalysis } from "./skin-analysis";
 export type {

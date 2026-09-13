@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSession } from "@/lib/services/session-service";
+import { getOccasion } from "@/lib/services/occasion-service";
 import { proxyStoredTryOnImage } from "@/lib/youcam/image-proxy";
 
 interface Context {
@@ -14,9 +14,9 @@ const OutfitIdSchema = z
   .regex(/^[A-Za-z0-9_-]+$/);
 
 /**
- * Proxy a stored live try-on result image through the app.
+ * Proxy a stored live AI Clothes render through the app.
  * Never accepts a URL from the request; only fetches the trusted YCE URL
- * already stored on the session.
+ * already stored on the occasion.
  */
 export async function GET(
   _req: Request,
@@ -25,16 +25,16 @@ export async function GET(
   const { id, outfitId } = await ctx.params;
 
   if (!z.string().uuid().safeParse(id).success) {
-    return NextResponse.json({ error: "Invalid session id." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid occasion id." }, { status: 400 });
   }
   if (!OutfitIdSchema.safeParse(outfitId).success) {
     return NextResponse.json({ error: "Invalid outfit id." }, { status: 400 });
   }
 
-  const session = await getSession(id);
-  if (!session) {
-    return NextResponse.json({ error: "Session not found." }, { status: 404 });
+  const occasion = await getOccasion(id);
+  if (!occasion) {
+    return NextResponse.json({ error: "Occasion not found." }, { status: 404 });
   }
 
-  return proxyStoredTryOnImage(session.tryOnResults?.[outfitId]);
+  return proxyStoredTryOnImage(occasion.tryOnResults?.[outfitId]);
 }
