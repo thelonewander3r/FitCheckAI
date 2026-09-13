@@ -1,5 +1,3 @@
-import fs from "fs/promises";
-import path from "path";
 import type {
   InterviewContext,
   IntakePayload,
@@ -8,15 +6,12 @@ import type {
   SkinAnalysisResult,
 } from "@/types/interview";
 import type { ApparelTryOnResult } from "@/lib/youcam/types";
-
-const DATA_DIR = path.join(process.cwd(), ".data");
-const SESSIONS_FILE = path.join(DATA_DIR, "sessions.json");
-// NOTE: single-process assumption — the lock below is in-process state and
-// this fixed tmp path is not safe across multiple server processes.
-const SESSIONS_TMP = path.join(
-  DATA_DIR,
-  `sessions.json.${process.pid}.tmp`,
-);
+import { JSON_DOC_KEYS } from "@/lib/storage/keys";
+import {
+  readJsonDocument,
+  withDocumentMutation,
+  writeJsonDocument,
+} from "@/lib/storage/json-document";
 
 export type SessionStatus =
   | "intake"
@@ -43,48 +38,16 @@ export interface StoredSession {
 }
 
 type SessionUpdates = Partial<Omit<StoredSession, "id" | "createdAt">>;
-
-let queue: Promise<unknown> = Promise.resolve();
-
-function withLock<T>(fn: () => Promise<T>): Promise<T> {
-  const run = queue.then(fn, fn);
-  queue = run.catch(() => {});
-  return run;
-}
-
-async function ensureDataDir(): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-}
-
-async function readSessions(): Promise<Record<string, StoredSession>> {
-  try {
-    const content = await fs.readFile(SESSIONS_FILE, "utf-8");
-    return JSON.parse(content) as Record<string, StoredSession>;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      return {};
-    }
-    throw err;
-  }
-}
-
-async function writeSessions(
-  sessions: Record<string, StoredSession>,
-): Promise<void> {
-  await ensureDataDir();
-  await fs.writeFile(
-    SESSIONS_TMP,
-    JSON.stringify(sessions, null, 2),
-    "utf-8",
-  );
-  await fs.rename(SESSIONS_TMP, SESSIONS_FILE);
-}
+type SessionsDoc = Record<string, StoredSession>;
 
 export async function createSession(
   intake: IntakePayload,
 ): Promise<StoredSession> {
-  return withLock(async () => {
-    const sessions = await readSessions();
+  return withDocumentMutation(async () => {
+    const sessions = await readJsonDocument<SessionsDoc>(
+      JSON_DOC_KEYS.sessions,
+      {},
+    );
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     const session: StoredSession = {
@@ -95,13 +58,16 @@ export async function createSession(
       updatedAt: now,
     };
     sessions[id] = session;
-    await writeSessions(sessions);
+    await writeJsonDocument(JSON_DOC_KEYS.sessions, sessions);
     return session;
   });
 }
 
 export async function getSession(id: string): Promise<StoredSession | null> {
-  const sessions = await readSessions();
+  const sessions = await readJsonDocument<SessionsDoc>(
+    JSON_DOC_KEYS.sessions,
+    {},
+  );
   if (!Object.hasOwn(sessions, id)) return null;
   return sessions[id]!;
 }
@@ -110,8 +76,11 @@ export async function updateSession(
   id: string,
   updates: SessionUpdates | ((curr: StoredSession) => SessionUpdates),
 ): Promise<StoredSession | null> {
-  return withLock(async () => {
-    const sessions = await readSessions();
+  return withDocumentMutation(async () => {
+    const sessions = await readJsonDocument<SessionsDoc>(
+      JSON_DOC_KEYS.sessions,
+      {},
+    );
     if (!Object.hasOwn(sessions, id)) return null;
     const existing = sessions[id]!;
     const resolved = typeof updates === "function" ? updates(existing) : updates;
@@ -123,7 +92,7 @@ export async function updateSession(
       updatedAt: new Date().toISOString(),
     };
     sessions[id] = updated;
-    await writeSessions(sessions);
+    await writeJsonDocument(JSON_DOC_KEYS.sessions, sessions);
     return updated;
   });
 }

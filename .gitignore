@@ -61,3 +61,8 @@ uploads/
 dev.db
 
 /src/generated/prisma
+/dist/
+.vinext/
+.wrangler/
+.dev.vars
+.open-next/
