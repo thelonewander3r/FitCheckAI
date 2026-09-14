@@ -1,0 +1,9 @@
+# Local Wrangler / vinext secrets (do not commit `.dev.vars`).
+# Copy to `.dev.vars` after `wrangler login`.
+
+YOUCAM_MODE=mock
+# YOUCAM_API_KEY=
+# YOUCAM_BASE_URL=https://yce-api-01.makeupar.com
+# VENUE_MODE=openai
+# OPENAI_API_KEY=
+# OPENAI_WEB_SEARCH_MODEL=gpt-4o-mini

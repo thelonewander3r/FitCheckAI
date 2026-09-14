@@ -24,9 +24,12 @@ Official references:
 
 The current product path therefore stays wardrobe-first: infer a broad context
 from the user's event, compose from saved wardrobe pieces, and use YouCam only
-when a user photo and valid visual input are available. A future shopping flow
-can provide garment reference images for AI Clothes VTO; the current built-in
-templates do not yet have that ingestion path.
+when a user photo and valid visual input are available.
+
+The garment reference for AI Clothes is the photo the user already saved for
+that wardrobe piece. That is what makes try-on possible from a real closet
+rather than a catalog: the app never needs a merchant asset, because the user
+photographed the garment when they added it.
 
 ### Future event-to-makeup flow
 
@@ -131,15 +134,34 @@ export interface ApparelTryOnResult {
 
 The live provider uses the current Perfect Corp transport flow: upload a base64 image, create a task, poll for completion, map the response into the app types, and validate result URLs. Skin AI uses the skin-analysis task; Apparel VTO uses the cloth-v4 task. The implementation uses `fetch` and Bearer authentication without logging credentials, IDs, signed URLs, or image payloads.
 
-The live provider has unit coverage with mocked HTTP responses. A credentialed local smoke test has also verified the full Skin AI path through FitCheck AI: metadata creation, signed upload, task creation, polling through success, session creation, and mapped non-mock results. Live Apparel VTO remains intentionally unverified because garment reference-image ingestion is not yet part of the default product flow. Mock mode remains the reliable/default submission path.
+The live provider has unit coverage with mocked HTTP responses. A credentialed local smoke test has verified the full Skin AI path through FitCheck AI: metadata creation, signed upload, task creation, polling through success, session creation, and mapped non-mock results.
+
+Live Apparel VTO is now wired from the occasion plan. `src/lib/services/occasion-vto-live.test.ts` drives the real `LiveYouCamProvider` against a stubbed Perfect Corp API and asserts the whole chain: outfit → saved wardrobe photo → two signed uploads → `cloth-v4` with the mapped `garment_category` → poll → stored render → proxied public URL. It has not yet been exercised against the live API with a real key.
 
 ## Live Requirements and Caveats
 
 1. Set `YOUCAM_MODE=live` and provide `YOUCAM_API_KEY`.
 2. `YOUCAM_BASE_URL` is optional; when omitted, the client uses `https://yce-api-01.makeupar.com`. It must be an HTTPS URL without embedded credentials.
-3. Supply valid JPEG, PNG, or WebP base64 data. Live Skin AI validates image dimensions before upload.
+3. Supply valid JPEG, PNG, or WebP base64 data. Both APIs validate image dimensions before upload, so an unusable image fails without spending an API unit.
 4. Live Apparel VTO requires both `userImageBase64` and `garmentImageBase64`. `garmentAssetId` is only an app identifier and cannot substitute for the garment reference image.
-5. The current built-in outfit templates and `/api/sessions/:id/try-on` route do not ingest garment reference assets, so live Apparel VTO remains unavailable for the default outfit flow until asset ingestion is added.
+5. Try-on is offered only for pieces that have a saved wardrobe photo. A piece without one returns HTTP 409 and a "add the piece with a photo" message rather than a failed render.
+
+## Outfit → garment mapping
+
+AI Clothes renders one garment per task, so `src/lib/wardrobe/garment-reference.ts`
+nominates the piece that defines a composed look and maps it to a Perfect Corp
+`garment_category`:
+
+| Wardrobe category | `garment_category` | Precedence |
+|---|---|---|
+| `dresses` | `full_body` | 1 |
+| `outerwear` | `outer` | 2 |
+| `tops` | `upper_body` | 3 |
+| `bottoms` | `lower_body` | 4 |
+
+`shoes` and `accessories` are never sent. The user can override the default by
+picking another piece, but only pieces belonging to that outfit are accepted, so
+a request can never point the renderer at something outside the composed look.
 
 Optional live tuning variables are `YOUCAM_TIMEOUT_MS`, `YOUCAM_POLL_INTERVAL_MS`, and `YOUCAM_SKIN_ACTIONS`. Keep real credentials in `.env.local`; never commit them.
 
@@ -161,7 +183,8 @@ The safety layer is applied at the **service layer** (`src/lib/services/session-
 ## Skin AI — Data Flow
 
 ```
-POST /api/sessions (or /api/sessions/:id/analyze)
+POST /api/occasions/:id/skin-prep   { imageBase64 }
+  (or /api/sessions, /api/sessions/:id/analyze in the interview flow)
   │
   └─► runSkinAnalysis({ imageBase64 })           ← src/lib/youcam/skin-analysis.ts
         │
@@ -170,20 +193,32 @@ POST /api/sessions (or /api/sessions/:id/analyze)
         │     └── [live] calls YouCam Skin AI endpoint → maps response
         │
         └── applySkinSafety(result)               ← safety filter
-              └── stored on session + rendered on analysis page
+              └── stored as skinPrep on the occasion (photo is not persisted)
+                    └── rendered in the "Optional cosmetic prep" panel
 ```
 
 ## Apparel VTO — Data Flow
 
 ```
-POST /api/sessions/:id/try-on   { outfitId }
+POST /api/occasions/:id/try-on   { outfitId, userImageBase64, itemId? }
   │
-  └─► runApparelVto({ userImageBase64, garmentAssetId: outfitId })
-        │                                         ← src/lib/youcam/apparel-vto.ts
-        ├── getYouCamProvider().generateApparelTryOn(input)
-        │     ├── [mock] returns SVG data URL
-        │     └── [live] calls YouCam Apparel VTO endpoint
+  └─► tryOnOccasionOutfit()                ← src/lib/services/occasion-service.ts
         │
-        └── stored as tryOnResults[outfitId] on session
-              └── rendered in OutfitCard on the try-on page
+        ├── selectGarmentReference(outfit.items, itemId)
+        │     └── nominates the piece + maps garment_category
+        │
+        ├── getItem(pieceId).imageBase64   ← the user's own wardrobe photo
+        │
+        ├── runApparelVto({ userImageBase64, garmentImageBase64, garmentCategory })
+        │     ├── [mock] returns SVG data URL
+        │     └── [live] upload ×2 → cloth-v4 → poll → signed result URL
+        │
+        └── stored as tryOnResults[outfitId] on the occasion
+              ├── user photo is never persisted
+              └── toPublicOccasion() rewrites live URLs to
+                  /api/occasions/:id/try-on/:outfitId/image
 ```
+
+The legacy interview flow keeps its own `POST /api/sessions/:id/try-on` route.
+Its outfits are static templates with no garment images, so live try-on there
+still requires a garment reference the templates do not carry.

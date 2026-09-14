@@ -1,32 +1,38 @@
-import { mkdir, writeFile, unlink } from "node:fs/promises";
-import path from "node:path";
+import { unlink } from "node:fs/promises";
+import { deleteTempBlob, putTempBlob } from "./blob-store";
+import { resolveStorageMode } from "./runtime";
 
 /**
- * Temporary local image storage for the prototype.
- * Images are not retained permanently by default — callers should delete after use.
- * Designed so a later object-storage provider can replace this module.
+ * Temporary image storage for the prototype.
+ * Images are not retained permanently — callers should delete after use.
+ *
+ * - `next dev` (`FITCHECK_STORAGE=fs`, default off Workers): local files
+ * - Cloudflare Workers: R2 (`FITCHECK_R2`), handle prefixed with `r2:`
+ * - Vitest: in-memory blob map
  */
-
-function tempDir(): string {
-  return process.env["UPLOAD_TEMP_DIR"] ?? path.join(process.cwd(), "uploads", "tmp");
-}
 
 export async function saveTempImage(
   sessionId: string,
   base64: string,
   mimeType = "image/jpeg",
 ): Promise<string> {
-  const dir = tempDir();
-  await mkdir(dir, { recursive: true });
   const ext = mimeType.includes("png") ? "png" : "jpg";
-  const filePath = path.join(dir, `${sessionId}-${Date.now()}.${ext}`);
-  await writeFile(filePath, Buffer.from(base64, "base64"));
-  return filePath;
+  const name = `${sessionId}-${Date.now()}.${ext}`;
+  const bytes = Uint8Array.from(Buffer.from(base64, "base64"));
+  return putTempBlob(name, bytes, mimeType);
 }
 
-export async function deleteTempImage(filePath: string): Promise<void> {
+export async function deleteTempImage(handle: string): Promise<void> {
+  if (handle.startsWith("r2:") || resolveStorageMode() !== "fs") {
+    try {
+      await deleteTempBlob(handle);
+    } catch {
+      // Best-effort cleanup
+    }
+    return;
+  }
   try {
-    await unlink(filePath);
+    await unlink(handle);
   } catch {
     // Best-effort cleanup — ignore missing files
   }

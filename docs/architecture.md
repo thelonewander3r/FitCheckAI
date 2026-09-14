@@ -55,7 +55,10 @@ graph TD
     end
 
     subgraph Persistence["Persistence"]
-        FileStore["File Session Store\n.data/sessions.json\n(MVP runtime)"]
+        JsonStore["JSON document stores\n(sessions / occasions / wardrobe / worn)"]
+        FileAdapter["Local fs adapter\n.data/*.json — next dev"]
+        KvAdapter["Cloudflare KV\nFITCHECK_KV — Workers"]
+        R2Temp["Cloudflare R2\nFITCHECK_R2 — ephemeral temp images"]
         PrismaSchema["Prisma Schema / Migrations\n(SQLite; deferred runtime migration)"]
     end
 
@@ -76,13 +79,17 @@ graph TD
     ContextEngine --> SafetyLayer
     YouCamProvider --> SafetyLayer
 
-    SessionsAPI --> FileStore
-    AnalyzeAPI --> FileStore
-    TryOnAPI --> FileStore
-    SelectAPI --> FileStore
-    PlanAPI --> FileStore
+    SessionsAPI --> JsonStore
+    AnalyzeAPI --> JsonStore
+    TryOnAPI --> JsonStore
+    SelectAPI --> JsonStore
+    PlanAPI --> JsonStore
 
-    PrismaSchema -.->|"future migration"| FileStore
+    JsonStore --> FileAdapter
+    JsonStore --> KvAdapter
+    JsonStore -.-> R2Temp
+
+    PrismaSchema -.->|"future migration"| JsonStore
 ```
 
 ---
@@ -153,7 +160,9 @@ The `prisma/schema.prisma` defines the following SQLite models and migration pat
 
 ### MVP persistence note
 
-Prisma 7 requires a **driver adapter** for SQLite (e.g. `@prisma/adapter-better-sqlite3`). The schema and migration remain available, but Prisma persistence is deferred for the MVP: the app uses lightweight file stores such as `src/lib/session-store.ts` and `.data/sessions.json`.
+Prisma 7 requires a **driver adapter** for SQLite (e.g. `@prisma/adapter-better-sqlite3`). The schema and migration remain available, but Prisma persistence is deferred for the MVP.
+
+Local `next dev` uses filesystem JSON under `.data/` (and `uploads/tmp` for ephemeral blobs). On Cloudflare Workers the same store APIs write **one KV document per collection** (`FITCHECK_KV` keys `doc:sessions`, `doc:occasions`, `doc:wardrobe`, `doc:worn`) and ephemeral temp images to **R2** (`FITCHECK_R2`). Writes in a single request are coalesced so the Free-plan 1,000 KV writes/day budget lasts through a demo. See the README **Deploy to Cloudflare** section.
 
 ---
 

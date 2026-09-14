@@ -1,36 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { WardrobeItem } from "@/types/wardrobe";
-
-// In-memory fs so the real occasion-store round-trips through JSON without
-// touching the repository's .data directory.
-const memFs = vi.hoisted(() => new Map<string, string>());
-
-vi.mock("fs/promises", () => {
-  const readFile = vi.fn(async (filePath: string) => {
-    const content = memFs.get(String(filePath));
-    if (content === undefined) {
-      const err = new Error(
-        `ENOENT: no such file or directory, open '${String(filePath)}'`,
-      ) as NodeJS.ErrnoException;
-      err.code = "ENOENT";
-      throw err;
-    }
-    return content;
-  });
-  const writeFile = vi.fn(async (filePath: string, content: string) => {
-    memFs.set(String(filePath), String(content));
-  });
-  const mkdir = vi.fn(async () => undefined);
-  const rename = vi.fn(async (from: string, to: string) => {
-    const content = memFs.get(String(from));
-    if (content !== undefined) {
-      memFs.set(String(to), content);
-      memFs.delete(String(from));
-    }
-  });
-  const api = { readFile, writeFile, mkdir, rename };
-  return { ...api, default: api };
-});
+import { JSON_DOC_KEYS } from "@/lib/storage/keys";
+import { peekJsonDocument } from "@/lib/storage/json-document";
+import { resetMemoryStorage } from "@/lib/storage/memory-backend";
 
 vi.mock("@/lib/wardrobe-store", () => ({
   listItems: vi.fn(),
@@ -85,16 +57,10 @@ function demoWardrobe(): WardrobeItem[] {
   ];
 }
 
-function occasionsJsonRaw(): string | undefined {
-  return [...memFs.entries()].find(([filePath]) =>
-    filePath.includes("occasions.json"),
-  )?.[1];
-}
-
 describe("occasion persisted DTO boundary", () => {
   afterEach(() => {
     vi.clearAllMocks();
-    memFs.clear();
+    resetMemoryStorage();
   });
 
   it("strips imageBase64 from composed outfits before persisting, preserving demo preview metadata", async () => {
@@ -133,7 +99,7 @@ describe("occasion persisted DTO boundary", () => {
     );
 
     // The raw persisted JSON (store write) contains no image bytes either.
-    const rawJson = occasionsJsonRaw();
+    const rawJson = await peekJsonDocument(JSON_DOC_KEYS.occasions);
     expect(rawJson).toBeDefined();
     expect(rawJson).not.toContain("imageBase64");
     expect(rawJson).not.toContain("BASE64_IMAGE_PAYLOAD");

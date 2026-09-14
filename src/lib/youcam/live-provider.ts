@@ -82,11 +82,11 @@ const HD_SKIN_ACTIONS = new Set(
 );
 
 const FIXED_PREPARATION_SUGGESTIONS = [
-  "Use a gentle cleanser the morning of your interview.",
+  "Use a gentle cleanser the morning of your event.",
   "Apply a lightweight moisturizer about 20–30 minutes before any grooming products.",
   "If using concealer, choose a shade close to your natural tone for a camera-friendly finish.",
-  "Blotting papers can help manage shine during a long interview day.",
-  "For video interviews, a light powder or setting spray can reduce visible shine under bright lights.",
+  "Blotting papers can help manage shine during a long day out.",
+  "A light powder or setting spray can reduce visible shine under bright lights.",
 ];
 
 const FIXED_LIGHTING_NOTES = [
@@ -138,7 +138,7 @@ const GUIDANCE_BY_TYPE: Record<string, string> = {
   acne:
     "Spot-concealing and avoiding heavy product layers can keep the focus on a clean camera look.",
   age_spot:
-    "A light, even base product can help tone look more uniform under interview lighting.",
+    "A light, even base product can help tone look more uniform under event lighting.",
   blackhead:
     "A gentle cleansing routine and mattifying finish can create a smoother camera-ready surface.",
   dark_circle:
@@ -148,7 +148,7 @@ const GUIDANCE_BY_TYPE: Record<string, string> = {
   firmness:
     "Hydration and good posture under soft light support a refreshed camera appearance.",
   sensitivity:
-    "Stick to familiar, fragrance-light products before interview day to keep skin looking calm.",
+    "Stick to familiar, fragrance-light products beforehand to keep skin looking calm.",
   mole: "Even lighting and a natural base help keep attention on your overall presentation.",
   crows_feet:
     "Hydrating eye cream and soft side lighting can soften the look of outer eye lines.",
@@ -550,6 +550,26 @@ function decodeImageForDimensions(imageBase64: string): {
     );
   }
   return { bytes, contentType: format.contentType };
+}
+
+/**
+ * Inspect a user/garment image without uploading it.
+ * Used by the try-on photo gate to reject empty or tiny sources before spend.
+ */
+export function inspectImageBase64(imageBase64: string): {
+  byteLength: number;
+  contentType: string;
+  width: number;
+  height: number;
+} {
+  const decoded = decodeImageForDimensions(imageBase64);
+  const dims = parseImageDimensions(decoded.bytes, decoded.contentType);
+  return {
+    byteLength: decoded.bytes.length,
+    contentType: decoded.contentType,
+    width: dims.width,
+    height: dims.height,
+  };
 }
 
 function assertSkinImageDimensions(

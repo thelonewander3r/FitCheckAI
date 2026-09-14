@@ -5,6 +5,7 @@ import {
   YouCamConfigurationError,
   assertLiveApiBaseUrl,
   assertTrustedYceHttpsUrl,
+  inspectImageBase64,
   isTrustedYceStorageHost,
   parseHttpsUrlNoCredentials,
 } from "./live-provider";
@@ -189,6 +190,18 @@ describe("URL validation helpers", () => {
     ).toThrow(YouCamConfigurationError);
     expect(assertLiveApiBaseUrl(BASE_URL)).toBe(BASE_URL);
     expect(assertLiveApiBaseUrl(`${BASE_URL}/`)).toBe(BASE_URL);
+  });
+});
+
+describe("inspectImageBase64", () => {
+  it("returns dimensions and byte length without uploading", () => {
+    const inspected = inspectImageBase64(jpegBase64WithDimensions(640, 800));
+    expect(inspected).toMatchObject({
+      width: 640,
+      height: 800,
+      contentType: "image/jpeg",
+    });
+    expect(inspected.byteLength).toBeGreaterThan(0);
   });
 });
 

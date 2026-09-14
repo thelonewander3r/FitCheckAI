@@ -5,10 +5,8 @@ import { generatePreparationPlan } from "@/lib/prep/plan-generator";
 import { runApparelVto } from "@/lib/youcam/apparel-vto";
 import { MockYouCamProvider } from "@/lib/youcam/mock-provider";
 import { runSkinAnalysis } from "@/lib/youcam/skin-analysis";
-import {
-  YouCamApiError,
-  YouCamConfigurationError,
-} from "@/lib/youcam/live-provider";
+import { YouCamConfigurationError } from "@/lib/youcam/live-provider";
+import { isLiveYouCamMode, logYouCamFailure } from "@/lib/youcam/logging";
 import type { RankedOutfit } from "@/types/interview";
 import type { ApparelTryOnResult } from "@/lib/youcam/types";
 import {
@@ -24,31 +22,6 @@ export type { StoredSession };
 /** 1×1 transparent PNG — safe placeholder for mock skin/VTO calls */
 const PLACEHOLDER_IMAGE_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
-
-function isLiveYouCamMode(): boolean {
-  return (process.env["YOUCAM_MODE"] ?? "mock").toLowerCase() === "live";
-}
-
-/**
- * Log only a fixed message plus safe error class/status/errorCode.
- * Never logs provider messages, URLs, IDs, or credentials.
- */
-function logYouCamFailure(scope: string, err: unknown): void {
-  const info: {
-    errorClass: string;
-    status?: number;
-    errorCode?: string;
-  } = {
-    errorClass: err instanceof Error ? err.name : "UnknownError",
-  };
-  if (err instanceof YouCamApiError) {
-    if (err.status !== undefined) info.status = err.status;
-    if (err.errorCode !== undefined) info.errorCode = err.errorCode;
-  } else if (err instanceof YouCamConfigurationError) {
-    info.errorClass = err.name;
-  }
-  console.error(`[${scope}] YouCam provider failed.`, info);
-}
 
 export async function createSession(
   intake: IntakePayload,

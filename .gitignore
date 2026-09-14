@@ -44,6 +44,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local VTO spike inputs/outputs — do not commit photos or live renders
+/scripts/spike-assets/*.jpg
+/scripts/spike-assets/*.jpeg
+/scripts/spike-assets/*.png
+/scripts/spike-assets/*.webp
+/scripts/spike-out/
+/spike-out/
+
 # session / upload data
 .data/
 uploads/
@@ -53,3 +61,8 @@ uploads/
 dev.db
 
 /src/generated/prisma
+/dist/
+.vinext/
+.wrangler/
+.dev.vars
+.open-next/

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { OccasionSkinPrep } from "@/components/occasion-skin-prep";
+import { OccasionTryOn } from "@/components/occasion-try-on";
 import type { OccasionSession, PersistedOutfit } from "@/types/occasion";
 import type { WardrobeItem } from "@/types/wardrobe";
 
@@ -234,7 +236,7 @@ export default function OccasionDetailPage({ params }: Props) {
     );
   }
 
-  const { intake, venueContext, outfits, gaps, isMockMode, isDemo } = session;
+  const { intake, venueContext, outfits, gaps, isMockMode, isDemo, tryOnResults, skinPrep } = session;
   const topOutfit = outfits[0];
   const alternatives = outfits.slice(1, 3);
   const emptyWardrobe = outfits.length === 0 && wardrobeCount === 0;
@@ -370,6 +372,14 @@ export default function OccasionDetailPage({ params }: Props) {
               </div>
             </section>
 
+            <OccasionTryOn
+              occasionId={session.id}
+              outfit={topOutfit}
+              {...(tryOnResults?.[topOutfit.id]
+                ? { initialResult: tryOnResults[topOutfit.id] }
+                : {})}
+            />
+
             {alternatives.length > 0 && (
               <section className="space-y-4">
                 <div className="flex items-end justify-between gap-4">
@@ -428,12 +438,10 @@ export default function OccasionDetailPage({ params }: Props) {
                 <p className="mt-5 text-xs text-[#718096]">{venueContext?.isMock ? "Mock context is on — switch to venue research when you are ready to test a real place." : `Source: ${venueContext?.source}`}</p>
               </div>
 
-              <div className="rounded-3xl border border-[#d8e1e5] bg-[#e8f3f1] p-6 sm:p-7" data-testid="skin-ai-next-step">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#2a6f7f]">Optional cosmetic prep</p>
-                <h2 className="mt-3 font-serif text-xl font-semibold text-[#0f2744]">Make the whole look feel ready.</h2>
-                <p className="mt-3 text-sm leading-6 text-[#53616d]">YouCam Skin AI can analyze a permitted photo for cosmetic observations. FitCheck keeps that separate from wardrobe reasoning — no identity, attractiveness, or medical inferences.</p>
-                <Link href="/interview" className="mt-5 inline-flex h-10 items-center rounded-xl border border-[#2a6f7f]/30 bg-white px-4 text-sm font-semibold text-[#0f2744] hover:bg-[#f7fffe]">Open cosmetic prep →</Link>
-              </div>
+              <OccasionSkinPrep
+                occasionId={session.id}
+                {...(skinPrep ? { initialResult: skinPrep } : {})}
+              />
             </section>
           </>
         ) : (

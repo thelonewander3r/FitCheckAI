@@ -1,5 +1,7 @@
 import type { VenueContext } from "@/lib/venue/types";
 import type { WardrobeItem } from "@/types/wardrobe";
+import type { ApparelTryOnResult, GarmentCategory } from "@/lib/youcam/types";
+import type { SkinAnalysisResult } from "@/types/interview";
 
 import type { OccasionSkinTone } from "@/lib/occasion/preferences";
 
@@ -47,6 +49,17 @@ export interface PersistedOutfit {
   previewImageAlt?: string;
 }
 
+/**
+ * An AI Clothes render for one outfit, plus the wardrobe piece that was sent as
+ * the garment reference. The piece is recorded so the UI can say exactly what
+ * was rendered instead of implying the whole outfit was generated.
+ */
+export interface OccasionTryOnResult extends ApparelTryOnResult {
+  garmentItemId: string;
+  garmentItemName?: string;
+  garmentCategory: GarmentCategory;
+}
+
 export interface OccasionSession {
   id: string;
   intake: OccasionIntake;
@@ -55,6 +68,10 @@ export interface OccasionSession {
   gaps: string[];
   isMockMode?: boolean;
   isDemo?: boolean;
+  /** AI Clothes renders keyed by outfit id. User photos are never persisted. */
+  tryOnResults?: Record<string, OccasionTryOnResult>;
+  /** Skin AI observations for pre-event cosmetic prep, safety-filtered. */
+  skinPrep?: SkinAnalysisResult;
   createdAt: string;
   updatedAt: string;
 }

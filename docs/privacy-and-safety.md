@@ -12,17 +12,19 @@ Uploaded candidate photos are:
 
 - **Downscaled on the client** to a longest edge of at most 512 pixels (JPEG quality 0.85) before upload
 - Used during the active session to generate Skin AI and Apparel VTO results
-- **Stored as base64** inside the session record in `.data/sessions.json` for the life of that session file — not written as separate image files
+- **Stored as base64** inside the session JSON document (`doc:sessions`) for the life of that document — not written as separate image files by default
 - **Not associated** with any user account, name, or persistent identifier beyond the ephemeral session ID
-- The app currently has **no automatic TTL/cleanup sweep**; sessions (and any embedded selfie base64) remain until the file is deleted manually or the environment is reset
+- The app currently has **no automatic TTL/cleanup sweep**; sessions (and any embedded selfie base64) remain until the document is deleted or the KV namespace / `.data` file is reset
 
 ### Session file storage
 
-Session data (including any selfie `userImageBase64` payload) lives in `.data/sessions.json`. The file-store is local/ephemeral for development and should not be committed to source control (it is listed in `.gitignore`).
+Locally, session data (including any selfie `userImageBase64` payload) lives in `.data/sessions.json`. On Cloudflare Workers the same JSON lives in KV under `doc:sessions`. Neither should be treated as a public object store; `.data/` is listed in `.gitignore`.
 
 ### Wardrobe store
 
-Wardrobe piece photos are **downscaled on the client**, then stored as **base64** in `.data/wardrobe.json`. There is **no automatic TTL**; items remain until the data file is deleted. The wardrobe API is accessible on **localhost without authentication**, so treat the file as sensitive local data and delete it when clearing session state.
+Wardrobe piece photos are **downscaled on the client**, then stored as **base64** inside the wardrobe JSON document (`.data/wardrobe.json` locally, KV `doc:wardrobe` on Workers). There is **no automatic TTL**; items remain until deleted. The wardrobe API is accessible without authentication, so treat the document as sensitive. **Do not** put a large permanent closet on the Workers Free 1 GB KV quota.
+
+Ephemeral temp uploads (when used) go to `uploads/tmp` locally or the `fitcheck-temp` R2 bucket on Workers, and callers should delete them after use.
 
 In a production deployment with a real database, implementers must:
 
