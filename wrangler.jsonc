@@ -28,7 +28,7 @@
   "kv_namespaces": [
     {
       "binding": "FITCHECK_KV",
-      "id": "00000000000000000000000000000000"
+      "id": "f0c0bad48a3f4bfe98ba550b96d10293"
     }
   ],
   // Create once: npx wrangler r2 bucket create fitcheck-temp
